@@ -247,6 +247,12 @@ func _show_game() -> void:
 		sub_viewport.transparent_bg = false
 		svc.add_child(sub_viewport)
 
+		# render at the container's true pixel size: a fixed 1080-wide target was
+		# being upscaled and softened the liquid edges and glyphs
+		svc.resized.connect(func():
+			if sub_viewport != null and svc.size.x > 2 and svc.size.y > 2:
+				sub_viewport.size = Vector2i(int(svc.size.x), int(svc.size.y)))
+
 		board_3d = Board3DScript.new()
 		sub_viewport.add_child(board_3d)
 

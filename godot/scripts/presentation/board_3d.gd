@@ -21,7 +21,7 @@ func _ready() -> void:
 	env.background_color = Color("#0B1F27")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("#2E5563")
-	env.ambient_light_energy = 0.16
+	env.ambient_light_energy = 0.10
 	env.glow_enabled = true
 	env.glow_intensity = 0.45
 	env.glow_bloom = 0.10
@@ -33,14 +33,14 @@ func _ready() -> void:
 
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-40, 24, 0)
-	key.light_energy = 0.85
+	key.light_energy = 0.60
 	key.light_color = Color("#EAF7FF")
 	key.shadow_enabled = false
 	add_child(key)
 
 	var rim := OmniLight3D.new()
 	rim.position = Vector3(0.6, 0.7, -0.5)
-	rim.light_energy = 2.0
+	rim.light_energy = 1.5
 	rim.light_color = Color("#7FE9FF")
 	rim.omni_range = 3.0
 	add_child(rim)

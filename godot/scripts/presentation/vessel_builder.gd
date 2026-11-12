@@ -51,7 +51,7 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 		label.pixel_size = 0.00042
 		label.modulate = _ink_for(colour)
 		label.outline_size = 14
-		label.outline_modulate = Color(1, 1, 1, 0.55) if colour.get_luminance() <= 0.55 else Color(0, 0, 0, 0.55)
+		label.outline_modulate = Color(1, 1, 1, 0.85) if colour.get_luminance() <= 0.55 else Color(0, 0, 0, 0.85)
 		label.position = Vector3(0, band_h * 0.5 + band_h * i, LIQUID_R + 0.012)
 		root.add_child(label)
 
@@ -134,11 +134,12 @@ static func _glass_material(selected: bool) -> StandardMaterial3D:
 
 static func _liquid_material(colour: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	m.albedo_color = colour.darkened(0.06)
-	m.emission_enabled = true
-	m.emission = colour.darkened(0.15)
-	m.emission_energy_multiplier = 0.18
-	m.roughness = 0.22
+	# Palette hex used verbatim as albedo. No emissive lift: emission was washing
+	# the liquid toward pastel and collapsing aqua/amber luminance separation.
+	m.albedo_color = colour
+	m.emission_enabled = false
+	m.roughness = 0.40
+	m.metallic_specular = 0.15
 	m.metallic = 0.0
 	m.metallic_specular = 0.35
 	return m

@@ -47,15 +47,28 @@ func _ready() -> void:
 
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = DESIGN_H / PX_PER_UNIT
 	camera.position = Vector3(0, 0, 2.0)
 	camera.near = 0.05
 	camera.far = 10.0
 	add_child(camera)
 	camera.current = true
+	_fit_camera()
+	get_viewport().size_changed.connect(_fit_camera)
 
 	_vessels = Node3D.new()
 	add_child(_vessels)
+
+## Keeps 1 design pixel equal to one screen pixel at any window size.
+## The 2D hit areas scale by viewport_width / DESIGN_W, so the camera must use
+## the same factor or the vessels and their hit strips drift apart.
+func _fit_camera() -> void:
+	if camera == null:
+		return
+	var vp := get_viewport().get_visible_rect().size
+	if vp.x < 2.0 or vp.y < 2.0:
+		return
+	var sx := vp.x / DESIGN_W
+	camera.size = vp.y / (PX_PER_UNIT * sx)
 
 ## Rebuilds every vessel from a board snapshot.
 func set_board(tubes: Array, capacity: int, selected: int) -> void:

@@ -167,7 +167,7 @@ func _show_level_select() -> void:
 
 	for i in levels.size():
 		var b := Button.new()
-		b.text = str(i + 1) if i <= unlocked else "-"
+		b.text = str(i + 1)
 		b.disabled = i > unlocked
 		b.custom_minimum_size = Vector2(150, 96)
 		b.add_theme_font_size_override("font_size", 30)
@@ -385,18 +385,32 @@ func _on_win() -> void:
 		unlocked = level_index + 1
 		_save_progress()
 
-	win_panel = Panel.new()
+	win_panel = Control.new()
 	win_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	win_panel.modulate = Color(0, 0, 0, 0.75)
+	win_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	screen_root.add_child(win_panel)
 
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	win_panel.add_child(center)
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0, 0, 0, 0.82)
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	win_panel.add_child(backdrop)
+
+	var card := PanelContainer.new()
+	card.set_anchors_preset(Control.PRESET_CENTER)
+	card.custom_minimum_size = Vector2(560, 0)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL
+	sb.border_color = ACCENT
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(14)
+	sb.set_content_margin_all(28)
+	card.add_theme_stylebox_override("panel", sb)
+	win_panel.add_child(card)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 20)
-	box.custom_minimum_size = Vector2(340, 0)
-	center.add_child(box)
+	card.add_child(box)
 
 	box.add_child(_label("Level Complete", 46, GOLD))
 	box.add_child(_label("Solved in %d moves" % moves, 24))
@@ -408,7 +422,7 @@ func _on_win() -> void:
 			_start_level(level_index + 1))
 		box.add_child(next_button)
 	else:
-		box.add_child(_label("That is all five levels.", 22, ACCENT))
+		box.add_child(_label("That is all 30 levels.", 22, ACCENT))
 
 	var replay := _button("Replay")
 	replay.pressed.connect(func():

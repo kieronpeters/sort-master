@@ -5,6 +5,17 @@ extends Control
 
 const PuzzleStateScript = preload("res://scripts/domain/puzzle_state.gd")
 const VesselViewScript = preload("res://scripts/ui/vessel_view.gd")
+const Board3DScript = preload("res://scripts/presentation/board_3d.gd")
+
+## Rendering switch. Set to false to fall back to the 2D VesselView board.
+const USE_3D := true
+
+# Design space shared with board_3d.gd
+const DESIGN_W := 1080.0
+const VESSEL_PX_W := 132.0
+const GAP_PX := 14.0
+const HIT_TOP := 0.14
+const HIT_BOTTOM := 0.90
 
 const BG := Color("#0B1F27")
 const PANEL := Color("#13272F")
@@ -22,6 +33,9 @@ var unlocked: int = 0
 
 var screen_root: Control
 var vessels_row: HBoxContainer
+var board_3d: Node3D
+var hit_layer: Control
+var sub_viewport: SubViewport
 var status_label: Label
 var header_label: Label
 var moves_label: Label
@@ -82,6 +96,9 @@ func _build_ui() -> void:
 func _clear_screen() -> void:
 	for child in screen_root.get_children():
 		child.queue_free()
+	board_3d = null
+	hit_layer = null
+	vessels_row = null
 
 func _label(text: String, size: int, colour: Color = TEXT) -> Label:
 	var l := Label.new()
@@ -156,7 +173,7 @@ func _show_level_select() -> void:
 		b.add_theme_font_size_override("font_size", 30)
 		if i == unlocked:
 			b.add_theme_color_override("font_color", GOLD)
-		var idx := i
+		var idx: int = i
 		b.pressed.connect(func(): _start_level(idx))
 		grid.add_child(b)
 
@@ -218,13 +235,35 @@ func _show_game() -> void:
 	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(holder)
 
-	var board_center := CenterContainer.new()
-	board_center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	holder.add_child(board_center)
-	vessels_row = HBoxContainer.new()
-	vessels_row.add_theme_constant_override("separation", 16)
-	vessels_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	board_center.add_child(vessels_row)
+	if USE_3D:
+		var svc := SubViewportContainer.new()
+		svc.set_anchors_preset(Control.PRESET_FULL_RECT)
+		svc.stretch = true
+		holder.add_child(svc)
+
+		sub_viewport = SubViewport.new()
+		sub_viewport.size = Vector2i(int(DESIGN_W), 820)
+		sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		sub_viewport.transparent_bg = false
+		svc.add_child(sub_viewport)
+
+		board_3d = Board3DScript.new()
+		sub_viewport.add_child(board_3d)
+
+		# transparent hit areas keep the existing tap semantics
+		hit_layer = Control.new()
+		hit_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+		hit_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(hit_layer)
+		hit_layer.resized.connect(_layout_hits)
+	else:
+		var board_center := CenterContainer.new()
+		board_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		holder.add_child(board_center)
+		vessels_row = HBoxContainer.new()
+		vessels_row.add_theme_constant_override("separation", 16)
+		vessels_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		board_center.add_child(vessels_row)
 
 	# status
 	status_label = _label("", 20, ACCENT)
@@ -234,20 +273,59 @@ func _show_game() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	if vessels_row == null or state == null:
+	if state == null:
 		return
-	for child in vessels_row.get_children():
-		child.queue_free()
-	for i in state.tube_count():
-		var v = VesselViewScript.new()
-		v.custom_minimum_size = Vector2(116, 300)
-		v.size = Vector2(116, 300)
-		v.setup(i, state.tubes[i], state.capacity)
-		v.selected = (i == selected)
-		v.tapped.connect(_on_vessel_tapped)
-		vessels_row.add_child(v)
+	if USE_3D:
+		if board_3d != null:
+			board_3d.set_board(state.tubes, state.capacity, selected)
+		_layout_hits()
+	elif vessels_row != null:
+		for child in vessels_row.get_children():
+			child.queue_free()
+		for i in state.tube_count():
+			var v = VesselViewScript.new()
+			v.custom_minimum_size = Vector2(116, 300)
+			v.size = Vector2(116, 300)
+			v.setup(i, state.tubes[i], state.capacity)
+			v.selected = (i == selected)
+			v.tapped.connect(_on_vessel_tapped)
+			vessels_row.add_child(v)
 	if moves_label:
 		moves_label.text = "Moves: %d" % moves
+
+## Positions transparent hit areas over the 3D vessels, using the same design
+## space as board_3d.gd so the tap targets line up with what is drawn.
+func _layout_hits() -> void:
+	if hit_layer == null or state == null:
+		return
+	for child in hit_layer.get_children():
+		child.queue_free()
+
+	var n: int = state.tube_count()
+	var w := hit_layer.size.x
+	var h := hit_layer.size.y
+	if n == 0 or w <= 1.0 or h <= 1.0:
+		return
+
+	var total: float = n * VESSEL_PX_W + (n - 1) * GAP_PX
+	var start: float = (DESIGN_W - total) * 0.5
+	var sx := w / DESIGN_W
+
+	for i in n:
+		var hit := Control.new()
+		hit.mouse_filter = Control.MOUSE_FILTER_STOP
+		var centre_x: float = start + i * (VESSEL_PX_W + GAP_PX) + VESSEL_PX_W * 0.5
+		var wpx := (VESSEL_PX_W + GAP_PX) * sx
+		hit.size = Vector2(wpx, h * (HIT_BOTTOM - HIT_TOP))
+		hit.position = Vector2(centre_x * sx - wpx * 0.5, h * HIT_TOP)
+		var idx: int = i
+		hit.gui_input.connect(func(event): _on_hit_input(event, idx))
+		hit_layer.add_child(hit)
+
+func _on_hit_input(event: InputEvent, index: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_vessel_tapped(index)
+		accept_event()
 
 func _on_vessel_tapped(index: int) -> void:
 	if state == null:
@@ -257,11 +335,13 @@ func _on_vessel_tapped(index: int) -> void:
 			_status("Pick a tube with liquid in it.")
 			return
 		selected = index
+		_status("Tube %d selected" % (index + 1))
 		_refresh()
 		return
 
 	if index == selected:
 		selected = -1
+		_status("")
 		_refresh()
 		return
 
@@ -270,6 +350,7 @@ func _on_vessel_tapped(index: int) -> void:
 		state.apply_move(selected, index)
 		moves += 1
 		selected = -1
+		_status("")
 		_refresh()
 		if state.is_won():
 			_on_win()

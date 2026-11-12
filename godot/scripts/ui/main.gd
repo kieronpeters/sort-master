@@ -6,6 +6,7 @@ extends Control
 const PuzzleStateScript = preload("res://scripts/domain/puzzle_state.gd")
 const VesselViewScript = preload("res://scripts/ui/vessel_view.gd")
 const Board3DScript = preload("res://scripts/presentation/board_3d.gd")
+const BackdropScript = preload("res://scripts/ui/backdrop.gd")
 
 ## Rendering switch. Set to false to fall back to the 2D VesselView board.
 const USE_3D := true
@@ -89,6 +90,9 @@ func _build_ui() -> void:
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
+	var backdrop = BackdropScript.new()
+	add_child(backdrop)
+
 	screen_root = Control.new()
 	screen_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(screen_root)
@@ -112,7 +116,23 @@ func _button(text: String, size: int = 26) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_size_override("font_size", size)
-	b.custom_minimum_size = Vector2(300, 64)
+	b.add_theme_color_override("font_color", TEXT)
+	b.custom_minimum_size = Vector2(300, 68)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color("#16323c")
+	sb.border_color = Color("#2f6b74")
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(18)
+	sb.set_content_margin_all(12)
+	var hover := sb.duplicate()
+	hover.bg_color = Color("#1d4450")
+	hover.border_color = ACCENT
+	var pressed := sb.duplicate()
+	pressed.bg_color = Color("#0f242c")
+	b.add_theme_stylebox_override("normal", sb)
+	b.add_theme_stylebox_override("hover", hover)
+	b.add_theme_stylebox_override("pressed", pressed)
+	b.add_theme_stylebox_override("focus", hover)
 	return b
 
 func _show_home() -> void:

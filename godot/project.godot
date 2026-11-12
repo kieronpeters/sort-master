@@ -1,10 +1,5 @@
 ; Engine configuration file.
-; It's best edited using the editor UI and not directly,
-; since the parameters that go here are not all obvious.
-;
-; Format:
-;   [section] ; section goes between []
-;   param=value ; assign values to parameters
+; Edit through the Godot editor where possible.
 
 config_version=5
 
@@ -13,7 +8,7 @@ config_version=5
 config/name="Sort Master"
 config/description="A calm, luminous water-sort puzzle set in a midnight greenhouse."
 config/version="0.1.0"
-config/features=PackedStringArray("4.7")
+run/main_scene="res://scenes/main.tscn"
 
 [display]
 
@@ -25,3 +20,4 @@ window/stretch/aspect="expand"
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

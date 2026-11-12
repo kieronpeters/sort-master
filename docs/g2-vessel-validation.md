@@ -74,3 +74,29 @@ The approach is sound enough to proceed with:
 - profile on hardware **when the owner re-enables device testing** — until then, treat performance as unknown.
 
 Until the hardware pass happens, the 2D placeholder vessels remain in the shipping build. The spike proves the pipeline and the look, not the frame budget.
+
+---
+
+## 7. Second pass — colour, glyphs, neck and meniscus
+
+The first pass left four known weaknesses. All four were addressed in the same isolated scene.
+
+| Weakness | Change | Result |
+|---|---|---|
+| Palette washed toward pastel | Ambient 0.22 → 0.16, key 0.95 → 0.80, fill 0.55 → 0.40; liquid albedo darkened 6 % plus a small emissive term (0.18) to hold saturation through the Filmic tonemap | Green, amber, cyan and violet now read as themselves |
+| Glyph contrast | Ink chosen by liquid luminance: near-black on light liquids, white on dark, with an opposing outline | Legible on every band, including amber |
+| No neck or mouth | Tapered neck (62–72 % radius, 45 mm) added above the body | The vessel reads as a vessel, not a tube |
+| No meniscus | Thin lighter disc at the liquid surface, inset to 99 % of the liquid radius | The surface is visible as a distinct plane |
+
+A torus lip and a torus meniscus ring were tried first and **removed**: at these dimensions they rendered as floating hoops and read as artefacts, not detail. Recorded so it is not re-attempted.
+
+### Evidence
+
+| File | Angle |
+|---|---|
+| `docs/evidence/g2-vessel-validation.png` | Gameplay angle — three vessels, three fill states |
+| `docs/evidence/g2-vessel-detail.png` | Detail three-quarter — one full vessel, neck and meniscus visible |
+
+### What is still true
+
+Everything in section 5 still holds. Nothing here has been run on Android. Glow, alpha fill-rate, thermal behaviour and the Mobile-versus-Compatibility choice remain unmeasured, and no performance claim is made.

@@ -1,41 +1,29 @@
 {
-    "id":  "L5",
-    "ruleVersion":  "rules-v1",
-    "capacity":  4,
-    "name":  "Level 5",
-    "tubes":  [
-                  [
-                      "A",
-                      "B",
-                      "C",
-                      "D"
-                  ],
-                  [
-                      "E",
-                      "A",
-                      "B",
-                      "C"
-                  ],
-                  [
-                      "D",
-                      "E",
-                      "A",
-                      "B"
-                  ],
-                  [
-                      "C",
-                      "D",
-                      "E",
-                      "A"
-                  ],
-                  [
-                      "B",
-                      "C",
-                      "D",
-                      "E"
-                  ],
-                  [
-
-                  ]
-              ]
+  "id": "L5",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 5",
+  "tubes": [
+    [
+      "C",
+      "C",
+      "A"
+    ],
+    [
+      "B",
+      "C",
+      "B",
+      "A"
+    ],
+    [
+      "C",
+      "A"
+    ],
+    [
+      "A",
+      "B",
+      "B"
+    ],
+    []
+  ]
 }

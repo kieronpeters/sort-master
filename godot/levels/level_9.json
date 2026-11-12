@@ -1,0 +1,28 @@
+{
+  "id": "L9",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 9",
+  "tubes": [
+    [
+      "A",
+      "B",
+      "C",
+      "A"
+    ],
+    [
+      "B",
+      "C",
+      "A",
+      "B"
+    ],
+    [
+      "C",
+      "A",
+      "B",
+      "C"
+    ],
+    [],
+    []
+  ]
+}

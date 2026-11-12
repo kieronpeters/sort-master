@@ -119,7 +119,7 @@ def key(tubes: list[list[str]]) -> tuple[tuple[str, ...], ...]:
     return tuple(sorted(tuple(t) for t in tubes))
 
 
-def solve(level: dict) -> dict:
+def solve(level: dict, max_states: int = 400000) -> dict:
     start = [list(t) for t in level["tubes"]]
     started = time.perf_counter()
 
@@ -132,6 +132,8 @@ def solve(level: dict) -> dict:
     move_into: dict[tuple, tuple | None] = {key(start): None}
 
     while queue:
+        if len(seen) > max_states:
+            return _result(level, False, None, None, len(seen), started, True)
         board = queue.popleft()
         board_key = key(board)
         for src_i, dst_i, units, colour in legal_moves(board):

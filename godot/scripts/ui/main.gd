@@ -39,17 +39,20 @@ func _ready() -> void:
 
 func _load_levels() -> void:
 	levels.clear()
-	for i in range(1, 6):
+	var i := 1
+	while true:
 		var path := "res://levels/level_%d.json" % i
 		if not FileAccess.file_exists(path):
-			push_warning("Missing level: " + path)
-			continue
+			break
 		var text := FileAccess.get_file_as_string(path)
 		var data = JSON.parse_string(text)
 		if data == null or not (data is Dictionary):
 			push_warning("Invalid level JSON: " + path)
-			continue
+			break
 		levels.append(data)
+		i += 1
+	if levels.is_empty():
+		push_warning("No levels found in res://levels/")
 
 func _load_progress() -> void:
 	var path := "user://progress.json"
@@ -122,25 +125,44 @@ func _on_play_pressed() -> void:
 
 func _show_level_select() -> void:
 	_clear_screen()
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	screen_root.add_child(center)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 16)
-	box.custom_minimum_size = Vector2(320, 0)
-	center.add_child(box)
+	var outer := VBoxContainer.new()
+	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	outer.offset_left = 60
+	outer.offset_right = -60
+	outer.offset_top = 60
+	outer.offset_bottom = -40
+	outer.add_theme_constant_override("separation", 18)
+	screen_root.add_child(outer)
 
-	box.add_child(_label("Levels", 40, GOLD))
+	outer.add_child(_label("Levels", 40, GOLD))
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	outer.add_child(scroll)
+
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 14)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(grid)
+
 	for i in levels.size():
-		var b := _button("Level %d%s" % [i + 1, "" if i <= unlocked else "  (locked)"], 24)
+		var b := Button.new()
+		b.text = str(i + 1) if i <= unlocked else "-"
 		b.disabled = i > unlocked
+		b.custom_minimum_size = Vector2(150, 96)
+		b.add_theme_font_size_override("font_size", 30)
+		if i == unlocked:
+			b.add_theme_color_override("font_color", GOLD)
 		var idx := i
 		b.pressed.connect(func(): _start_level(idx))
-		box.add_child(b)
+		grid.add_child(b)
 
 	var back := _button("Back", 22)
 	back.pressed.connect(_show_home)
-	box.add_child(back)
+	outer.add_child(back)
 
 func _start_level(index: int) -> void:
 	if index < 0 or index >= levels.size():

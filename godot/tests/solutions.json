@@ -1,0 +1,2420 @@
+{
+  "level_1": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 3,
+    "moves": [
+      {
+        "from": 0,
+        "to": 2,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 2,
+        "colour": "B"
+      }
+    ]
+  },
+  "level_10": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 10,
+    "moves": [
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_11": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 11,
+    "moves": [
+      {
+        "from": 1,
+        "to": 3,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 3,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 3,
+        "colour": "B"
+      }
+    ]
+  },
+  "level_12": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 11,
+    "moves": [
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 3,
+        "colour": "B"
+      }
+    ]
+  },
+  "level_13": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 11,
+    "moves": [
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_14": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 11,
+    "moves": [
+      {
+        "from": 1,
+        "to": 4,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 3,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_15": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 12,
+    "moves": [
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 3,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_16": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 12,
+    "moves": [
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 3,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 3,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_17": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 13,
+    "moves": [
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_18": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 13,
+    "moves": [
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_19": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 14,
+    "moves": [
+      {
+        "from": 1,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 1,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_2": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 6,
+    "moves": [
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 2,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_20": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 15,
+    "moves": [
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_21": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 16,
+    "moves": [
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 3,
+        "colour": "E"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_22": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 16,
+    "moves": [
+      {
+        "from": 1,
+        "to": 6,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 5,
+        "to": 1,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_23": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 16,
+    "moves": [
+      {
+        "from": 4,
+        "to": 6,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 3,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 3,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_24": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 16,
+    "moves": [
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_25": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 18,
+    "moves": [
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 6,
+        "to": 5,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_26": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 18,
+    "moves": [
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 6,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 3,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_27": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 18,
+    "moves": [
+      {
+        "from": 4,
+        "to": 7,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 7,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 3,
+        "colour": "E"
+      }
+    ]
+  },
+  "level_28": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 19,
+    "moves": [
+      {
+        "from": 0,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 5,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 6,
+        "to": 4,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 1,
+        "colour": "F"
+      }
+    ]
+  },
+  "level_29": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 19,
+    "moves": [
+      {
+        "from": 0,
+        "to": 7,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "units": 3,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 3,
+        "colour": "B"
+      }
+    ]
+  },
+  "level_3": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 6,
+    "moves": [
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_30": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 20,
+    "moves": [
+      {
+        "from": 1,
+        "to": 6,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "F"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 2,
+        "colour": "E"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "E"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 2,
+        "colour": "F"
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 3,
+        "colour": "F"
+      }
+    ]
+  },
+  "level_4": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 7,
+    "moves": [
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_5": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 7,
+    "moves": [
+      {
+        "from": 0,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 3,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_6": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 8,
+    "moves": [
+      {
+        "from": 0,
+        "to": 5,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 3,
+        "colour": "D"
+      }
+    ]
+  },
+  "level_7": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 8,
+    "moves": [
+      {
+        "from": 1,
+        "to": 5,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 1,
+        "colour": "D"
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "units": 2,
+        "colour": "A"
+      }
+    ]
+  },
+  "level_8": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 9,
+    "moves": [
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 2,
+        "colour": "D"
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "units": 2,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "units": 3,
+        "colour": "D"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 1,
+        "colour": "C"
+      }
+    ]
+  },
+  "level_9": {
+    "ruleVersion": "rules-v1",
+    "minimumMoves": 10,
+    "moves": [
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 1,
+        "colour": "C"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 1,
+        "colour": "B"
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 2,
+        "colour": "C"
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "units": 2,
+        "colour": "B"
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "units": 3,
+        "colour": "C"
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "units": 3,
+        "colour": "B"
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "units": 1,
+        "colour": "A"
+      }
+    ]
+  }
+}

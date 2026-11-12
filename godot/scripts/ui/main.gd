@@ -7,6 +7,7 @@ const PuzzleStateScript = preload("res://scripts/domain/puzzle_state.gd")
 const VesselViewScript = preload("res://scripts/ui/vessel_view.gd")
 const Board3DScript = preload("res://scripts/presentation/board_3d.gd")
 const BackdropScript = preload("res://scripts/ui/backdrop.gd")
+const LevelValidatorScript = preload("res://scripts/domain/level_validator.gd")
 
 ## Rendering switch. Set to false to fall back to the 2D VesselView board.
 const USE_3D := true
@@ -61,9 +62,11 @@ func _load_levels() -> void:
 			break
 		var text := FileAccess.get_file_as_string(path)
 		var data = JSON.parse_string(text)
-		if data == null or not (data is Dictionary):
-			push_warning("Invalid level JSON: " + path)
-			break
+		var problem: String = LevelValidatorScript.validate(data)
+		if problem != "":
+			push_warning("Rejected level %s: %s" % [path, problem])
+			i += 1
+			continue
 		levels.append(data)
 		i += 1
 	if levels.is_empty():

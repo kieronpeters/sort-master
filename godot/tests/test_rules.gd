@@ -1,4 +1,4 @@
-﻿extends SceneTree
+extends SceneTree
 
 ## Headless rules tests. Run:
 ##   Godot_v4.7.2-stable_win64_console.exe --headless --path godot --script res://tests/test_rules.gd
@@ -81,6 +81,30 @@ func _initialize() -> void:
 	var k2 = S.new(4, [["B"], [], ["A"], []]).canonical_key()
 	check("canonical key ignores order", k1 == k2)
 
+
+	# --- level validation (BUG-01) ---
+	var V = load("res://scripts/domain/level_validator.gd")
+	check("valid level accepted", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A","B","B"],["B","B","A","A"],[],[]]}) == "")
+	check("wrong ruleVersion rejected", V.validate({"ruleVersion": "rules-v2", "capacity": 4, "tubes": [["A"],["A"],[],[]]}) != "")
+	check("wrong capacity rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 5, "tubes": [["A"],["A"],[],[]]}) != "")
+	check("wrong colour count rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A"],["A"],[],[]]}) != "")
+	check("over-capacity tube rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A","A","A","A"],[],[]]}) != "")
+	check("no empty tube rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A","B","B"],["B","B","A","A"]]}) != "")
+	check("already won rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A","A","A"],["B","B","B","B"],[]]}) != "")
+	check("single tube rejected", V.validate({"ruleVersion": "rules-v1", "capacity": 4, "tubes": [["A","A","A","A"]]}) != "")
+	check("non-object rejected", V.validate("nope") != "")
+
+	# every shipped level must pass the game's own validator
+	var shipped := 0
+	for n in range(1, 31):
+		var path := "res://levels/level_%d.json" % n
+		if not FileAccess.file_exists(path):
+			continue
+		shipped += 1
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var err: String = V.validate(parsed)
+		check("shipped level %d validates (%s)" % [n, err], err == "")
+	check("all 30 shipped levels present", shipped == 30)
 	print("")
 	print("PASSED: ", passed, "  FAILED: ", failed)
 	quit(0 if failed == 0 else 1)

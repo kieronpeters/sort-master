@@ -33,7 +33,7 @@ powershell -ExecutionPolicy Bypass -File tools\test.ps1
 |---|---|---|
 | Rules, validation, layout, progress | **108 passed, 0 failed** | 13 Nov 2026 |
 | Parity | **153 checks, 0 failed, 30 levels** | 13 Nov 2026 |
-| Integration flow | **136 passed, 0 failed, 30/30 levels solved through the game** | 13 Nov 2026 |
+| Integration flow | **141 passed, 0 failed, 30/30 levels solved through the game** | 13 Nov 2026 |
 | Manual desktop | Level 1 interaction set (select, pour, undo, real mouse) + hit-alignment at 4 and 6 tubes | 13 Nov 2026 |
 | Manual full playthrough | 1 of 30 done by hand (Level 1). 29 levels covered only by the flow harness. | — |
 | Device | Not run (deferred) | — |
@@ -59,10 +59,10 @@ powershell -ExecutionPolicy Bypass -File tools\test.ps1
 - Boots `main.tscn`, then for each level: starts it, taps the verified
   solution's source/destination tubes, checks the game declares a win, that the
   move count equals the solver's minimum, that a best is recorded, and that the
-  win card exists.
+  win card exists.\n- Checks back-navigation: gameplay → map → home, credits → home, and that back at home does not quit on desktop.
 - Checks progression reaches level 30, the save file contains 30 bests, undo
   restores the exact board and counter, undo at the start is harmless, restart
-  opens the confirmation, and an empty tube cannot be selected.
+  opens the confirmation, an empty tube cannot be selected, and the Android back notification routes through `_go_back()`.
 
 ## 4. Manual desktop pass (this cycle)
 

@@ -9,6 +9,7 @@ config/name="Sort Master"
 config/description="A calm, luminous water-sort puzzle set in a midnight greenhouse."
 config/version="0.1.0"
 config/icon="res://assets/2d/icons/icon.png"
+config/quit_on_go_back=false
 run/main_scene="res://scenes/main.tscn"
 
 [display]

@@ -112,6 +112,21 @@ func _run() -> void:
 	main._on_vessel_tapped(empty_tube)
 	check("empty tube cannot be selected", main.selected == -1)
 
+	# --- navigation and Android back -------------------------------------
+	main._show_level_select()
+	check("level map is reachable", main._screen == "levels")
+	main._start_level(0)
+	await process_frame
+	main._go_back()
+	check("back from gameplay returns to the map", main._screen == "levels")
+	main._go_back()
+	check("back from the map returns home", main._screen == "home")
+	main._go_back()
+	check("back at home does not quit on desktop", main._screen == "home")
+	main._show_credits()
+	main._go_back()
+	check("back from credits returns home", main._screen == "home")
+
 	_finish()
 
 

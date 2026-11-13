@@ -62,6 +62,7 @@ var layout: Dictionary = {}
 
 var _screen := "home"
 var _debug_visible := false
+var _safe := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
 var _toast: Label
 var _toast_tween: Tween
 
@@ -74,6 +75,8 @@ func _ready() -> void:
 	audio = AudioDirectorScript.new()
 	audio.muted = bool(data.get("muted", false))
 	add_child(audio)
+	_refresh_safe_area()
+	get_viewport().size_changed.connect(_refresh_safe_area)
 	_build_ui()
 	_show_home()
 
@@ -151,6 +154,20 @@ func _clear_screen() -> void:
 		_toast.modulate.a = 0.0
 
 
+## Insets from the Android safe area, converted to design pixels. Zero on
+## desktop and on devices without a cutout.
+func _refresh_safe_area() -> void:
+	var win := DisplayServer.window_get_size()
+	var area := DisplayServer.get_display_safe_area()
+	if win.x < 1 or win.y < 1 or area.size.x < 1 or area.size.y < 1:
+		return
+	var k := 1080.0 / float(win.x)
+	_safe["top"] = maxf(0.0, float(area.position.y)) * k
+	_safe["bottom"] = maxf(0.0, float(win.y - area.position.y - area.size.y)) * k
+	_safe["left"] = maxf(0.0, float(area.position.x)) * k
+	_safe["right"] = maxf(0.0, float(win.x - area.position.x - area.size.x)) * k
+
+
 func _page(margin_x: int = 64, margin_top: int = 48, margin_bottom: int = 44) -> MarginContainer:
 	var page := Control.new()
 	page.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -159,10 +176,10 @@ func _page(margin_x: int = 64, margin_top: int = 48, margin_bottom: int = 44) ->
 
 	var m := MarginContainer.new()
 	m.set_anchors_preset(Control.PRESET_FULL_RECT)
-	m.add_theme_constant_override("margin_left", margin_x)
-	m.add_theme_constant_override("margin_right", margin_x)
-	m.add_theme_constant_override("margin_top", margin_top)
-	m.add_theme_constant_override("margin_bottom", margin_bottom)
+	m.add_theme_constant_override("margin_left", margin_x + int(_safe.left))
+	m.add_theme_constant_override("margin_right", margin_x + int(_safe.right))
+	m.add_theme_constant_override("margin_top", margin_top + int(_safe.top))
+	m.add_theme_constant_override("margin_bottom", margin_bottom + int(_safe.bottom))
 	page.add_child(m)
 
 	page.modulate.a = 0.0
@@ -262,7 +279,7 @@ func _show_home() -> void:
 	credits.pressed.connect(_show_credits)
 	tools.add_child(credits)
 
-	sound_button = IconButtonScript.new("sound_off" if audio.muted else "sound_on", "", 64)
+	sound_button = IconButtonScript.new("sound_off" if audio.muted else "sound_on", "", 84)
 	sound_button.pressed.connect(_toggle_audio)
 	tools.add_child(sound_button)
 
@@ -303,7 +320,7 @@ func _show_level_select() -> void:
 	header.add_theme_constant_override("separation", 20)
 	col.add_child(header)
 
-	var back := IconButtonScript.new("back", "", 72)
+	var back := IconButtonScript.new("back", "", 96)
 	back.pressed.connect(_show_home)
 	header.add_child(back)
 
@@ -357,7 +374,7 @@ func _show_level_select() -> void:
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 18)
 	col.add_child(footer)
-	var home := IconButtonScript.new("home", "", 72)
+	var home := IconButtonScript.new("home", "", 96)
 	home.pressed.connect(_show_home)
 	footer.add_child(home)
 	var hint := UIKit.label("Restore a garden to open the next one.", 20, P.MUTED)
@@ -388,7 +405,7 @@ func _show_credits() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 20)
 	col.add_child(header)
-	var back := IconButtonScript.new("back", "", 72)
+	var back := IconButtonScript.new("back", "", 96)
 	back.pressed.connect(_show_home)
 	header.add_child(back)
 	var heading := UIKit.label("Credits & licences", 36, P.TEXT)
@@ -506,17 +523,17 @@ func _build_2d_board(parent: Control) -> void:
 func _build_hud(parent: Control) -> void:
 	var header := MarginContainer.new()
 	header.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	header.offset_left = 40
-	header.offset_right = -40
-	header.offset_top = 30
-	header.offset_bottom = 148
+	header.offset_left = 40 + int(_safe.left)
+	header.offset_right = -40 - int(_safe.right)
+	header.offset_top = 30 + int(_safe.top)
+	header.offset_bottom = 156 + int(_safe.top)
 	parent.add_child(header)
 
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 20)
 	header.add_child(row)
 
-	var back := IconButtonScript.new("back", "", 72)
+	var back := IconButtonScript.new("back", "", 96)
 	back.pressed.connect(_show_level_select)
 	row.add_child(back)
 
@@ -543,30 +560,30 @@ func _build_hud(parent: Control) -> void:
 
 	status_label = UIKit.label("", 20, P.MUTED)
 	status_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	status_label.offset_left = 50
-	status_label.offset_right = -50
-	status_label.offset_top = -200
-	status_label.offset_bottom = -158
+	status_label.offset_left = 50 + int(_safe.left)
+	status_label.offset_right = -50 - int(_safe.right)
+	status_label.offset_top = -206 - int(_safe.bottom)
+	status_label.offset_bottom = -164 - int(_safe.bottom)
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(status_label)
 
 	var bottom := MarginContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bottom.offset_left = 40
-	bottom.offset_right = -40
-	bottom.offset_top = -148
-	bottom.offset_bottom = -30
+	bottom.offset_left = 40 + int(_safe.left)
+	bottom.offset_right = -40 - int(_safe.right)
+	bottom.offset_top = -158 - int(_safe.bottom)
+	bottom.offset_bottom = -26 - int(_safe.bottom)
 	parent.add_child(bottom)
 
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 20)
 	bottom.add_child(bar)
 
-	undo_button = IconButtonScript.new("undo", "Undo", 96)
+	undo_button = IconButtonScript.new("undo", "Undo", 120)
 	undo_button.pressed.connect(_on_undo)
 	bar.add_child(undo_button)
 
-	var restart := IconButtonScript.new("restart", "Restart", 96)
+	var restart := IconButtonScript.new("restart", "Restart", 120)
 	restart.pressed.connect(_on_restart)
 	bar.add_child(restart)
 
@@ -883,11 +900,40 @@ func _update_debug() -> void:
 	debug_overlay.setup(layout, state.tubes, selected, moves, level_index + 1, hit_layer.size)
 
 
+## Android's system back button arrives as a window notification. Without this
+## the app would quit mid-level, which is both surprising and loses progress.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_go_back()
+
+
+func _go_back() -> void:
+	if modal_layer != null:
+		modal_layer.queue_free()
+		modal_layer = null
+		return
+	if win_layer != null:
+		_close_win()
+		_show_level_select()
+		return
+	match _screen:
+		"game":
+			_show_level_select()
+		"levels", "credits":
+			_show_home()
+		"home":
+			if OS.has_feature("mobile"):
+				get_tree().quit()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F1 and DEBUG_OVERLAY_AVAILABLE and _screen == "game":
 			_debug_visible = not _debug_visible
 			_update_debug()
+			return
+		if event.keycode == KEY_ESCAPE:
+			_go_back()
 			return
 		if _screen != "game" or win_layer != null or modal_layer != null:
 			return
@@ -895,5 +941,3 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_undo()
 		elif event.keycode == KEY_R:
 			_on_restart()
-		elif event.keycode == KEY_ESCAPE:
-			_show_level_select()

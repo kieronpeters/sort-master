@@ -1,0 +1,73 @@
+# Audio audition checklist
+
+**Status:** **NOT PERFORMED.** No human has listened to the six sounds. This
+checklist is the procedure; it is not evidence.
+
+Automated measurements prove the files are short, quiet and reproducible, but
+they cannot judge tone. Do not claim audition from an automated test.
+
+## 1. Files under test
+
+All are 22 050 Hz, 16-bit mono, synthesised by `tools/make_audio.ps1`, CC0 1.0.
+
+| File | Use | Duration | Peak |
+|---|---|---:|---:|
+| `select.wav` | tube selected | 0.09 s | −11.2 dBFS |
+| `pour.wav` | legal transfer | 0.45 s | −15.3 dBFS |
+| `invalid.wav` | illegal transfer / locked level | 0.16 s | −11.5 dBFS |
+| `undo.wav` | undo | 0.14 s | −15.7 dBFS |
+| `win.wav` | level complete | 0.85 s | −11.6 dBFS |
+| `ui.wav` | navigation | 0.05 s | −17.3 dBFS |
+
+Per-sound trim in `AudioDirector` is −8 to −15 dB. Pour high-frequency energy
+(>4 kHz) was reduced from 31.7 % to 2.1 % after the low-pass change.
+
+## 2. How to audition
+
+1. Install the debug or RC build on the S23 Ultra (or run on desktop).
+2. Set media volume to 50 % and then 100 %; do not use headphones only.
+3. Play each trigger at least five times, including rapid repeats.
+4. Judge each item below and record PASS/FAIL with a note.
+5. If a sound fails, record which file and the perceived problem (harsh, quiet,
+   long, clipped, repetitive).
+
+## 3. Checklist
+
+| ID | Check | Expected | Status |
+|---|---|---|---|
+| A01 | Select sound triggers once per selection | soft tick, no double trigger | NOT TESTED |
+| A02 | Pour sound triggers once per legal move | liquid sweep, not a click | NOT TESTED |
+| A03 | Invalid sound on illegal move | low thud, not harsh | NOT TESTED |
+| A04 | Undo sound | short descending blip | NOT TESTED |
+| A05 | Win sound | warm arpeggio, ≤1 s, not intrusive | NOT TESTED |
+| A06 | UI click on navigation | quiet, consistent | NOT TESTED |
+| A07 | Volume balance across the six | win/select audible; UI not louder | NOT TESTED |
+| A08 | Gameplay vs menus consistency | same character, no jarring shift | NOT TESTED |
+| A09 | No clipping at 100 % volume | no crackle or distortion | NOT TESTED |
+| A10 | No hiss/noise, especially pour | clean | NOT TESTED |
+| A11 | Repetition fatigue (5× each) | not annoying | NOT TESTED |
+| A12 | Enhances without dominating | can hear the game, not the SFX | NOT TESTED |
+| A13 | Mute is immediate and persists after relaunch | silence everywhere | NOT TESTED |
+| A14 | No audio after backgrounding | silence when the app is not focused | NOT TESTED |
+
+## 4. Result template
+
+| File | Rating (PASS/FAIL) | Note | Tester | Date |
+|---|---|---|---|---|
+| select.wav | | | | |
+| pour.wav | | | | |
+| invalid.wav | | | | |
+| undo.wav | | | | |
+| win.wav | | | | |
+| ui.wav | | | | |
+
+Overall: **PASS / FAIL**. If FAIL, open a defect with the file, the trigger and
+the perceived issue; do not re-tune by guesswork.
+
+## 5. Known limitations
+
+- No music track exists, so “music/SFX balance” is out of scope.
+- Audio-focus handling (calls, notifications) is not implemented; note it as a
+  separate gap, not an audition failure.
+- The RC is a debug build; audio behaviour should be re-checked on the signed
+  release build before publishing.

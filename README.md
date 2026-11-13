@@ -6,6 +6,8 @@ Android-first, portrait, offline.
 **Status:** release candidate (unsigned). 30 solver-verified levels, frozen
 `rules-v1`, rebuilt presentation, original artwork and audio. Not publishable
 until the owner supplies a signing key and the S23 Ultra checklist is run.
+See `docs/release-readiness.md` for the gate list and `docs/owner-decisions.md`
+for the four decisions that must be recorded first.
 
 ## Run
 
@@ -51,6 +53,11 @@ licences/         licence texts (Godot MIT, CC0 for the audio)
 - `docs/rendering.md` — backdrop, glass, board layout
 - `docs/palette-matrix.md` — colour and symbol contrast, known level-pair gaps
 - `docs/test-plan.md` — suites, device matrix, current results
+- `docs/release-readiness.md` — release gates, status and blockers
+- `docs/owner-decisions.md` — palette, post-win undo, SDK and levels 3–5
+- `docs/device-validation.md` — S23 Ultra matrix and evidence template
+- `docs/audio-audition.md` — human listening checklist
+- `docs/release-signing.md` — secure signing and production build
 - `docs/release-candidate.md` — artifacts, verification, signing boundary
 - `docs/credits-and-licences.md` — asset provenance
 - `docs/deferred-work.md` — what is deliberately not done

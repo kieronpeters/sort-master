@@ -19,6 +19,9 @@ genuine gaps, each with the reason it is still open.
 | 7 | Screen-reader and large-text modes | Needs a device pass and a design decision | Not required for the release gate, still an accessibility gap. |
 | 8 | Emulator floor-device coverage | Ultra is the target; emulator adds no evidence | Low-end Android performance unmeasured. |
 | 9 | Gradle/AAB path | Debug/release APK is enough for the RC | Play Store upload would need AAB + signing. |
+| 10 | Level colour-pair exceptions (13/30 below ΔE 15; 13 use 5–6 colours) | The 30-level set is frozen; re-authoring needs owner approval | Colour-vision users lose hue separation on those pairs; symbols mitigate. |
+| 11 | Audio audition | No human listening pass was possible this cycle | Tone and harshness are unverified; measurements only. |
+| 12 | Minimum Android version (B8) | Owner decision; presets use the template default 24 | The supported install base is undocumented. |
 
 ## Deliberate compromises
 

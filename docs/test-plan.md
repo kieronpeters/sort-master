@@ -1,100 +1,95 @@
 # Test Plan
 
 **Ticket:** M8-01
-**Status:** current as of 13 November 2026 (release-candidate cycle)
+**Status:** current as of 13 November 2026 (QA cycle 2)
 
 ---
 
-## 1. Layers
+## 1. Layers, entry and exit
 
-| Layer | Tool | Command | Authority |
+| Layer | Entry criterion | Exit criterion | Command |
 |---|---|---|---|
-| Rules + validation + layout + progress | GDScript, headless | `tests/test_rules.gd` | Authoritative for R1–R8, W1, level validation, board layout, save format |
-| Solver | Python 3.12 | `tools/solver/solve.py godot/levels/*.json --summary` | Authoritative for solvability and minimum moves |
-| Parity | GDScript + solver paths | `tests/parity.gd` | Authoritative for solver↔game agreement |
-| Integration flow | GDScript, headless | `tests/test_flow.gd` | Drives the real game screens through all 30 levels via selection/transfer/undo |
-| Manual desktop | Real window, real mouse | see §4 | Authoritative for the interface |
-| Device | Deferred by owner | `docs/device-test-checklist.md` | Not available |
+| Rules + validation + layout + save | Clean checkout, Godot 4.7.2 available | **0 failed**, runtime < 5 s | `test_rules.gd` |
+| Solver output | 30 level files + `solutions.json` | 30/30 solvable, minima match the recorded solutions | `tools/solver/solve.py` |
+| Parity, direction 1 (solver → game) | Same as above | 0 failed, < 60 s, both sides declare `rules-v1` | `parity.gd` |
+| Parity, direction 2 (game → solver) | Flow suite transcript | 30 levels replayed by the Python rules, 0 failed | `verify_game_moves.py` |
+| Integration flow | Runnable main scene | 30/30 wins, 0 failed, transcript written | `test_flow.gd` |
+| Manual desktop | Debug build, real window | Every checklist row has a capture or log | `docs/device-test-checklist.md` §3 |
+| Device | Signed RC + S23 Ultra | Checklist complete, frame/thermal gates met | `docs/device-test-checklist.md` |
 
-Solver output never counts as manual completion. Parity proves the rules agree;
-it does not prove the UI is usable. The flow harness exercises the game's own
-input path but still does not prove pixels land where a finger lands — that is
-what the manual pass and the debug overlay are for.
+Device performance gate: no interaction frame above **33 ms** and no visible
+hitch across 15 minutes; record `gfxinfo framestats` and battery delta. Device
+testing is **not run**; nothing in this document claims it.
 
-Run everything with:
+## 2. Device matrix
 
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\test.ps1
-```
+The S23 Ultra is the **baseline target**, not the floor: it is a flagship and
+cannot prove low-end behaviour. The matrix therefore records both.
 
-## 2. Results
+| Tier | Device | Android / API | Purpose | Status |
+|---|---|---|---|---|
+| Floor | 720 × 1280, 4 GB, e.g. Galaxy A13/A14 | 9–12 / 28–31 | minimum experience, 1080-design downscale | not available |
+| Baseline | Galaxy S23 Ultra 1440 × 3088 | 14–15 / 34–35 | target device, touch, thermals | deferred by owner |
+| Forward | Galaxy S24/S25 | 15–16 / 35–36 | future OS behaviour, edge-to-edge | not available |
+| Emulator | x86_64 AVD | any | fallback | not usable: APK is arm64-only and no system images are installed |
 
-| Suite | Result | Date |
+**Gap:** no device older than the S23 is available, so the floor is unverified.
+The 1080 × 1920 and 1080 × 2400 layout maths is tested; physical small-screen
+legibility is not.
+
+## 3. Evidence format
+
+A claim is only accepted with one of:
+
+- command output/log under `builds/` (test suites, exports, aapt2),
+- a screenshot under `docs/evidence/` named for the screen/state,
+- a filled row in `docs/device-test-checklist.md` with a capture reference.
+
+Prose alone is not evidence. Device rows must say "not run" until executed.
+
+## 4. Current results
+
+| Layer | Result | Date |
 |---|---|---|
-| Rules, validation, layout, progress | **108 passed, 0 failed** | 13 Nov 2026 |
-| Parity | **153 checks, 0 failed, 30 levels** | 13 Nov 2026 |
-| Integration flow | **142 passed, 0 failed, 30/30 levels solved through the game** | 13 Nov 2026 |
-| Manual desktop | Level 1 interaction set (select, pour, undo, real mouse) + hit-alignment at 4 and 6 tubes | 13 Nov 2026 |
-| Manual full playthrough | 1 of 30 done by hand (Level 1). 29 levels covered only by the flow harness. | — |
-| Device | Not run (deferred) | — |
+| Rules, validation, layout, save, ink contrast | **118 passed, 0 failed** | 13 Nov 2026 |
+| Parity direction 1 | **154 checks, 0 failed, 30 levels** | 13 Nov 2026 |
+| Integration flow | **150 passed, 0 failed, 30/30 levels** | 13 Nov 2026 |
+| Parity direction 2 | **GAME MOVES VERIFIED: 30 levels, 0 failed** | 13 Nov 2026 |
+| Manual desktop | Level 1 interaction set (select/pour/undo) + 4/6-tube hit alignment | 13 Nov 2026 |
+| Manual full playthrough | **1 of 30 by hand**; 29 covered only by the flow harness | — |
+| Device | **Not run** | — |
 
-## 3. What the suites cover
+## 5. What is covered
 
-### Rules (`test_rules.gd`)
-- Construction, clone independence, all move-legality rules, atomic apply,
-  whole-run transfer, win detection, canonical keys.
-- Level validation: ruleVersion, capacity, tube shape, per-colour counts,
-  empty-tube requirement, already-won rejection, non-object rejection, all 30
-  shipped levels validated through the game's own validator.
-- `BoardLayout`: 3/4/5/6/8 tubes, ordering, centring, width containment,
-  baseline, taller viewports, degenerate input.
-- `ProgressStore`: missing file, round-trip, corrupt JSON, negative clamping,
-  non-positive bests discarded.
+- **Rules:** construction, clone independence, pure and in-place move APIs,
+  R1–R8, whole-run transfer, win detection, canonical keys, `RULE_VERSION`.
+- **Validation:** ruleVersion, capacity, tube shape, per-colour counts, empty
+  tube, already-won, non-object, all 30 shipped levels.
+- **Layout:** 3/4/5/6/8 tubes, ordering, centring, width containment, baseline,
+  taller viewports, degenerate input.
+- **Save:** missing file, round-trip, corrupt JSON, negative clamping,
+  non-positive bests, non-numeric bests.
+- **Symbols:** ink contrast ≥ 4.5:1 for all six liquid colours.
+- **Flow:** every level solved through the game's own selection/transfer path;
+  Next Level wiring; undo restores the exact board; restart confirmation and
+  execution; bounded history; locked-level taps; empty-tube taps; navigation
+  and the Android back notification.
+- **Parity:** solver paths replayed in-game; the game's recorded moves replayed
+  by the independent Python rules.
 
-### Parity (`parity.gd`)
-- Replays the independent Python solver's path for every level through
-  `PuzzleState` and checks every move is legal and the final board is a win.
+## 6. Not automatable
 
-### Integration flow (`test_flow.gd`)
-- Boots `main.tscn`, then for each level: starts it, taps the verified
-  solution's source/destination tubes, checks the game declares a win, that the
-  move count equals the solver's minimum, that a best is recorded, and that the
-  win card exists.\n- Checks back-navigation: gameplay → map → home, credits → home, and that back at home does not quit on desktop.
-- Checks progression reaches level 30, the save file contains 30 bests, undo
-  restores the exact board and counter, undo at the start is harmless, restart
-  opens the confirmation, an empty tube cannot be selected, and the Android back notification routes through `_go_back()`.
-
-## 4. Manual desktop pass (this cycle)
-
-Performed in a real 720 × 1280 window with OS-level mouse input:
-
-1. Launched the saved profile → Home showed **Continue · Level 1**.
-2. Started the level, pressed F1 → debug overlay drew four hit strips exactly
-   around four vessels.
-3. Clicked tube 1 → gold rim, lift, "selected 1".
-4. Clicked empty tube 3 → two aqua units poured, moves 0 → 1.
-5. Clicked Undo → board and counter restored to the start.
-6. Captured home, levels, credits, gameplay, selection, transfer, undo,
-   completion, debug and final-level screens (`docs/evidence/rc-*.png`).
-
-A six-tube board was checked with the overlay (`rc-debug.png`): strips align
-with all six vessels.
-
-Not manually verified: levels 2–30 completion by hand, audio perception,
-physical-size legibility. These are recorded as gaps rather than passes.
-
-## 5. Not automatable
-
-| Area | Why | Covered by |
+| Area | Why | Coverage |
 |---|---|---|
-| Frame time, thermals, memory | needs the S23 Ultra | device checklist |
-| Touch at real size, safe areas | needs the device | device checklist |
-| Audio quality | perception | manual listen |
+| Frame time, thermals, memory | needs hardware | device checklist |
+| Real-size legibility, safe areas | needs hardware | device checklist |
+| Audio tone | human judgement | **not performed** (recorded as a gap) |
 | Visual polish | judgement | screenshots + review |
 
-## 6. Regression policy
+## 7. Regression policy
 
-- Existing tests must not be weakened to make a change pass.
-- New pure logic gets a test in `test_rules.gd`; new screen behaviour gets a
-  step in `test_flow.gd` where it can run headless.
-- `tools/test.ps1` is the gate before any build.
+- Tests must not be weakened to make a change pass.
+- New pure logic gets a check in `test_rules.gd`; new screen behaviour gets a
+  step in `test_flow.gd`; new solver/game interaction gets a direction-2 case.
+- `tools/test.ps1` is the gate before every build and requires **exit code 0**
+  and `FAILED: 0` in each suite.

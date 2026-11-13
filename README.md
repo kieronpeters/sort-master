@@ -1,57 +1,61 @@
 # Sort Master — Prism Garden
 
-Water-sort puzzle for Android. Five polished levels, 2.5D presentation
-(3D vessels, 2D interface), offline, no ads or monetisation in the prototype.
+A calm water-sort puzzle set in a midnight greenhouse. Godot 4.7.2, GDScript,
+Android-first, portrait, offline.
 
-**Status:** M0 research complete. G1 environment installed and verified.
-No game code yet — this repository is the skeleton created by M1-04.
+**Status:** release candidate (unsigned). 30 solver-verified levels, frozen
+`rules-v1`, rebuilt presentation, original artwork and audio. Not publishable
+until the owner supplies a signing key and the S23 Ultra checklist is run.
 
-## Toolchain (verified 12 Nov 2026)
+## Run
 
-| Component | Version | Location |
-|---|---|---|
-| Godot | 4.7.2 stable | `C:\Tools\Godot\4.7.2` |
-| Export templates | 4.7.2 | `%APPDATA%\Godot\export_templates\4.7.2.stable` |
-| Temurin JDK | 17.0.21 | `C:\Tools\jdk-17.0.21.9` |
-| Android SDK | platform-tools 37.0.1, build-tools 35.0.1, platform 35 | `%LOCALAPPDATA%\Android\Sdk` |
-| Blender | 4.5.15 LTS (pinned) | existing install |
+```powershell
+$env:GODOT = 'C:\Tools\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe'
+& $env:GODOT --path godot
+```
 
-Oracle Java 8 remains installed and remains the default `java` on PATH.
-Do not change `JAVA_HOME` or PATH to make the toolchain work.
+## Test
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\test.ps1
+```
+
+Four suites: rules/validation/layout/save (118), solver→game parity (154),
+30-level integration flow (150), and the independent Python replay of the
+game's recorded moves (30 levels).
+
+## Build
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\build_debug.ps1   # dev APK
+powershell -ExecutionPolicy Bypass -File tools\build_rc.ps1      # release candidate
+```
+
+`build_rc.ps1` requires the owner's keystore for a real release build; without
+it, it produces a debuggable, debug-signed RC and says so. Both scripts verify
+package id, version code and portrait lock with `aapt2`.
 
 ## Layout
 
 ```
-godot/          Godot project root (open this in the editor)
-  scenes/       screens and components
-  scripts/      domain (rules), services, presentation, ui
-  assets/       3d, 2d, audio, themes
-  levels/       data-only level definitions
-  tests/        automated tests
-art_source/     Blender and Krita sources - outside the Godot project on purpose
-tools/          blender build scripts, Python solver
-docs/           decision records and milestone reports
-licences/       licence evidence for third-party assets
-builds/         APK output (git-ignored)
+godot/            project (scenes, scripts, levels, assets, tests)
+tools/            build/test scripts, solver, asset generators
+docs/             rules, rendering, palette, test plan, RC, credits, device checklist
+licences/         licence texts (Godot MIT, CC0 for the audio)
 ```
 
-`art_source/` sits outside `godot/` so the engine never imports `.blend` files.
+## Documentation
 
-## Scope boundaries
+- `docs/rules-v1.md` — frozen rules contract
+- `docs/levels.md` — the 30-level catalogue and difficulty metrics
+- `docs/rendering.md` — backdrop, glass, board layout
+- `docs/palette-matrix.md` — colour and symbol contrast, known level-pair gaps
+- `docs/test-plan.md` — suites, device matrix, current results
+- `docs/release-candidate.md` — artifacts, verification, signing boundary
+- `docs/credits-and-licences.md` — asset provenance
+- `docs/deferred-work.md` — what is deliberately not done
 
-- Android first; S23 is the minimum performance target.
-- No backend, accounts, cloud saves, analytics, ads or purchases.
-- No points, hints or economy in the first five levels.
-- Full art and screen production wait for the G2 rendering proof of concept.
+## Licence
 
-## Planning documents
-
-The production plan lives outside this repository, next to it:
-`..\Sort Master — Prism Garden\SORT_MASTER_MASTER_PRODUCTION_PLAN\`
-(read-only reference; the copy in `docs/` is not maintained).
-
-## Working rules
-
-- One writer per file at a time; coordination happens on the FlowQuery board.
-- No commits to shared branches, no pushes, no deploys without owner approval.
-- Never commit secrets, keystores or build output.
+Original code and artwork. Audio is CC0 1.0. Engine: Godot, MIT
+(`licences/GODOT-MIT.txt`). No accounts, ads, analytics or network calls.

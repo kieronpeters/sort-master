@@ -190,3 +190,49 @@ Select-String -Path "$env:APPDATA\Godot\editor_settings-4.7.tres" -Pattern 'expo
 ## 11. What this record does not authorise
 
 No installation, update, removal, PATH change, `JAVA_HOME` change, registry edit or SDK reconfiguration. Any change to this toolchain requires a ticket and, where the G1 plan is affected, owner approval.
+
+---
+
+## 12. Pinned identifiers and digests (QA cycle 2)
+
+Build identifiers are enough where the tool publishes one; the engine and
+templates also have SHA-256 digests so a rebuild can be checked on another
+machine.
+
+| Component | Version | Identifier / digest |
+|---|---|---|
+| Godot console binary | 4.7.2.stable | build `ed1daf0bf`; SHA-256 `C8F0A6BC45A19B33541501E57F6F7CD972AB18453743266339D495CBBE846643` |
+| Godot editor binary | 4.7.2.stable | SHA-256 `AB1824F85BFD8E0E4128182C000C4003A3E042245B2967848D089B2A04B22424` |
+| Android debug template | 4.7.2.stable | SHA-256 `59E0073F0FA59F552684A861D8F4266B0B34B488A140D6657EAC7DD70D1A0A0D` |
+| Temurin JDK | 17.0.21+9 | build string `17.0.21+9` |
+| Android build-tools | 35.0.1 | package id `build-tools;35.0.1` |
+| Git | 2.55.0.windows.3 | version string |
+| Python (solver) | 3.12.10 | `py -3.12 --version` |
+| Blender | 4.5.15 LTS | folder + `blender --version` |
+
+### Blender drift check
+
+Before any Blender-based asset export:
+
+1. run `blender --version` and compare to `4.5.15 LTS`;
+2. record the output and date in this file;
+3. if it differs, stop and open a decision ticket — do not re-export silently.
+
+### Upgrade policy
+
+Godot **4.8** and Blender **5.3** must not be adopted mid-project without a
+decision record and a full regression run (rules, parity, flow, APK
+verification). Patch-level Godot updates require the same test gate.
+
+## 13. Build and test commands
+
+```powershell
+$env:GODOT = 'C:\Tools\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe'  # optional
+powershell -ExecutionPolicy Bypass -File tools\test.ps1
+powershell -ExecutionPolicy Bypass -File tools\build_debug.ps1
+powershell -ExecutionPolicy Bypass -File tools\build_rc.ps1
+```
+
+The scripts do not contain credentials or personal paths. The editor settings
+paths above are machine-local and must be recreated on another machine.
+

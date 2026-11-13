@@ -83,3 +83,25 @@ a renderer problem on a future device is a one-line switch, not a rewrite.
   physical panel resolution; this is intentional for consistent cost.
 
 Device frame-time remains unverified until the S23 Ultra pass.
+
+## 7. QA cycle 2 corrections
+
+- **Tone mapping switched to linear.** Filmic desaturated the liquids (amber
+  `#FFC24B` rendered as `#F8D65A`, emerald as `#38C377`), which pushed a
+  documented colour pair below the accessibility threshold. Linear mapping now
+  renders within a few units of the authored palette.
+- **The glass mouth is sealed.** The lathe profile now rolls the lip inward
+  (`0.061 → 0.058 → 0.050 → 0.047`) instead of ending in an open edge, which
+  read as broken glass at phone scale. Vessel height is 0.512 world units.
+- **The glass body is a faint film**, not a wire and not frosted plastic:
+  `body_alpha 0.022`, `edge_alpha 0.55`, Fresnel power 5.
+- **The garden is brighter and dithered.** The original ramp sat within 0.3
+  luminance units of a flat fill; the new top/mid/low values plus sub-LSB
+  dither make the leaves, shelf light and vignette readable without competing
+  with the liquids.
+- **The 2D menu backdrop now actually draws.** It used `set_anchors_preset` in
+  `_ready`, which left its size at zero; `set_anchors_and_offsets_preset` fixes
+  it. The menu and gameplay gardens now share the same tonal family.
+- **Win card moved up.** It is centred in the upper 70% of the screen with a
+  0.58 scrim, so the solved vessels remain visible behind it.
+

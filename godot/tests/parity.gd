@@ -29,6 +29,9 @@ func _initialize() -> void:
 		_finish()
 		return
 
+	var V = load("res://scripts/domain/level_validator.gd")
+	check("game rule version is rules-v1", V.RULE_VERSION == "rules-v1")
+
 	var solutions = JSON.parse_string(FileAccess.get_file_as_string(solutions_path))
 	check("solutions parse", solutions is Dictionary)
 	if not (solutions is Dictionary):
@@ -67,7 +70,7 @@ func _initialize() -> void:
 				legal = false
 				print("  %s move %d unit count mismatch" % [key, i + 1])
 				break
-			state.apply_move(from_i, to_i)
+			state.apply_move_in_place(from_i, to_i)
 
 		check(key + ": every solver move is legal in the game", legal)
 		check(key + ": solver move count matches minimum", moves.size() == int(entry.get("minimumMoves", -1)))

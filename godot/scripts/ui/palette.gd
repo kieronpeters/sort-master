@@ -20,7 +20,7 @@ const PINK := Color("#F87AA7")
 const DANGER := Color("#F87AA7")
 
 const TITLE_SIZE := 60
-const HEADING_SIZE := 40
-const BODY_SIZE := 26
-const SMALL_SIZE := 21
-const TINY_SIZE := 17
+const HEADING_SIZE := 44
+const BODY_SIZE := 32
+const SMALL_SIZE := 27
+const TINY_SIZE := 22

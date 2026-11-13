@@ -52,17 +52,24 @@ for ($i = 0; $i -lt $n; $i++) {
 }
 Write-Wav 'select.wav' $data
 
-# --- pour: a short rising liquid sweep -------------------------------------
-$n = Samples 0.22
+# --- pour: a low-passed rising liquid sweep --------------------------------
+# Deterministic noise (LCG + one-pole low-pass), so the committed file is
+# reproducible and has no 4 kHz hiss on a phone speaker.
+$n = Samples 0.45
 $data = New-Object double[] $n
 $phase = 0.0
+$low = 0.0
+$seed = 20261113
 for ($i = 0; $i -lt $n; $i++) {
     $t = $i / $rate
-    $f = 220 + 380 * ($t / 0.22)
+    $f = 190 + 300 * ($t / 0.45)
     $phase += 2 * [math]::PI * $f / $rate
-    $e = Envelope $t 0.012 0.075
-    $air = (Get-Random -Minimum -1.0 -Maximum 1.0) * 0.05 * $e
-    $data[$i] = 0.20 * $e * ([math]::Sin($phase) + 0.30 * [math]::Sin(2 * $phase)) + $air
+    $e = Envelope $t 0.02 0.16
+    $seed = (($seed * 1103515245) + 12345) % 2147483648
+    $white = (($seed / 2147483648.0) * 2.0) - 1.0
+    $low = ($low * 0.90) + ($white * 0.10)
+    $glug = 0.86 + 0.14 * [math]::Sin(2 * [math]::PI * 7.0 * $t)
+    $data[$i] = 0.17 * $e * $glug * ([math]::Sin($phase) + 0.30 * [math]::Sin(2 * $phase)) + (0.02 * $low * $e)
 }
 Write-Wav 'pour.wav' $data
 

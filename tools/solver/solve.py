@@ -133,7 +133,7 @@ def solve(level: dict, max_states: int = 400000) -> dict:
 
     while queue:
         if len(seen) > max_states:
-            return _result(level, False, None, None, len(seen), started, True)
+            return _result(level, None, None, None, len(seen), started, True)
         board = queue.popleft()
         board_key = key(board)
         for src_i, dst_i, units, colour in legal_moves(board):
@@ -184,6 +184,7 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("levels", nargs="+")
     parser.add_argument("--summary", action="store_true")
+    parser.add_argument("--max-states", type=int, default=400000)
     args = parser.parse_args(argv)
 
     worst = 0
@@ -202,13 +203,20 @@ def main(argv: list[str]) -> int:
             worst = max(worst, 2)
             continue
 
-        result = solve(level)
+        result = solve(level, max_states=args.max_states)
+        if result["bounded"]:
+            status = "UNKNOWN (state cap reached)"
+        elif result["solvable"]:
+            status = f"solvable in {result['minimumMoves']}"
+        else:
+            status = "UNSOLVABLE"
         if args.summary:
-            status = f"solvable in {result['minimumMoves']}" if result["solvable"] else "UNSOLVABLE"
             print(f"{path.name}: {status} | visited {result['visitedStates']} | {result['elapsedMs']} ms")
         else:
             print(json.dumps(result, indent=2))
-        if not result["solvable"]:
+        if result["bounded"]:
+            worst = max(worst, 4)
+        elif not result["solvable"]:
             worst = max(worst, 3)
 
     return worst

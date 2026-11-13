@@ -21,7 +21,10 @@ static var OUTER: Array = [
 	Vector2(0.046, 0.472),
 	Vector2(0.049, 0.487),
 	Vector2(0.058, 0.498),
-	Vector2(0.060, 0.504),
+	Vector2(0.061, 0.506),
+	Vector2(0.058, 0.512),
+	Vector2(0.050, 0.510),
+	Vector2(0.047, 0.501),
 ]
 
 static var WALL: float = 0.006
@@ -81,7 +84,7 @@ static func inner_radius_at(y: float) -> float:
 const LIQUID_BASE := 0.045
 
 static func liquid_radius() -> float:
-	return inner_radius_at(0.15) - 0.001
+	return inner_radius_at(0.15) - 0.0005
 
 static func capacity_height() -> float:
 	return 0.285

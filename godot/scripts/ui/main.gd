@@ -20,6 +20,10 @@ const LevelTileScript = preload("res://scripts/ui/level_tile.gd")
 const UIKit = preload("res://scripts/ui/ui_kit.gd")
 const P = preload("res://scripts/ui/palette.gd")
 
+## Undo history is a session aid, not a log: cap it so a wandering player
+## cannot grow memory without bound.
+const MAX_HISTORY := 200
+
 ## Fallback switch: false renders the old 2D vessel row.
 const USE_3D := true
 
@@ -44,6 +48,7 @@ var selected := -1
 var moves := 0
 var unlocked := 0
 var best: Dictionary = {}
+var load_errors: Array = []
 
 var screen_root: Control
 var board_3d: Node3D
@@ -70,8 +75,17 @@ var _toast_tween: Tween
 func _ready() -> void:
 	_load_levels()
 	var data: Dictionary = ProgressStoreScript.load_data()
-	unlocked = clampi(int(data.get("unlocked", 0)), 0, maxi(0, levels.size() - 1))
 	best = data.get("best", {})
+	unlocked = int(data.get("unlocked", 0))
+	# a completed level is always unlocked, even if the save was written by an
+	# older build that only advanced one counter
+	for key in best.keys():
+		var idx := str(key)
+		if not idx.is_valid_int() or int(idx) < 0 or int(idx) >= levels.size():
+			best.erase(key)
+			continue
+		unlocked = maxi(unlocked, int(idx))
+	unlocked = clampi(unlocked, 0, maxi(0, levels.size() - 1))
 	audio = AudioDirectorScript.new()
 	audio.muted = bool(data.get("muted", false))
 	add_child(audio)
@@ -85,26 +99,27 @@ func _ready() -> void:
 
 func _load_levels() -> void:
 	levels.clear()
-	var i := 1
-	while true:
+	load_errors.clear()
+	for i in range(1, 31):
 		var path := "res://levels/level_%d.json" % i
 		if not FileAccess.file_exists(path):
-			break
+			load_errors.append("level_%d.json is missing" % i)
+			continue
 		var text := FileAccess.get_file_as_string(path)
 		var data = JSON.parse_string(text)
 		var problem: String = LevelValidatorScript.validate(data)
 		if problem != "":
-			push_warning("Rejected level %s: %s" % [path, problem])
-			i += 1
+			load_errors.append("level_%d.json: %s" % [i, problem])
 			continue
 		levels.append(data)
-		i += 1
-	if levels.is_empty():
-		push_warning("No levels found in res://levels/")
+	if not load_errors.is_empty():
+		push_warning("%d level file(s) rejected: %s" % [load_errors.size(), "; ".join(load_errors)])
 
 
 func _save_progress() -> void:
-	ProgressStoreScript.save_data({"unlocked": unlocked, "best": best, "muted": audio.muted if audio else false})
+	var ok: bool = ProgressStoreScript.save_data({"unlocked": unlocked, "best": best, "muted": audio.muted if audio else false})
+	if not ok:
+		push_warning("Progress save failed; the session continues in memory.")
 
 
 func _stage_name(index: int) -> String:
@@ -197,7 +212,7 @@ func _status(text: String, colour: Color = P.MUTED) -> void:
 
 func _show_toast(text: String, colour: Color = P.GOLD) -> void:
 	if _toast == null:
-		_toast = UIKit.label("", 22, colour)
+		_toast = UIKit.label("", 26, colour)
 		_toast.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 		_toast.offset_left = 60
 		_toast.offset_right = -60
@@ -225,7 +240,8 @@ func _continue_index() -> int:
 	for i in levels.size():
 		if i <= unlocked and not best.has(str(i)):
 			return i
-	return mini(unlocked + 1, levels.size() - 1)
+	# every accessible level is restored: replay the highest one
+	return mini(unlocked, levels.size() - 1)
 
 
 func _play_label() -> String:
@@ -256,8 +272,10 @@ func _show_home() -> void:
 	col.add_child(emblem)
 
 	col.add_child(UIKit.label("S O R T   M A S T E R", 50, P.GOLD))
-	col.add_child(UIKit.label("P R I S M   G A R D E N", 22, P.ACCENT))
-	col.add_child(UIKit.label("A midnight greenhouse of colours", 21, P.MUTED))
+	col.add_child(UIKit.label("P R I S M   G A R D E N", 26, P.ACCENT))
+	col.add_child(UIKit.label("A midnight greenhouse of colours", 25, P.MUTED))
+	if not load_errors.is_empty():
+		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 19, P.PINK))
 	col.add_child(UIKit.spacer(26))
 
 	var play := UIKit.primary_button(_play_label())
@@ -275,11 +293,11 @@ func _show_home() -> void:
 	tools.add_theme_constant_override("separation", 22)
 	col.add_child(tools)
 
-	var credits := UIKit.text_button("Credits & licences", 21)
+	var credits := UIKit.text_button("Credits & licences", 23)
 	credits.pressed.connect(_show_credits)
 	tools.add_child(credits)
 
-	sound_button = IconButtonScript.new("sound_off" if audio.muted else "sound_on", "", 84)
+	sound_button = IconButtonScript.new("sound_off" if audio.muted else "sound_on", "", 96)
 	sound_button.pressed.connect(_toggle_audio)
 	tools.add_child(sound_button)
 
@@ -328,8 +346,10 @@ func _show_level_select() -> void:
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 2)
 	header.add_child(titles)
-	titles.add_child(UIKit.eyebrow("THE GARDEN MAP"))
-	var heading := UIKit.label("Levels", 40, P.TEXT)
+	var map_eyebrow := UIKit.eyebrow("THE GARDEN MAP")
+	map_eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	titles.add_child(map_eyebrow)
+	var heading := UIKit.label("Levels", 46, P.TEXT)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	titles.add_child(heading)
 
@@ -340,7 +360,10 @@ func _show_level_select() -> void:
 	chip_box.add_theme_constant_override("separation", 0)
 	chip.add_child(chip_box)
 	chip_box.add_child(UIKit.label("RESTORED", P.TINY_SIZE - 2, P.MUTED))
-	chip_box.add_child(UIKit.label("%d / %d" % [best.size(), levels.size()], 26, P.GOLD))
+	chip_box.add_child(UIKit.label("%d / %d" % [mini(best.size(), levels.size()), levels.size()], 30, P.GOLD))
+
+	if not load_errors.is_empty():
+		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 19, P.PINK))
 
 	var grid := GridContainer.new()
 	grid.columns = 5
@@ -367,9 +390,9 @@ func _show_level_select() -> void:
 	legend.alignment = BoxContainer.ALIGNMENT_CENTER
 	legend.add_theme_constant_override("separation", 34)
 	col.add_child(legend)
-	legend.add_child(UIKit.label("●  Restored", 19, P.GOLD))
-	legend.add_child(UIKit.label("●  In bloom", 19, P.ACCENT))
-	legend.add_child(UIKit.label("●  Locked", 19, P.DIM))
+	legend.add_child(UIKit.label("●  Restored", 21, P.GOLD))
+	legend.add_child(UIKit.label("●  In bloom", 21, P.ACCENT))
+	legend.add_child(UIKit.label("●  Locked", 21, P.DIM))
 
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 18)
@@ -377,7 +400,7 @@ func _show_level_select() -> void:
 	var home := IconButtonScript.new("home", "", 96)
 	home.pressed.connect(_show_home)
 	footer.add_child(home)
-	var hint := UIKit.label("Restore a garden to open the next one.", 20, P.MUTED)
+	var hint := UIKit.label("Restore a garden to open the next one.", 24, P.MUTED)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(hint)
@@ -408,7 +431,7 @@ func _show_credits() -> void:
 	var back := IconButtonScript.new("back", "", 96)
 	back.pressed.connect(_show_home)
 	header.add_child(back)
-	var heading := UIKit.label("Credits & licences", 36, P.TEXT)
+	var heading := UIKit.label("Credits & licences", 42, P.TEXT)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
@@ -432,6 +455,8 @@ func _show_credits() -> void:
 		"All sound effects are synthesised from scratch by tools/make_audio.ps1 and are dedicated to the public domain (CC0 1.0). No sample libraries are used.")
 	_credits_section(body, "Privacy",
 		"Offline by design. No accounts, no analytics, no advertising, no purchases. Progress is a single local save file.")
+	_credits_section(body, "Licence texts",
+		"Godot Engine is MIT-licensed and the six sound effects are CC0 1.0. The full licence texts are included with the game under assets/legal.")
 
 	var done := UIKit.ghost_button("Back")
 	done.pressed.connect(_show_home)
@@ -444,10 +469,10 @@ func _credits_section(parent: VBoxContainer, title: String, text: String) -> voi
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
-	var t := UIKit.label(title, 22, P.ACCENT)
+	var t := UIKit.label(title, 26, P.ACCENT)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	box.add_child(t)
-	var b := UIKit.label(text, 20, P.MUTED)
+	var b := UIKit.label(text, 24, P.MUTED)
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(b)
@@ -457,6 +482,8 @@ func _credits_section(parent: VBoxContainer, title: String, text: String) -> voi
 
 func _start_level(index: int) -> void:
 	if index < 0 or index >= levels.size():
+		return
+	if index > unlocked:
 		return
 	_screen = "game"
 	level_index = index
@@ -534,7 +561,7 @@ func _build_hud(parent: Control) -> void:
 	header.add_child(row)
 
 	var back := IconButtonScript.new("back", "", 96)
-	back.pressed.connect(_show_level_select)
+	back.pressed.connect(_go_back)
 	row.add_child(back)
 
 	var titles := VBoxContainer.new()
@@ -544,7 +571,7 @@ func _build_hud(parent: Control) -> void:
 	var eyebrow := UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()])
 	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	titles.add_child(eyebrow)
-	var stage := UIKit.label(_stage_name(level_index), 30, P.TEXT)
+	var stage := UIKit.label(_stage_name(level_index), 36, P.TEXT)
 	stage.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	titles.add_child(stage)
 
@@ -555,10 +582,10 @@ func _build_hud(parent: Control) -> void:
 	chip_box.add_theme_constant_override("separation", 0)
 	chip.add_child(chip_box)
 	chip_box.add_child(UIKit.label("MOVES", P.TINY_SIZE - 2, P.MUTED))
-	moves_label = UIKit.label("0", 30, P.TEXT)
+	moves_label = UIKit.label("0", 36, P.TEXT)
 	chip_box.add_child(moves_label)
 
-	status_label = UIKit.label("", 20, P.MUTED)
+	status_label = UIKit.label("", 26, P.MUTED)
 	status_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	status_label.offset_left = 50 + int(_safe.left)
 	status_label.offset_right = -50 - int(_safe.right)
@@ -682,8 +709,8 @@ func _on_vessel_tapped(index: int) -> void:
 		return
 
 	if state.can_move(selected, index):
-		history.append(state.clone())
-		state.apply_move(selected, index)
+		_push_history()
+		state.apply_move_in_place(selected, index)
 		moves += 1
 		selected = -1
 		audio.play("pour")
@@ -713,6 +740,12 @@ func _move_error(from_i: int, to_i: int) -> String:
 	if state.top_run(from_i) > state.capacity - state.count_at(to_i):
 		return "Not enough room for that pour."
 	return "That pour is not allowed."
+
+
+func _push_history() -> void:
+	history.append(state.clone())
+	if history.size() > MAX_HISTORY:
+		history.pop_front()
 
 
 func _on_undo() -> void:
@@ -803,14 +836,40 @@ func _show_win_card(record: bool, previous: int) -> void:
 	win_layer.modulate.a = 0.0
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.01, 0.03, 0.04, 0.84)
+	dim.color = Color(0.01, 0.03, 0.04, 0.48)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	win_layer.add_child(dim)
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# lift the card into the upper half so the solved vessels stay visible
+	center.offset_bottom = -600.0
 	win_layer.add_child(center)
+
+	# a warm bloom behind the card: the completion beat
+	var glow_tex := GradientTexture2D.new()
+	var glow_grad := Gradient.new()
+	glow_grad.set_color(0, Color(1.0, 0.82, 0.38, 0.34))
+	glow_grad.set_color(1, Color(1.0, 0.82, 0.38, 0.0))
+	glow_tex.gradient = glow_grad
+	glow_tex.fill = GradientTexture2D.FILL_RADIAL
+	glow_tex.fill_from = Vector2(0.5, 0.5)
+	glow_tex.fill_to = Vector2(1.0, 0.5)
+	var glow := TextureRect.new()
+	glow.texture = glow_tex
+	glow.set_anchors_preset(Control.PRESET_CENTER)
+	glow.offset_left = -470
+	glow.offset_right = 470
+	glow.offset_top = -720
+	glow.offset_bottom = -180
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.stretch_mode = TextureRect.STRETCH_SCALE
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow.modulate.a = 0.0
+	win_layer.add_child(glow)
+	var glow_tween := create_tween()
+	glow_tween.tween_property(glow, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
 
 	var card := PanelContainer.new()
 	var sb := UIKit.panel_style(P.PANEL_HI, P.GOLD, 2, 32)
@@ -826,17 +885,19 @@ func _show_win_card(record: bool, previous: int) -> void:
 	card.add_child(box)
 
 	box.add_child(UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()], P.ACCENT))
-	box.add_child(UIKit.label("Garden Restored" if final_level else "Level Complete", 46, P.GOLD))
-	box.add_child(UIKit.label("Solved in %d moves" % moves, 26, P.TEXT))
+	box.add_child(UIKit.label("Garden Restored" if final_level else "Level Complete", 50, P.GOLD))
+	box.add_child(UIKit.label("Solved in %d moves" % moves, 30, P.TEXT))
 	if record and previous > 0:
-		box.add_child(UIKit.label("New best — previous was %d" % previous, 20, P.ACCENT))
-	elif not record:
-		box.add_child(UIKit.label("Best remains %d moves" % previous, 20, P.MUTED))
+		box.add_child(UIKit.label("New best — previous was %d" % previous, 22, P.ACCENT))
+	elif record:
+		box.add_child(UIKit.label("First restoration", 24, P.ACCENT))
+	elif previous == moves:
+		box.add_child(UIKit.label("Matched your best", 24, P.MUTED))
 	else:
-		box.add_child(UIKit.label("First restoration", 20, P.ACCENT))
+		box.add_child(UIKit.label("Best remains %d moves" % previous, 24, P.MUTED))
 
 	if final_level:
-		box.add_child(UIKit.label("All 30 gardens are in bloom.", 21, P.MUTED))
+		box.add_child(UIKit.label("All 30 gardens are in bloom.", 24, P.MUTED))
 
 	box.add_child(UIKit.divider())
 	box.add_child(UIKit.spacer(4))
@@ -869,6 +930,14 @@ func _show_win_card(record: bool, previous: int) -> void:
 		_close_win()
 		_show_level_select())
 	row.add_child(levels_button)
+
+	card.scale = Vector2(0.95, 0.95)
+	await get_tree().process_frame
+	if not is_instance_valid(card):
+		return
+	card.pivot_offset = card.size * 0.5
+	var pop := create_tween()
+	pop.tween_property(card, "scale", Vector2.ONE, 0.30).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 	var t := create_tween()
 	t.tween_property(win_layer, "modulate:a", 1.0, 0.22).set_trans(Tween.TRANS_SINE)
@@ -918,12 +987,59 @@ func _go_back() -> void:
 		return
 	match _screen:
 		"game":
-			_show_level_select()
+			if moves > 0:
+				_confirm_leave()
+			else:
+				_show_level_select()
 		"levels", "credits":
 			_show_home()
 		"home":
 			if OS.has_feature("mobile"):
 				get_tree().quit()
+
+
+func _confirm_leave() -> void:
+	if modal_layer != null:
+		return
+	modal_layer = Control.new()
+	modal_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	screen_root.add_child(modal_layer)
+
+	var dim := ColorRect.new()
+	dim.color = Color(0.01, 0.03, 0.04, 0.80)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(center)
+
+	var card := UIKit.panel(P.PANEL, P.LINE, 2, 28)
+	card.custom_minimum_size = Vector2(660, 0)
+	center.add_child(card)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 18)
+	card.add_child(box)
+	box.add_child(UIKit.label("Leave level?", 36, P.TEXT))
+	box.add_child(UIKit.label("Your %d moves will be discarded." % moves, 22, P.MUTED))
+	box.add_child(UIKit.spacer(4))
+
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 16)
+	box.add_child(buttons)
+	var stay := UIKit.primary_button("Keep playing")
+	stay.pressed.connect(func():
+		modal_layer.queue_free()
+		modal_layer = null)
+	buttons.add_child(stay)
+	var leave := UIKit.ghost_button("Leave")
+	leave.pressed.connect(func():
+		modal_layer.queue_free()
+		modal_layer = null
+		_show_level_select())
+	buttons.add_child(leave)
 
 
 func _unhandled_input(event: InputEvent) -> void:

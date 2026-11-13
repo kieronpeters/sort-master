@@ -12,7 +12,7 @@ const DESIGN_W := 1080.0
 
 ## Vessel metrics in world units, taken from vessel_mesh.gd's lathe profile.
 const VESSEL_WORLD_W := 0.172
-const VESSEL_WORLD_H := 0.504
+const VESSEL_WORLD_H := 0.512
 
 const VESSEL_GAP := 20.0        # design px between neighbouring vessels
 const WIDTH_FRACTION := 0.88    # of the design width, including the outer margin

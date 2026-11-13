@@ -1,0 +1,9 @@
+CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+The six sound effects in godot/assets/audio/ (select, pour, invalid, undo, win,
+ui) were synthesised for this project by tools/make_audio.ps1. To the extent
+possible under law, the project dedicates them to the public domain under CC0
+1.0. They may be used, modified and redistributed without attribution.
+
+No third-party samples, recordings or sample libraries are included.

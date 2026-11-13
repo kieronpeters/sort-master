@@ -6,17 +6,17 @@ render_mode unshaded, cull_disabled, shadows_disabled;
 // brightest thing on screen, so the garden is mostly silhouette and a single
 // pool of light on the shelf where the vessels stand.
 
-uniform vec3 top_colour : source_color = vec3(0.024, 0.082, 0.110);
-uniform vec3 mid_colour : source_color = vec3(0.018, 0.058, 0.078);
-uniform vec3 low_colour : source_color = vec3(0.012, 0.037, 0.050);
+uniform vec3 top_colour : source_color = vec3(0.059, 0.188, 0.239);
+uniform vec3 mid_colour : source_color = vec3(0.039, 0.129, 0.169);
+uniform vec3 low_colour : source_color = vec3(0.025, 0.075, 0.095);
 uniform vec3 glow_colour : source_color = vec3(0.250, 0.800, 0.780);
 uniform vec3 leaf_colour : source_color = vec3(0.055, 0.220, 0.205);
-uniform float glow_strength = 0.10;
+uniform float glow_strength = 0.18;
 uniform float shelf_y = 0.82;
-uniform float shelf_strength = 0.10;
-uniform float leaf_strength = 0.30;
+uniform float shelf_strength = 0.14;
+uniform float leaf_strength = 0.45;
 uniform float mote_strength = 0.22;
-uniform float vignette_strength = 0.62;
+uniform float vignette_strength = 0.45;
 
 float hash21(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -75,6 +75,9 @@ void fragment() {
 	vec2 v = (uv - 0.5) * vec2(1.0, 0.86);
 	float vig = smoothstep(0.74, 0.18, length(v));
 	col *= mix(1.0 - vignette_strength, 1.0, vig);
+
+	// sub-LSB dither: kills the 8-bit staircases in a near-black gradient
+	col += (hash21(uv * vec2(1920.0, 1080.0) + TIME) - 0.5) * (1.6 / 255.0);
 
 	ALBEDO = col;
 }

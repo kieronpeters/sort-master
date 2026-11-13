@@ -80,6 +80,22 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 		disc_mi.position = Vector3(0, base_y + band_h * contents.size() + 0.002, 0)
 		root.add_child(disc_mi)
 
+	# dark inner neck, so the mouth reads as an opening rather than a cap
+	var bore := CylinderMesh.new()
+	bore.top_radius = 0.045
+	bore.bottom_radius = 0.045
+	bore.height = 0.055
+	bore.radial_segments = 32
+	var bore_mi := MeshInstance3D.new()
+	bore_mi.mesh = bore
+	var bm_inner := StandardMaterial3D.new()
+	bm_inner.albedo_color = Color("#081A20")
+	bm_inner.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bm_inner.cull_mode = BaseMaterial3D.CULL_DISABLED
+	bore_mi.material_override = bm_inner
+	bore_mi.position = Vector3(0, 0.474, 0)
+	root.add_child(bore_mi)
+
 	# contact shadow, so the vessel sits on the garden rather than floating
 	var shadow := Sprite3D.new()
 	shadow.texture = _shadow_texture()
@@ -111,16 +127,16 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 
 	# base plinth
 	var base := CylinderMesh.new()
-	base.top_radius = 0.090
-	base.bottom_radius = 0.094
-	base.height = 0.014
+	base.top_radius = 0.088
+	base.bottom_radius = 0.091
+	base.height = 0.010
 	base.radial_segments = 40
 	var base_mi := MeshInstance3D.new()
 	base_mi.mesh = base
 	var bm := StandardMaterial3D.new()
-	bm.albedo_color = Color("#1B3A44")
-	bm.roughness = 0.38
-	bm.metallic = 0.30
+	bm.albedo_color = Color("#16323C")
+	bm.roughness = 0.42
+	bm.metallic = 0.20
 	base_mi.material_override = bm
 	base_mi.position = Vector3(0, 0.006, 0)
 	root.add_child(base_mi)
@@ -135,14 +151,14 @@ static func glass_material(selected: bool) -> ShaderMaterial:
 	if selected:
 		m.set_shader_parameter("body_colour", Color(1.0, 0.95, 0.85))
 		m.set_shader_parameter("edge_colour", Color(1.0, 0.82, 0.38))
-		m.set_shader_parameter("body_alpha", 0.0)
+		m.set_shader_parameter("body_alpha", 0.022)
 		m.set_shader_parameter("edge_alpha", 0.62)
 		m.set_shader_parameter("edge_power", 5.0)
 		m.set_shader_parameter("glow", 0.0)
 	else:
-		m.set_shader_parameter("body_colour", Color(0.70, 0.93, 1.0))
+		m.set_shader_parameter("body_colour", Color(0.50, 0.66, 0.72))
 		m.set_shader_parameter("edge_colour", Color(0.80, 0.97, 1.0))
-		m.set_shader_parameter("body_alpha", 0.0)
+		m.set_shader_parameter("body_alpha", 0.014)
 		m.set_shader_parameter("edge_alpha", 0.55)
 		m.set_shader_parameter("edge_power", 5.0)
 		m.set_shader_parameter("glow", 0.0)
@@ -184,5 +200,20 @@ static func _glow_texture() -> GradientTexture2D:
 	tex.fill_to = Vector2(1.0, 0.5)
 	return tex
 
+## Picks whichever ink has the higher WCAG contrast against the band. The old
+## luminance threshold put white ink on emerald at ~1.8:1.
 static func _ink_for(colour: Color) -> Color:
-	return Color(0.03, 0.05, 0.07, 0.92) if colour.get_luminance() > 0.55 else Color(1, 1, 1, 0.95)
+	var dark := Color(0.03, 0.05, 0.07, 0.95)
+	var light := Color(1, 1, 1, 0.97)
+	var band := _rel_lum(colour)
+	var c_dark: float = (maxf(band, _rel_lum(dark)) + 0.05) / (minf(band, _rel_lum(dark)) + 0.05)
+	var c_light: float = (maxf(band, 1.0) + 0.05) / (minf(band, 1.0) + 0.05)
+	return dark if c_dark >= c_light else light
+
+
+static func _rel_lum(c: Color) -> float:
+	return 0.2126 * _linear(c.r) + 0.7152 * _linear(c.g) + 0.0722 * _linear(c.b)
+
+
+static func _linear(v: float) -> float:
+	return (v / 12.92) if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4)

@@ -2,7 +2,7 @@
 # Original artwork; no third-party imagery. Output: godot/assets/2d/icons/.
 Add-Type -AssemblyName System.Drawing
 
-$root = 'C:\Users\Asus\source\repos\sort-master'
+$root = Split-Path -Parent $PSScriptRoot
 $outDir = Join-Path $root 'godot\assets\2d\icons'
 New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 
@@ -65,8 +65,27 @@ function Draw-Icon([int]$size, [string]$file, [bool]$withBg) {
     $g.Dispose(); $bmp.Dispose()
 }
 
+function Draw-Background([int]$size, [string]$file) {
+    $bmp = New-Object System.Drawing.Bitmap($size, $size)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.SmoothingMode = 'AntiAlias'
+    $rect = New-Object System.Drawing.Rectangle(0, 0, $size, $size)
+    $br = New-Object System.Drawing.Drawing2D.LinearGradientBrush($rect, [System.Drawing.Color]::FromArgb(255, 18, 52, 63), [System.Drawing.Color]::FromArgb(255, 6, 17, 22), 90)
+    $g.FillRectangle($br, $rect)
+    $br.Dispose()
+    # soft prism glow, no bottle: the foreground layer carries the mark
+    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $path.AddEllipse(0, 0, $size, $size)
+    $pgb = New-Object System.Drawing.Drawing2D.PathGradientBrush($path)
+    $pgb.CenterColor = [System.Drawing.Color]::FromArgb(255, 24, 74, 84)
+    $pgb.SurroundColors = [System.Drawing.Color[]]@([System.Drawing.Color]::FromArgb(255, 6, 17, 22))
+    $g.FillPath($pgb, $path)
+    $pgb.Dispose(); $path.Dispose()
+    $bmp.Save((Join-Path $outDir $file), [System.Drawing.Imaging.ImageFormat]::Png)
+    $g.Dispose(); $bmp.Dispose()
+}
 Draw-Icon 512 'icon.png' $true
 Draw-Icon 432 'icon_foreground.png' $false
-Draw-Icon 432 'icon_background.png' $true
+Draw-Background 432 'icon_background.png'
 
 Get-ChildItem $outDir -Filter 'icon*.png' | Select-Object Name, Length | Format-Table -AutoSize

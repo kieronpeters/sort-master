@@ -47,14 +47,15 @@ $pts = @(
 $c[1].FillPolygon($b, [System.Drawing.PointF[]]$pts)
 $b.Dispose(); Save-Canvas $c[0] $c[1] 'glyph_b.png'
 
-# C - leaf
+# C - triangle (distinct from the droplet at small sizes)
 $c = New-Canvas; $b = New-Brush
-$path = New-Object System.Drawing.Drawing2D.GraphicsPath
-$path.AddBezier(64, 8, 118, 40, 112, 104, 64, 120)
-$path.AddBezier(64, 120, 16, 104, 10, 40, 64, 8)
-$path.CloseFigure()
-$c[1].FillPath($b, $path)
-$b.Dispose(); $path.Dispose(); Save-Canvas $c[0] $c[1] 'glyph_c.png'
+$pts = @(
+    (New-Object System.Drawing.PointF(64, 8)),
+    (New-Object System.Drawing.PointF(120, 116)),
+    (New-Object System.Drawing.PointF(8, 116))
+)
+$c[1].FillPolygon($b, [System.Drawing.PointF[]]$pts)
+$b.Dispose(); Save-Canvas $c[0] $c[1] 'glyph_c.png'
 
 # D - four point sparkle
 $c = New-Canvas; $b = New-Brush

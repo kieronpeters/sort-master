@@ -11,7 +11,7 @@ const Glyphs = preload("res://scripts/ui/icon_glyphs.gd")
 var kind := "undo"
 var label_text := ""
 var diameter := 72.0
-var font_size := 24
+var font_size := 28
 var tint := P.TEXT
 var accent := P.ACCENT
 
@@ -25,7 +25,7 @@ func _init(p_kind := "undo", p_label := "", p_diameter := 72.0) -> void:
 	if label_text == "":
 		custom_minimum_size = Vector2(diameter, diameter)
 	else:
-		custom_minimum_size = Vector2(0, 96)
+		custom_minimum_size = Vector2(0, diameter)
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tooltip_text = label_text
 

@@ -4,6 +4,8 @@ extends RefCounted
 ## rules-v1 domain model. No nodes, no rendering, no input.
 ## See docs/rules-v1.md. This class is the single source of truth for gameplay.
 
+const RULE_VERSION := "rules-v1"
+
 var capacity: int = 4
 var tubes: Array = []          # Array of Array[String], index 0 = bottom
 
@@ -54,8 +56,15 @@ func can_move(from_i: int, to_i: int) -> bool:
 			return false                               # R4
 	return top_run(from_i) <= capacity - tubes[to_i].size()   # R5
 
+## Pure form: returns a new state and never mutates this one.
+func apply_move(from_i: int, to_i: int) -> PuzzleState:
+	var next = clone()
+	next.apply_move_in_place(from_i, to_i)
+	return next
+
 ## Applies a legal move atomically (R8). Returns false and changes nothing otherwise.
-func apply_move(from_i: int, to_i: int) -> bool:
+## The UI snapshots with clone() before calling this so undo can restore exactly.
+func apply_move_in_place(from_i: int, to_i: int) -> bool:
 	if not can_move(from_i, to_i):
 		return false
 	var units := top_run(from_i)
@@ -89,7 +98,7 @@ func all_moves() -> Array:
 func canonical_key() -> String:
 	var parts: Array = []
 	for t in tubes:
-		parts.append("".join(t))
+		parts.append("\u001f".join(t))
 	parts.sort()
 	return "|".join(parts)
 

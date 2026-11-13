@@ -74,12 +74,16 @@ func _draw() -> void:
 	draw_style_box(sb, rect)
 
 	var font := ThemeDB.fallback_font
-	var font_size := 48 if number < 10 else 42
+	var font_size := 54 if number < 10 else 50
 	var baseline: float = size.y * 0.5 + font_size * 0.35
 	if tile_state == "done":
 		baseline -= 8.0
 	draw_string(font, Vector2(0, baseline), str(number), HORIZONTAL_ALIGNMENT_CENTER,
 		size.x, font_size, ink)
+
+	if current and tile_state != "locked":
+		# shape cue, so "current" does not depend on colour alone
+		Glyphs.draw(self, "spark", Vector2(size.x * 0.10, size.y * 0.10), size.x * 0.20, P.ACCENT)
 
 	if tile_state == "done":
 		Glyphs.draw(self, "check", Vector2(size.x * 0.62, size.y * 0.62), size.x * 0.24, P.GOLD)

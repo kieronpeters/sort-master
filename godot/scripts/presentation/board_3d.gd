@@ -28,15 +28,15 @@ var _tube_count := 0
 func _ready() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("#081A22")
+	env.background_color = Color("#0B1F27")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("#2E5563")
 	env.ambient_light_energy = 0.16
 	env.glow_enabled = true
-	env.glow_intensity = 0.40
+	env.glow_intensity = 0.35
 	env.glow_bloom = 0.08
 	env.glow_hdr_threshold = 1.15
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	var world := WorldEnvironment.new()
 	world.environment = env
 	add_child(world)

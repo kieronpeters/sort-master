@@ -56,11 +56,11 @@ static func _style_button(b: Button, normal: StyleBoxFlat, hover: StyleBoxFlat, 
 	b.focus_mode = Control.FOCUS_NONE
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
-static func primary_button(text: String, font_size: int = 30) -> Button:
+static func primary_button(text: String, font_size: int = 36) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_size_override("font_size", font_size)
-	b.custom_minimum_size = Vector2(0, 108)
+	b.custom_minimum_size = Vector2(0, 120)
 	_style_button(
 		b,
 		_button_style(P.ACCENT_DARK, P.ACCENT, 2, 26),
@@ -71,11 +71,11 @@ static func primary_button(text: String, font_size: int = 30) -> Button:
 	)
 	return b
 
-static func ghost_button(text: String, font_size: int = 26) -> Button:
+static func ghost_button(text: String, font_size: int = 32) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_size_override("font_size", font_size)
-	b.custom_minimum_size = Vector2(0, 92)
+	b.custom_minimum_size = Vector2(0, 104)
 	_style_button(
 		b,
 		_button_style(P.PANEL, P.LINE, 2, 24),
@@ -86,7 +86,7 @@ static func ghost_button(text: String, font_size: int = 26) -> Button:
 	)
 	return b
 
-static func text_button(text: String, font_size: int = 22) -> Button:
+static func text_button(text: String, font_size: int = 26) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_size_override("font_size", font_size)

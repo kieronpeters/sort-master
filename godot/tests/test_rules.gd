@@ -23,8 +23,16 @@ func _initialize() -> void:
 	check("not won at start", not s.is_won())
 	var c = s.clone()
 	check("clone is independent", c.signature() == s.signature())
-	c.apply_move(0, 2)
+	c.apply_move_in_place(0, 2)
 	check("clone mutation does not leak", s.signature() != c.signature())
+	check("rule version frozen", S.RULE_VERSION == "rules-v1")
+
+	# --- purity: apply_move returns a new state and leaves the input alone ---
+	var base_sig: String = s.signature()
+	var moved_state = s.apply_move(0, 2)
+	check("apply_move is pure", s.signature() == base_sig)
+	check("apply_move returns the moved board", moved_state.signature() != base_sig)
+	check("apply_move does not consume the source", s.can_move(0, 2))
 
 	# --- R1 same tube ---
 	check("R1 same tube illegal", not s.can_move(0, 0))
@@ -49,14 +57,14 @@ func _initialize() -> void:
 
 	# --- R6/R7 whole run, order preserved ---
 	var mv = S.new(4, [["B", "A", "A"], ["A"], [], []])
-	var ok = mv.apply_move(0, 1)
+	var ok = mv.apply_move_in_place(0, 1)
 	check("R6 move applied", ok)
 	check("R6 whole run moved", mv.tubes[0] == ["B"])
 	check("R7 order preserved", mv.tubes[1] == ["A","A","A"])
 
 	# --- R8 illegal move changes nothing ---
 	var before = mv.signature()
-	check("R8 illegal returns false", not mv.apply_move(0, 0))
+	check("R8 illegal returns false", not mv.apply_move_in_place(0, 0))
 	check("R8 state unchanged", mv.signature() == before)
 
 	# --- W1: single-colour but not full is NOT a win ---
@@ -144,7 +152,47 @@ func _initialize() -> void:
 	check("non-positive best discarded", not clamped.best.has("0") and int(clamped.best.get("1", 0)) == 4)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
 
+	# --- hostile save types and write sanitisation ------------------------
+	var fh := FileAccess.open(tmp, FileAccess.WRITE)
+	fh.store_string('{"unlocked":"7","best":{"0":"x","1":4.5,"2":-1,"3":5},"muted":"false"}')
+	fh.close()
+	var hostile: Dictionary = PS.load_data(tmp)
+	check("string unlocked ignored", int(hostile.unlocked) == 0)
+	check("non-numeric best dropped", not hostile.best.has("0"))
+	check("negative best dropped", not hostile.best.has("2"))
+	check("numeric best kept", int(hostile.best.get("3", 0)) == 5)
+	check("string muted ignored", bool(hostile.muted) == false)
+	check("write sanitises best", PS.save_data({"unlocked": 0, "best": {"0": "x", "1": 3}}, tmp))
+	check("sanitised save keeps only numbers", PS.load_data(tmp).best.size() == 1)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
+
+	# --- canonical key must not merge different unit splits ---------------
+	var split_a = S.new(4, [["ab", "c"], ["a", "bc"], [], []]).canonical_key()
+	var split_b = S.new(4, [["abc"], ["a", "b", "c"], [], []]).canonical_key()
+	check("canonical key separates unit splits", split_a != split_b)
+
+	# --- liquid symbol ink contrast (M5-01 secondary cue) -----------------
+	var VB = load("res://scripts/presentation/vessel_builder.gd")
+	for key in VB.COLOURS.keys():
+		var band: Color = VB.COLOURS[key]
+		var ink: Color = VB._ink_for(band)
+		check("symbol ink contrast %s >= 4.5" % key, _contrast(band, ink) >= 4.5)
+
 	print("")
 	print("PASSED: ", passed, "  FAILED: ", failed)
 	quit(0 if failed == 0 else 1)
+
+
+func _lum(c: Color) -> float:
+	return 0.2126 * _lin(c.r) + 0.7152 * _lin(c.g) + 0.0722 * _lin(c.b)
+
+
+func _lin(v: float) -> float:
+	return (v / 12.92) if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4)
+
+
+func _contrast(a: Color, b: Color) -> float:
+	var la := _lum(a)
+	var lb := _lum(b)
+	return (maxf(la, lb) + 0.05) / (minf(la, lb) + 0.05)
 

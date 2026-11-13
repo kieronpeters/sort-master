@@ -11,6 +11,9 @@ config/version="0.1.0"
 config/icon="res://assets/2d/icons/icon.png"
 config/quit_on_go_back=false
 run/main_scene="res://scenes/main.tscn"
+boot_splash/bg_color=Color(0.0235294, 0.0666667, 0.0862745, 1)
+boot_splash/image="res://assets/2d/icons/icon_foreground.png"
+boot_splash/fullsize=false
 
 [display]
 
@@ -18,6 +21,7 @@ window/size/viewport_width=1080
 window/size/viewport_height=1920
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [rendering]
 

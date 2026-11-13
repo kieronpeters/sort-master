@@ -16,6 +16,16 @@ const SOUND_PATHS := {
 const VOICES := 8
 const BASE_VOLUME_DB := -9.0
 
+## Per-sound trim so the short ticks sit under the longer reward sound.
+const GAINS := {
+	"select": -12.0,
+	"pour": -10.0,
+	"invalid": -9.0,
+	"undo": -13.0,
+	"win": -8.0,
+	"ui": -15.0,
+}
+
 var muted := false
 
 var _streams := {}
@@ -46,7 +56,7 @@ func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:
 	if player == null:
 		player = _players[0]
 	player.stream = _streams[sound]
-	player.volume_db = volume_db
+	player.volume_db = GAINS.get(sound, volume_db)
 	player.play()
 
 

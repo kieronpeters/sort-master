@@ -33,6 +33,9 @@ func _run() -> void:
 	await _settle()
 	await _shot("rc-home")
 
+	# a realistic map: six restored gardens and level 7 current
+	main.unlocked = 6
+	main.best = {"0": 3, "1": 6, "2": 6, "3": 7, "4": 7, "5": 8}
 	main._show_level_select()
 	await _settle()
 	await _shot("rc-levels")
@@ -41,7 +44,7 @@ func _run() -> void:
 	await _settle()
 	await _shot("rc-credits")
 
-	main.unlocked = 3
+	main.unlocked = 6
 	main._start_level(1)
 	await _settle()
 	await _shot("rc-gameplay")

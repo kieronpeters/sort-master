@@ -1,55 +1,82 @@
 extends Control
 
-## M3/M6 minimal playable shell: home, level select, gameplay, win.
-## Deliberately plain - polish is deferred (see docs/deferred-work.md).
+## Screen shell for Sort Master — Prism Garden.
+##
+## Presentation only: every rule decision comes from PuzzleState, and progress
+## lives in ProgressStore. Screens are built in code so there is one place to
+## change the look, and all of them share Palette / UIKit.
 
 const PuzzleStateScript = preload("res://scripts/domain/puzzle_state.gd")
+const ProgressStoreScript = preload("res://scripts/domain/progress_store.gd")
+const LevelValidatorScript = preload("res://scripts/domain/level_validator.gd")
 const VesselViewScript = preload("res://scripts/ui/vessel_view.gd")
 const Board3DScript = preload("res://scripts/presentation/board_3d.gd")
+const LayoutScript = preload("res://scripts/presentation/board_layout.gd")
 const BackdropScript = preload("res://scripts/ui/backdrop.gd")
-const LevelValidatorScript = preload("res://scripts/domain/level_validator.gd")
+const AudioDirectorScript = preload("res://scripts/audio/audio_director.gd")
+const EmblemScript = preload("res://scripts/ui/emblem.gd")
+const IconButtonScript = preload("res://scripts/ui/icon_button.gd")
+const LevelTileScript = preload("res://scripts/ui/level_tile.gd")
+const UIKit = preload("res://scripts/ui/ui_kit.gd")
+const P = preload("res://scripts/ui/palette.gd")
 
-## Rendering switch. Set to false to fall back to the 2D VesselView board.
+## Fallback switch: false renders the old 2D vessel row.
 const USE_3D := true
 
-# Design space shared with board_3d.gd
-const DESIGN_W := 1080.0
-const VESSEL_PX_W := 132.0
-const GAP_PX := 14.0
-const HIT_TOP := 0.14
-const HIT_BOTTOM := 0.90
+## The M8-06 overlay is a dev-build facility. Release exports carry the
+## release_build feature and never contain scripts/debug.
+var DEBUG_OVERLAY_AVAILABLE: bool = not OS.has_feature("release_build") and (OS.is_debug_build() or OS.has_feature("dev_build"))
+const FADE_TIME := 0.18
 
-const BG := Color("#0B1F27")
-const PANEL := Color("#13272F")
-const TEXT := Color("#EAF7FF")
-const ACCENT := Color("#46D8D0")
-const GOLD := Color("#FFC24B")
+const STAGES := [
+	[1, "Discovery"],
+	[7, "Growing complexity"],
+	[16, "Strategy"],
+	[19, "Mastery"],
+	[25, "Expert"],
+]
 
 var levels: Array = []
-var level_index: int = 0
+var level_index := 0
 var state = null
 var history: Array = []
-var selected: int = -1
-var moves: int = 0
-var unlocked: int = 0
+var selected := -1
+var moves := 0
+var unlocked := 0
+var best: Dictionary = {}
 
 var screen_root: Control
-var vessels_row: HBoxContainer
 var board_3d: Node3D
 var hit_layer: Control
 var sub_viewport: SubViewport
+var vessels_row: HBoxContainer
 var status_label: Label
-var header_label: Label
 var moves_label: Label
-var win_panel: Panel
-var win_label: Label
-var next_button: Button
+var undo_button: IconButton
+var sound_button: IconButton
+var win_layer: Control
+var modal_layer: Control
+var audio: AudioDirector
+var debug_overlay = null
+var layout: Dictionary = {}
+
+var _screen := "home"
+var _debug_visible := false
+var _toast: Label
+var _toast_tween: Tween
+
 
 func _ready() -> void:
 	_load_levels()
-	_load_progress()
+	var data: Dictionary = ProgressStoreScript.load_data()
+	unlocked = clampi(int(data.get("unlocked", 0)), 0, maxi(0, levels.size() - 1))
+	best = data.get("best", {})
+	audio = AudioDirectorScript.new()
+	audio.muted = bool(data.get("muted", false))
+	add_child(audio)
 	_build_ui()
 	_show_home()
+
 
 # ---------- data ----------
 
@@ -72,141 +99,349 @@ func _load_levels() -> void:
 	if levels.is_empty():
 		push_warning("No levels found in res://levels/")
 
-func _load_progress() -> void:
-	var path := "user://progress.json"
-	if FileAccess.file_exists(path):
-		var data = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if data is Dictionary:
-			unlocked = int(data.get("unlocked", 0))
 
 func _save_progress() -> void:
-	var f := FileAccess.open("user://progress.json", FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify({"unlocked": unlocked}))
-		f.close()
+	ProgressStoreScript.save_data({"unlocked": unlocked, "best": best, "muted": audio.muted if audio else false})
 
-# ---------- ui ----------
+
+func _stage_name(index: int) -> String:
+	var level := index + 1
+	var name := STAGES[0][1]
+	for entry in STAGES:
+		if level >= int(entry[0]):
+			name = entry[1]
+	return str(name)
+
+
+# ---------- shell ----------
 
 func _build_ui() -> void:
 	var bg := ColorRect.new()
-	bg.color = BG
+	bg.color = P.BG_DEEP
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
-	var backdrop = BackdropScript.new()
-	add_child(backdrop)
+	add_child(BackdropScript.new())
 
 	screen_root = Control.new()
 	screen_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	screen_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(screen_root)
+
 
 func _clear_screen() -> void:
 	for child in screen_root.get_children():
+		screen_root.remove_child(child)
 		child.queue_free()
 	board_3d = null
 	hit_layer = null
+	sub_viewport = null
 	vessels_row = null
+	win_layer = null
+	modal_layer = null
+	debug_overlay = null
+	layout = {}
+	selected = -1
+	moves_label = null
+	status_label = null
+	undo_button = null
+	sound_button = null
+	if _toast != null:
+		_toast.modulate.a = 0.0
 
-func _label(text: String, size: int, colour: Color = TEXT) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", colour)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	return l
 
-func _button(text: String, size: int = 26) -> Button:
-	var b := Button.new()
-	b.text = text
-	b.add_theme_font_size_override("font_size", size)
-	b.add_theme_color_override("font_color", TEXT)
-	b.custom_minimum_size = Vector2(300, 68)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color("#16323c")
-	sb.border_color = Color("#2f6b74")
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(18)
-	sb.set_content_margin_all(12)
-	var hover := sb.duplicate()
-	hover.bg_color = Color("#1d4450")
-	hover.border_color = ACCENT
-	var pressed := sb.duplicate()
-	pressed.bg_color = Color("#0f242c")
-	b.add_theme_stylebox_override("normal", sb)
-	b.add_theme_stylebox_override("hover", hover)
-	b.add_theme_stylebox_override("pressed", pressed)
-	b.add_theme_stylebox_override("focus", hover)
-	return b
+func _page(margin_x: int = 64, margin_top: int = 48, margin_bottom: int = 44) -> MarginContainer:
+	var page := Control.new()
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	screen_root.add_child(page)
+
+	var m := MarginContainer.new()
+	m.set_anchors_preset(Control.PRESET_FULL_RECT)
+	m.add_theme_constant_override("margin_left", margin_x)
+	m.add_theme_constant_override("margin_right", margin_x)
+	m.add_theme_constant_override("margin_top", margin_top)
+	m.add_theme_constant_override("margin_bottom", margin_bottom)
+	page.add_child(m)
+
+	page.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(page, "modulate:a", 1.0, FADE_TIME).set_trans(Tween.TRANS_SINE)
+	return m
+
+
+func _status(text: String, colour: Color = P.MUTED) -> void:
+	if status_label == null:
+		return
+	status_label.text = text
+	status_label.add_theme_color_override("font_color", colour)
+
+
+func _show_toast(text: String, colour: Color = P.GOLD) -> void:
+	if _toast == null:
+		_toast = UIKit.label("", 22, colour)
+		_toast.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		_toast.offset_left = 60
+		_toast.offset_right = -60
+		_toast.offset_top = -220
+		_toast.offset_bottom = -170
+		_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_toast)
+	_toast.text = text
+	_toast.add_theme_color_override("font_color", colour)
+	_toast.modulate.a = 1.0
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_interval(1.5)
+	_toast_tween.tween_property(_toast, "modulate:a", 0.0, 0.35)
+
+
+# ---------- home ----------
+
+func _continue_index() -> int:
+	if levels.is_empty():
+		return 0
+	if best.size() >= levels.size():
+		return 0
+	for i in levels.size():
+		if i <= unlocked and not best.has(str(i)):
+			return i
+	return mini(unlocked + 1, levels.size() - 1)
+
+
+func _play_label() -> String:
+	if levels.is_empty():
+		return "Begin"
+	if best.size() >= levels.size():
+		return "Play again"
+	if unlocked == 0 and best.is_empty():
+		return "Begin"
+	return "Continue · Level %d" % (_continue_index() + 1)
+
 
 func _show_home() -> void:
+	_screen = "home"
 	_clear_screen()
+	var m := _page(72, 56, 48)
+
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	screen_root.add_child(center)
-	var box := VBoxContainer.new()
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 18)
-	box.custom_minimum_size = Vector2(320, 0)
-	center.add_child(box)
+	m.add_child(center)
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(780, 0)
+	col.add_theme_constant_override("separation", 14)
+	center.add_child(col)
 
-	box.add_child(_label("SORT MASTER", 56, GOLD))
-	box.add_child(_label("Prism Garden", 28, ACCENT))
+	var emblem := EmblemScript.new()
+	emblem.custom_minimum_size = Vector2(320, 320)
+	emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(emblem)
 
-	var play := _button("Play")
+	col.add_child(UIKit.label("S O R T   M A S T E R", 50, P.GOLD))
+	col.add_child(UIKit.label("P R I S M   G A R D E N", 22, P.ACCENT))
+	col.add_child(UIKit.label("A midnight greenhouse of colours", 21, P.MUTED))
+	col.add_child(UIKit.spacer(26))
+
+	var play := UIKit.primary_button(_play_label())
 	play.pressed.connect(_on_play_pressed)
-	box.add_child(play)
+	col.add_child(play)
 
-	var pick := _button("Levels")
+	var pick := UIKit.ghost_button("Levels")
 	pick.pressed.connect(_show_level_select)
-	box.add_child(pick)
+	col.add_child(pick)
+
+	col.add_child(UIKit.spacer(10))
+
+	var tools := HBoxContainer.new()
+	tools.alignment = BoxContainer.ALIGNMENT_CENTER
+	tools.add_theme_constant_override("separation", 22)
+	col.add_child(tools)
+
+	var credits := UIKit.text_button("Credits & licences", 21)
+	credits.pressed.connect(_show_credits)
+	tools.add_child(credits)
+
+	sound_button = IconButtonScript.new("sound_off" if audio.muted else "sound_on", "", 64)
+	sound_button.pressed.connect(_toggle_audio)
+	tools.add_child(sound_button)
+
+	col.add_child(UIKit.spacer(16))
+	var footer := UIKit.label("v%s  ·  offline  ·  no ads" % ProjectSettings.get_setting("application/config/version", "0.1.0"), P.TINY_SIZE, P.DIM)
+	col.add_child(footer)
+
 
 func _on_play_pressed() -> void:
-	_start_level(min(unlocked, levels.size() - 1))
+	if levels.is_empty():
+		return
+	audio.play("ui")
+	_start_level(_continue_index())
+
+
+func _toggle_audio() -> void:
+	audio.set_muted(not audio.muted)
+	if sound_button != null:
+		sound_button.kind = "sound_off" if audio.muted else "sound_on"
+		sound_button.queue_redraw()
+	_save_progress()
+	if not audio.muted:
+		audio.play("ui")
+
+
+# ---------- level select ----------
 
 func _show_level_select() -> void:
+	_screen = "levels"
 	_clear_screen()
-	var outer := VBoxContainer.new()
-	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	outer.offset_left = 60
-	outer.offset_right = -60
-	outer.offset_top = 60
-	outer.offset_bottom = -40
-	outer.add_theme_constant_override("separation", 18)
-	screen_root.add_child(outer)
+	var m := _page(52, 44, 36)
 
-	outer.add_child(_label("Levels", 40, GOLD))
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 18)
+	m.add_child(col)
+
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 20)
+	col.add_child(header)
+
+	var back := IconButtonScript.new("back", "", 72)
+	back.pressed.connect(_show_home)
+	header.add_child(back)
+
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	titles.add_theme_constant_override("separation", 2)
+	header.add_child(titles)
+	titles.add_child(UIKit.eyebrow("THE GARDEN MAP"))
+	var heading := UIKit.label("Levels", 40, P.TEXT)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	titles.add_child(heading)
+
+	var chip := UIKit.panel(P.PANEL, P.LINE, 2, 18)
+	chip.custom_minimum_size = Vector2(170, 76)
+	header.add_child(chip)
+	var chip_box := VBoxContainer.new()
+	chip_box.add_theme_constant_override("separation", 0)
+	chip.add_child(chip_box)
+	chip_box.add_child(UIKit.label("RESTORED", P.TINY_SIZE - 2, P.MUTED))
+	chip_box.add_child(UIKit.label("%d / %d" % [best.size(), levels.size()], 26, P.GOLD))
+
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 18)
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(grid)
+
+	for i in levels.size():
+		var tile = LevelTileScript.new(i + 1)
+		var tile_state := "locked"
+		if best.has(str(i)):
+			tile_state = "done"
+		elif i <= unlocked:
+			tile_state = "open"
+		tile.set_tile(tile_state, i == unlocked)
+		var idx: int = i
+		tile.pressed.connect(func(): _on_level_pressed(idx))
+		grid.add_child(tile)
+
+	col.add_child(UIKit.spacer(4))
+	var legend := HBoxContainer.new()
+	legend.alignment = BoxContainer.ALIGNMENT_CENTER
+	legend.add_theme_constant_override("separation", 34)
+	col.add_child(legend)
+	legend.add_child(UIKit.label("●  Restored", 19, P.GOLD))
+	legend.add_child(UIKit.label("●  In bloom", 19, P.ACCENT))
+	legend.add_child(UIKit.label("●  Locked", 19, P.DIM))
+
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 18)
+	col.add_child(footer)
+	var home := IconButtonScript.new("home", "", 72)
+	home.pressed.connect(_show_home)
+	footer.add_child(home)
+	var hint := UIKit.label("Restore a garden to open the next one.", 20, P.MUTED)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(hint)
+
+
+func _on_level_pressed(index: int) -> void:
+	if index > unlocked:
+		audio.play("invalid")
+		_show_toast("Restore level %d first." % index, P.PINK)
+		return
+	audio.play("ui")
+	_start_level(index)
+
+
+# ---------- credits ----------
+
+func _show_credits() -> void:
+	_screen = "credits"
+	_clear_screen()
+	var m := _page(64, 44, 36)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 16)
+	m.add_child(col)
+
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 20)
+	col.add_child(header)
+	var back := IconButtonScript.new("back", "", 72)
+	back.pressed.connect(_show_home)
+	header.add_child(back)
+	var heading := UIKit.label("Credits & licences", 36, P.TEXT)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(heading)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	outer.add_child(scroll)
+	col.add_child(scroll)
+	var body := VBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 22)
+	scroll.add_child(body)
 
-	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(grid)
+	_credits_section(body, "The game",
+		"Sort Master — Prism Garden. Designed and built for this project. All 30 levels are solver-verified against the rules-v1 contract.")
+	_credits_section(body, "Engine",
+		"Godot Engine 4.7.2 — MIT licence. The engine's built-in default font is used for the interface.")
+	_credits_section(body, "Artwork",
+		"Vessel meshes, liquid symbols, interface icons, the garden backdrop and the application icon are original work generated inside this repository. No third-party artwork is included.")
+	_credits_section(body, "Audio",
+		"All sound effects are synthesised from scratch by tools/make_audio.ps1 and are dedicated to the public domain (CC0 1.0). No sample libraries are used.")
+	_credits_section(body, "Privacy",
+		"Offline by design. No accounts, no analytics, no advertising, no purchases. Progress is a single local save file.")
 
-	for i in levels.size():
-		var b := Button.new()
-		b.text = str(i + 1)
-		b.disabled = i > unlocked
-		b.custom_minimum_size = Vector2(150, 96)
-		b.add_theme_font_size_override("font_size", 30)
-		if i == unlocked:
-			b.add_theme_color_override("font_color", GOLD)
-		var idx: int = i
-		b.pressed.connect(func(): _start_level(idx))
-		grid.add_child(b)
+	var done := UIKit.ghost_button("Back")
+	done.pressed.connect(_show_home)
+	col.add_child(done)
 
-	var back := _button("Back", 22)
-	back.pressed.connect(_show_home)
-	outer.add_child(back)
+
+func _credits_section(parent: VBoxContainer, title: String, text: String) -> void:
+	var panel := UIKit.panel(P.PANEL, P.LINE, 1, 20)
+	parent.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	var t := UIKit.label(title, 22, P.ACCENT)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	box.add_child(t)
+	var b := UIKit.label(text, 20, P.MUTED)
+	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(b)
+
+
+# ---------- gameplay ----------
 
 func _start_level(index: int) -> void:
 	if index < 0 or index >= levels.size():
 		return
+	_screen = "game"
 	level_index = index
 	var data: Dictionary = levels[index]
 	state = PuzzleStateScript.new(int(data.get("capacity", 4)), data.get("tubes", []))
@@ -215,91 +450,126 @@ func _start_level(index: int) -> void:
 	moves = 0
 	_show_game()
 
+
 func _show_game() -> void:
 	_clear_screen()
-
-	var root := VBoxContainer.new()
+	var root := Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_theme_constant_override("separation", 12)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	screen_root.add_child(root)
 
-	# header
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 18)
-	root.add_child(header)
-
-	var back := _button("Back", 20)
-	back.custom_minimum_size = Vector2(110, 56)
-	back.pressed.connect(_show_home)
-	header.add_child(back)
-
-	header_label = _label("Level %d" % (level_index + 1), 26)
-	header_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(header_label)
-
-	moves_label = _label("Moves: 0", 22)
-	moves_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	moves_label.custom_minimum_size = Vector2(160, 0)
-	header.add_child(moves_label)
-
-	var undo := _button("Undo", 20)
-	undo.custom_minimum_size = Vector2(110, 56)
-	undo.pressed.connect(_on_undo)
-	header.add_child(undo)
-
-	var restart := _button("Restart", 20)
-	restart.custom_minimum_size = Vector2(120, 56)
-	restart.pressed.connect(_on_restart)
-	header.add_child(restart)
-
-	# board
-	var holder := Control.new()
-	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(holder)
-
 	if USE_3D:
-		var svc := SubViewportContainer.new()
-		svc.set_anchors_preset(Control.PRESET_FULL_RECT)
-		svc.stretch = true
-		holder.add_child(svc)
-
-		sub_viewport = SubViewport.new()
-		sub_viewport.size = Vector2i(int(DESIGN_W), 820)
-		sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-		sub_viewport.transparent_bg = false
-		svc.add_child(sub_viewport)
-
-		# render at the container's true pixel size: a fixed 1080-wide target was
-		# being upscaled and softened the liquid edges and glyphs
-		svc.resized.connect(func():
-			if sub_viewport != null and svc.size.x > 2 and svc.size.y > 2:
-				sub_viewport.size = Vector2i(int(svc.size.x), int(svc.size.y)))
-
-		board_3d = Board3DScript.new()
-		sub_viewport.add_child(board_3d)
-
-		# transparent hit areas keep the existing tap semantics
-		hit_layer = Control.new()
-		hit_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-		hit_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		holder.add_child(hit_layer)
-		hit_layer.resized.connect(_layout_hits)
+		_build_board_layer(root)
 	else:
-		var board_center := CenterContainer.new()
-		board_center.set_anchors_preset(Control.PRESET_FULL_RECT)
-		holder.add_child(board_center)
-		vessels_row = HBoxContainer.new()
-		vessels_row.add_theme_constant_override("separation", 16)
-		vessels_row.alignment = BoxContainer.ALIGNMENT_CENTER
-		board_center.add_child(vessels_row)
+		_build_2d_board(root)
 
-	# status
-	status_label = _label("", 20, ACCENT)
-	status_label.custom_minimum_size = Vector2(0, 44)
-	root.add_child(status_label)
-
+	_build_hud(root)
 	_refresh()
+
+	root.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(root, "modulate:a", 1.0, FADE_TIME).set_trans(Tween.TRANS_SINE)
+
+
+func _build_board_layer(parent: Control) -> void:
+	var svc := SubViewportContainer.new()
+	svc.set_anchors_preset(Control.PRESET_FULL_RECT)
+	svc.stretch = true
+	svc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(svc)
+
+	sub_viewport = SubViewport.new()
+	sub_viewport.transparent_bg = false
+	sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	svc.add_child(sub_viewport)
+
+	board_3d = Board3DScript.new()
+	sub_viewport.add_child(board_3d)
+
+	hit_layer = Control.new()
+	hit_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hit_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(hit_layer)
+	hit_layer.resized.connect(_layout_hits)
+
+
+func _build_2d_board(parent: Control) -> void:
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	parent.add_child(center)
+	vessels_row = HBoxContainer.new()
+	vessels_row.add_theme_constant_override("separation", 16)
+	vessels_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	center.add_child(vessels_row)
+
+
+func _build_hud(parent: Control) -> void:
+	var header := MarginContainer.new()
+	header.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	header.offset_left = 40
+	header.offset_right = -40
+	header.offset_top = 30
+	header.offset_bottom = 148
+	parent.add_child(header)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 20)
+	header.add_child(row)
+
+	var back := IconButtonScript.new("back", "", 72)
+	back.pressed.connect(_show_level_select)
+	row.add_child(back)
+
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	titles.add_theme_constant_override("separation", 2)
+	row.add_child(titles)
+	var eyebrow := UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()])
+	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	titles.add_child(eyebrow)
+	var stage := UIKit.label(_stage_name(level_index), 30, P.TEXT)
+	stage.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	titles.add_child(stage)
+
+	var chip := UIKit.panel(P.PANEL, P.LINE, 2, 20)
+	chip.custom_minimum_size = Vector2(146, 76)
+	row.add_child(chip)
+	var chip_box := VBoxContainer.new()
+	chip_box.add_theme_constant_override("separation", 0)
+	chip.add_child(chip_box)
+	chip_box.add_child(UIKit.label("MOVES", P.TINY_SIZE - 2, P.MUTED))
+	moves_label = UIKit.label("0", 30, P.TEXT)
+	chip_box.add_child(moves_label)
+
+	status_label = UIKit.label("", 20, P.MUTED)
+	status_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	status_label.offset_left = 50
+	status_label.offset_right = -50
+	status_label.offset_top = -200
+	status_label.offset_bottom = -158
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(status_label)
+
+	var bottom := MarginContainer.new()
+	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.offset_left = 40
+	bottom.offset_right = -40
+	bottom.offset_top = -148
+	bottom.offset_bottom = -30
+	parent.add_child(bottom)
+
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 20)
+	bottom.add_child(bar)
+
+	undo_button = IconButtonScript.new("undo", "Undo", 96)
+	undo_button.pressed.connect(_on_undo)
+	bar.add_child(undo_button)
+
+	var restart := IconButtonScript.new("restart", "Restart", 96)
+	restart.pressed.connect(_on_restart)
+	bar.add_child(restart)
+
 
 func _refresh() -> void:
 	if state == null:
@@ -310,6 +580,7 @@ func _refresh() -> void:
 		_layout_hits()
 	elif vessels_row != null:
 		for child in vessels_row.get_children():
+			vessels_row.remove_child(child)
 			child.queue_free()
 		for i in state.tube_count():
 			var v = VesselViewScript.new()
@@ -319,57 +590,76 @@ func _refresh() -> void:
 			v.selected = (i == selected)
 			v.tapped.connect(_on_vessel_tapped)
 			vessels_row.add_child(v)
-	if moves_label:
-		moves_label.text = "Moves: %d" % moves
 
-## Positions transparent hit areas over the 3D vessels, using the same design
-## space as board_3d.gd so the tap targets line up with what is drawn.
+	if moves_label != null:
+		moves_label.text = str(moves)
+	if undo_button != null:
+		undo_button.disabled = history.is_empty()
+		undo_button.queue_redraw()
+	_update_debug()
+
+
+## Builds the transparent tap strips from the same BoardLayout used by the 3D
+## vessels. This is the only place screen space and world space are bridged.
 func _layout_hits() -> void:
 	if hit_layer == null or state == null:
 		return
 	for child in hit_layer.get_children():
+		hit_layer.remove_child(child)
 		child.queue_free()
 
 	var n: int = state.tube_count()
-	var w := hit_layer.size.x
-	var h := hit_layer.size.y
-	if n == 0 or w <= 1.0 or h <= 1.0:
+	var vp := hit_layer.size
+	if n == 0 or vp.x <= 1.0 or vp.y <= 1.0:
 		return
 
-	var total: float = n * VESSEL_PX_W + (n - 1) * GAP_PX
-	var start: float = (DESIGN_W - total) * 0.5
-	var sx := w / DESIGN_W
+	layout = LayoutScript.compute(n, vp)
+	if layout.is_empty():
+		return
+
+	var sx: float = layout.scale
+	var slot: float = layout.slot
+	var top: float = layout.hit_top * sx
+	var bottom: float = (layout.baseline + 16.0) * sx
+	var centres: Array = layout.centres
 
 	for i in n:
 		var hit := Control.new()
 		hit.mouse_filter = Control.MOUSE_FILTER_STOP
-		var centre_x: float = start + i * (VESSEL_PX_W + GAP_PX) + VESSEL_PX_W * 0.5
-		var wpx := (VESSEL_PX_W + GAP_PX) * sx
-		hit.size = Vector2(wpx, h * (HIT_BOTTOM - HIT_TOP))
-		hit.position = Vector2(centre_x * sx - wpx * 0.5, h * HIT_TOP)
+		hit.position = Vector2((centres[i] - slot * 0.5) * sx, top)
+		hit.size = Vector2(slot * sx, bottom - top)
 		var idx: int = i
 		hit.gui_input.connect(func(event): _on_hit_input(event, idx))
 		hit_layer.add_child(hit)
 
+	_update_debug()
+
+
 func _on_hit_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_on_vessel_tapped(index)
-		accept_event()
+
 
 func _on_vessel_tapped(index: int) -> void:
-	if state == null:
+	if state == null or win_layer != null or modal_layer != null:
 		return
+
 	if selected == -1:
 		if state.count_at(index) == 0:
-			_status("Pick a tube with liquid in it.")
+			audio.play("invalid")
+			if board_3d != null:
+				board_3d.reject(index)
+			_status("Pick a tube with liquid in it.", P.PINK)
 			return
 		selected = index
-		_status("Tube %d selected" % (index + 1))
+		audio.play("select")
+		_status("")
 		_refresh()
 		return
 
 	if index == selected:
 		selected = -1
+		audio.play("ui")
 		_status("")
 		_refresh()
 		return
@@ -379,88 +669,231 @@ func _on_vessel_tapped(index: int) -> void:
 		state.apply_move(selected, index)
 		moves += 1
 		selected = -1
+		audio.play("pour")
 		_status("")
 		_refresh()
 		if state.is_won():
 			_on_win()
-	else:
-		if state.count_at(index) > 0 and state.count_at(selected) > 0:
-			selected = index
-			_status("That pour is not allowed - switching selection.")
-			_refresh()
-		else:
-			_status("That pour is not allowed.")
+		return
 
-func _status(text: String) -> void:
-	if status_label:
-		status_label.text = text
+	var reason := _move_error(selected, index)
+	audio.play("invalid")
+	if board_3d != null:
+		board_3d.reject(index)
+	_status(reason, P.PINK)
+
+	# selecting another filled tube is a natural retry; stay selected on it
+	if state.count_at(index) > 0:
+		selected = index
+		_refresh()
+
+
+func _move_error(from_i: int, to_i: int) -> String:
+	if state.count_at(to_i) >= state.capacity:
+		return "That tube is full."
+	if state.count_at(to_i) > 0 and state.top_colour(from_i) != state.top_colour(to_i):
+		return "Colours must match."
+	if state.top_run(from_i) > state.capacity - state.count_at(to_i):
+		return "Not enough room for that pour."
+	return "That pour is not allowed."
+
 
 func _on_undo() -> void:
 	if history.is_empty():
-		_status("Nothing to undo.")
+		_status("Nothing to undo.", P.MUTED)
 		return
 	state = history.pop_back()
-	moves = max(0, moves - 1)
+	moves = maxi(0, moves - 1)
 	selected = -1
+	audio.play("undo")
 	_status("")
 	_refresh()
 
+
 func _on_restart() -> void:
-	_start_level(level_index)
+	if history.is_empty():
+		_start_level(level_index)
+		return
+	_confirm_restart()
 
-func _on_win() -> void:
-	_status("Level complete.")
-	if level_index + 1 > unlocked:
-		unlocked = level_index + 1
-		_save_progress()
 
-	win_panel = Control.new()
-	win_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	win_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	screen_root.add_child(win_panel)
+func _confirm_restart() -> void:
+	if modal_layer != null:
+		return
+	modal_layer = Control.new()
+	modal_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	screen_root.add_child(modal_layer)
 
-	var backdrop := ColorRect.new()
-	backdrop.color = Color(0, 0, 0, 0.82)
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	win_panel.add_child(backdrop)
+	var dim := ColorRect.new()
+	dim.color = Color(0.01, 0.03, 0.04, 0.80)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(dim)
 
-	var card := PanelContainer.new()
-	card.set_anchors_preset(Control.PRESET_CENTER)
-	card.custom_minimum_size = Vector2(560, 0)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = PANEL
-	sb.border_color = ACCENT
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(14)
-	sb.set_content_margin_all(28)
-	card.add_theme_stylebox_override("panel", sb)
-	win_panel.add_child(card)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(center)
+
+	var card := UIKit.panel(P.PANEL, P.LINE, 2, 28)
+	card.custom_minimum_size = Vector2(660, 0)
+	center.add_child(card)
 
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 20)
+	box.add_theme_constant_override("separation", 18)
+	card.add_child(box)
+	box.add_child(UIKit.label("Restart level?", 34, P.TEXT))
+	box.add_child(UIKit.label("Your %d moves so far will be discarded." % moves, 21, P.MUTED))
+	box.add_child(UIKit.spacer(4))
+
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 16)
+	box.add_child(buttons)
+	var cancel := UIKit.ghost_button("Keep playing")
+	cancel.pressed.connect(func():
+		modal_layer.queue_free()
+		modal_layer = null)
+	buttons.add_child(cancel)
+	var confirm := UIKit.primary_button("Restart")
+	confirm.pressed.connect(func():
+		modal_layer.queue_free()
+		modal_layer = null
+		_start_level(level_index))
+	buttons.add_child(confirm)
+
+
+# ---------- completion ----------
+
+func _on_win() -> void:
+	audio.play("win")
+	var key := str(level_index)
+	var previous := int(best.get(key, 0))
+	var record: bool = previous == 0 or moves < previous
+	if record:
+		best[key] = moves
+	unlocked = maxi(unlocked, mini(level_index + 1, levels.size() - 1))
+	_save_progress()
+	_status("")
+	_show_win_card(record, previous)
+
+
+func _show_win_card(record: bool, previous: int) -> void:
+	var final_level: bool = level_index >= levels.size() - 1
+
+	win_layer = Control.new()
+	win_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	win_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	screen_root.add_child(win_layer)
+	win_layer.modulate.a = 0.0
+
+	var dim := ColorRect.new()
+	dim.color = Color(0.01, 0.03, 0.04, 0.84)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	win_layer.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	win_layer.add_child(center)
+
+	var card := PanelContainer.new()
+	var sb := UIKit.panel_style(P.PANEL_HI, P.GOLD, 2, 32)
+	sb.set_content_margin_all(44)
+	sb.shadow_color = Color(0, 0, 0, 0.45)
+	sb.shadow_size = 22
+	card.add_theme_stylebox_override("panel", sb)
+	card.custom_minimum_size = Vector2(760, 0)
+	center.add_child(card)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 16)
 	card.add_child(box)
 
-	box.add_child(_label("Level Complete", 46, GOLD))
-	box.add_child(_label("Solved in %d moves" % moves, 24))
-
-	if level_index + 1 < levels.size():
-		next_button = _button("Next Level")
-		next_button.pressed.connect(func():
-			win_panel.queue_free()
-			_start_level(level_index + 1))
-		box.add_child(next_button)
+	box.add_child(UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()], P.ACCENT))
+	box.add_child(UIKit.label("Garden Restored" if final_level else "Level Complete", 46, P.GOLD))
+	box.add_child(UIKit.label("Solved in %d moves" % moves, 26, P.TEXT))
+	if record and previous > 0:
+		box.add_child(UIKit.label("New best — previous was %d" % previous, 20, P.ACCENT))
+	elif not record:
+		box.add_child(UIKit.label("Best remains %d moves" % previous, 20, P.MUTED))
 	else:
-		box.add_child(_label("That is all 30 levels.", 22, ACCENT))
+		box.add_child(UIKit.label("First restoration", 20, P.ACCENT))
 
-	var replay := _button("Replay")
+	if final_level:
+		box.add_child(UIKit.label("All 30 gardens are in bloom.", 21, P.MUTED))
+
+	box.add_child(UIKit.divider())
+	box.add_child(UIKit.spacer(4))
+
+	if not final_level:
+		var next := UIKit.primary_button("Next Level")
+		next.pressed.connect(func():
+			_close_win()
+			_start_level(level_index + 1))
+		box.add_child(next)
+	else:
+		var again := UIKit.primary_button("Replay the Garden")
+		again.pressed.connect(func():
+			_close_win()
+			_start_level(0))
+		box.add_child(again)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	box.add_child(row)
+	var replay := UIKit.ghost_button("Replay")
+	replay.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	replay.pressed.connect(func():
-		win_panel.queue_free()
+		_close_win()
 		_start_level(level_index))
-	box.add_child(replay)
-
-	var menu := _button("Levels")
-	menu.pressed.connect(func():
-		win_panel.queue_free()
+	row.add_child(replay)
+	var levels_button := UIKit.ghost_button("Levels")
+	levels_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	levels_button.pressed.connect(func():
+		_close_win()
 		_show_level_select())
-	box.add_child(menu)
+	row.add_child(levels_button)
+
+	var t := create_tween()
+	t.tween_property(win_layer, "modulate:a", 1.0, 0.22).set_trans(Tween.TRANS_SINE)
+
+
+func _close_win() -> void:
+	if win_layer != null:
+		win_layer.queue_free()
+		win_layer = null
+
+
+# ---------- debug overlay ----------
+
+func _update_debug() -> void:
+	if not DEBUG_OVERLAY_AVAILABLE or not _debug_visible or state == null or layout.is_empty() or hit_layer == null:
+		if debug_overlay != null:
+			debug_overlay.queue_free()
+			debug_overlay = null
+		return
+
+	if debug_overlay == null:
+		# loaded dynamically so the release export can exclude the folder
+		var script = load("res://scripts/debug/debug_overlay.gd")
+		if script == null:
+			return
+		debug_overlay = script.new()
+		screen_root.add_child(debug_overlay)
+
+	debug_overlay.setup(layout, state.tubes, selected, moves, level_index + 1, hit_layer.size)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F1 and DEBUG_OVERLAY_AVAILABLE and _screen == "game":
+			_debug_visible = not _debug_visible
+			_update_debug()
+			return
+		if _screen != "game" or win_layer != null or modal_layer != null:
+			return
+		if event.keycode == KEY_U:
+			_on_undo()
+		elif event.keycode == KEY_R:
+			_on_restart()
+		elif event.keycode == KEY_ESCAPE:
+			_show_level_select()

@@ -10,27 +10,28 @@ const SEGMENTS := 48
 ## Outer silhouette, bottom to top: (radius, height) in metres.
 static var OUTER: Array = [
 	Vector2(0.052, 0.000),
-	Vector2(0.078, 0.010),
-	Vector2(0.086, 0.030),
-	Vector2(0.086, 0.055),
-	Vector2(0.084, 0.150),
-	Vector2(0.079, 0.196),
-	Vector2(0.068, 0.232),
-	Vector2(0.054, 0.262),
-	Vector2(0.046, 0.286),
-	Vector2(0.044, 0.306),
-	Vector2(0.047, 0.318),
-	Vector2(0.056, 0.328),
-	Vector2(0.058, 0.334),
+	Vector2(0.078, 0.014),
+	Vector2(0.086, 0.040),
+	Vector2(0.086, 0.070),
+	Vector2(0.086, 0.330),
+	Vector2(0.082, 0.360),
+	Vector2(0.070, 0.395),
+	Vector2(0.056, 0.425),
+	Vector2(0.048, 0.450),
+	Vector2(0.046, 0.472),
+	Vector2(0.049, 0.487),
+	Vector2(0.058, 0.498),
+	Vector2(0.060, 0.504),
 ]
 
 static var WALL: float = 0.006
 
-static func build_glass() -> ArrayMesh:
+static func build_glass(inner_wall: bool = true) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_stitch(st, OUTER, false)
-	_stitch(st, _inset(OUTER), true)
+	if inner_wall:
+		_stitch(st, _inset(OUTER), true)
 	st.generate_normals()
 	return st.commit()
 
@@ -76,8 +77,11 @@ static func inner_radius_at(y: float) -> float:
 			return lerp(a.x, b.x, t) - WALL
 	return OUTER[OUTER.size() - 1].x - WALL
 
+## Liquid sits above the base fillet so no band can poke through the glass.
+const LIQUID_BASE := 0.045
+
 static func liquid_radius() -> float:
-	return inner_radius_at(0.10) - 0.002
+	return inner_radius_at(0.15) - 0.001
 
 static func capacity_height() -> float:
-	return 0.245
+	return 0.285

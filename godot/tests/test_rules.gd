@@ -105,6 +105,45 @@ func _initialize() -> void:
 		var err: String = V.validate(parsed)
 		check("shipped level %d validates (%s)" % [n, err], err == "")
 	check("all 30 shipped levels present", shipped == 30)
+
+	# --- board layout: one source of truth for 3D placement and tap strips ---
+	var L = load("res://scripts/presentation/board_layout.gd")
+	for n in [3, 4, 5, 6, 8]:
+		var lay: Dictionary = L.compute(n, Vector2(1080, 1920))
+		check("layout %d tubes not empty" % n, not lay.is_empty())
+		check("layout %d vessel width positive" % n, float(lay.vessel_w) > 0.0)
+		check("layout %d baseline on the 78%% line" % n, is_equal_approx(float(lay.baseline), 1920.0 * 0.78))
+		check("layout %d hit strip starts above the base" % n, float(lay.hit_top) < float(lay.baseline))
+		check("layout %d centres ordered" % n, float(lay.centres[0]) < float(lay.centres[n - 1]))
+		check("layout %d group inside the design width" % n, float(lay.centres[n - 1]) + float(lay.slot) * 0.5 <= 1080.0)
+		check("layout %d group centred" % n, is_equal_approx(float(lay.centres[0]) + float(lay.centres[n - 1]), 1080.0 + float(lay.slot) - float(lay.vessel_w)))
+
+	var tall: Dictionary = L.compute(6, Vector2(1080, 2400))
+	check("taller viewport keeps 1:1 design scale", is_equal_approx(float(tall.scale), 1.0))
+	check("taller viewport moves the baseline down", float(tall.baseline) > 1920.0 * 0.78)
+	check("degenerate layout rejected", L.compute(0, Vector2(1080, 1920)).is_empty())
+
+	# --- progress store: save, load, clamping, corrupt data ----------------
+	var PS = load("res://scripts/domain/progress_store.gd")
+	var tmp := "user://test_progress.json"
+	if FileAccess.file_exists(tmp):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
+	check("missing save gives a clean profile", int(PS.load_data(tmp).unlocked) == 0)
+	check("progress round-trips", PS.save_data({"unlocked": 7, "best": {"0": 3, "2": 9}, "muted": true}, tmp))
+	var loaded: Dictionary = PS.load_data(tmp)
+	check("unlocked persisted", int(loaded.unlocked) == 7)
+	check("best persisted", int(loaded.best.get("2", 0)) == 9)
+	check("mute persisted", bool(loaded.muted) == true)
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
+	f.store_string("{not json")
+	f.close()
+	check("corrupt save falls back to a clean profile", int(PS.load_data(tmp).unlocked) == 0)
+	PS.save_data({"unlocked": -5, "best": {"0": -2, "1": 4}}, tmp)
+	var clamped: Dictionary = PS.load_data(tmp)
+	check("negative unlocked clamped", int(clamped.unlocked) == 0)
+	check("non-positive best discarded", not clamped.best.has("0") and int(clamped.best.get("1", 0)) == 4)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
+
 	print("")
 	print("PASSED: ", passed, "  FAILED: ", failed)
 	quit(0 if failed == 0 else 1)

@@ -1,34 +1,37 @@
-# Deferred Work — post-prototype
+# Deferred work — release-candidate cycle
 
-Everything here was consciously deferred to get a playable build. Nothing listed is required for the five levels to be correct or playable.
+**Status:** current as of 13 November 2026.
 
-| # | Deferred | Why | Risk if left |
+This list was rewritten after the release-candidate cycle. Items that were
+previously deferred and are now done have been removed; the remainder are
+genuine gaps, each with the reason it is still open.
+
+## Still deferred
+
+| # | Item | Why it is deferred | Impact |
 |---|---|---|---|
-| 1 | Pour animation (M2-05) | Correctness first; moves are instant | Game feels abrupt. No rule impact. |
-| 2 | 3D vessels and the Blender pipeline (M2-01…M2-08) | G2 not run; 2D placeholder vessels used | Visual identity is not yet Prism Garden. Rules unaffected. |
-| 3 | Renderer bake-off (M2-08) | Needs the device and the 3D scene | Renderer choice still provisional ("mobile"). |
-| 4 | Sound and haptics (M7-02, M7-03) | No audio imported | Silent build. |
-| 5 | Tutorial overlay (M6-07) | First level is self-evident enough for testing | New players may need one prompt. |
-| 6 | Level-complete celebration | Plain panel used | Less satisfying, no functional gap. |
-| 7 | Accessibility pass (M8-04) | Needs device + palette check on screen | Contrast unverified at phone scale. |
-| 8 | Robustness suite (M8-02) | Time | Rapid-tap and interrupt paths untested beyond the rules layer. |
-| 9 | Performance and thermal (M9) | Needs device | Unknown frame time on hardware. |
-| 10 | App icon and adaptive icon (M5-05) | Cosmetic; export warns and uses a default | Launcher shows a generic icon. |
-| 11 | Save schema beyond `unlocked` | Only progression is persisted | In-progress board is not restored after a kill. |
-| 12 | Settings screen (M6-06) | No audio to toggle yet | None functionally. |
-| 13 | Gradle/AAB path and release signing (M10-03) | Needs NDK/CMake and owner approval | Debug APK only. |
-| 14 | Emulator feasibility execution (doc 18) | Not needed while the Ultra is the test device | No floor-device coverage. |
+| 1 | Physical device testing (S23 Ultra) | Device unavailable for this cycle (owner decision) | Performance, thermals, safe areas and real-size legibility are unverified. See `docs/device-test-checklist.md`. |
+| 2 | Release signing (M10-03) | Needs the owner's keystore and approval | The RC APK is debug-signed. Not publishable. |
+| 3 | Store listing / publishing | Owner boundary | Nothing published. |
+| 4 | Haptics (M7-03) | Android hardware needed to tune intensity | No tactile feedback; sound carries all feedback. |
+| 5 | Mid-level save | Progress currently stores unlocked level, best moves and mute | A killed process restarts the level; no rule impact. |
+| 6 | Tutorial overlay (M6-07) | Level 1 is self-evident in playtesting | New players rely on the selection glow and error messages. |
+| 7 | Screen-reader and large-text modes | Needs a device pass and a design decision | Not required for the release gate, still an accessibility gap. |
+| 8 | Emulator floor-device coverage | Ultra is the target; emulator adds no evidence | Low-end Android performance unmeasured. |
+| 9 | Gradle/AAB path | Debug/release APK is enough for the RC | Play Store upload would need AAB + signing. |
 
-## Deliberate compromises in the current build
+## Deliberate compromises
 
-- Vessels are drawn with `_draw()` rectangles, not meshes. Readable, not premium.
-- No animation, so the input lock (M3-05) is trivial: state changes are synchronous.
-- Progress saves only the unlocked level, not mid-level state.
-- Level 3 and Level 4 both solve in 13 moves; the difficulty ramp is not yet tuned.
+- Pour and selection are animated in place, but there is no liquid "stream"
+  animation. Moves are instant and unambiguous.
+- The board is a fixed five- or six-tube layout per level; there is no zoom.
+- `best` move counts are recorded but not shown on the level grid (only on the
+  completion card), to keep the grid legible.
 
-## Not deferred — these must not be cut
+## Not negotiable — these must never regress
 
-- Rule correctness and the solver contract (`rules-v1`).
-- One-commit-per-move state discipline.
+- `rules-v1` correctness and solver parity.
+- One-commit-per-move state discipline in `PuzzleState`.
 - No ads, analytics, accounts or network calls.
 - Undo and restart correctness.
+- The M8-06 overlay must never appear in a release build.

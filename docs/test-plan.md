@@ -33,7 +33,7 @@ powershell -ExecutionPolicy Bypass -File tools\test.ps1
 |---|---|---|
 | Rules, validation, layout, progress | **108 passed, 0 failed** | 13 Nov 2026 |
 | Parity | **153 checks, 0 failed, 30 levels** | 13 Nov 2026 |
-| Integration flow | **141 passed, 0 failed, 30/30 levels solved through the game** | 13 Nov 2026 |
+| Integration flow | **142 passed, 0 failed, 30/30 levels solved through the game** | 13 Nov 2026 |
 | Manual desktop | Level 1 interaction set (select, pour, undo, real mouse) + hit-alignment at 4 and 6 tubes | 13 Nov 2026 |
 | Manual full playthrough | 1 of 30 done by hand (Level 1). 29 levels covered only by the flow harness. | — |
 | Device | Not run (deferred) | — |

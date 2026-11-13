@@ -117,6 +117,10 @@ func _run() -> void:
 	check("level map is reachable", main._screen == "levels")
 	main._start_level(0)
 	await process_frame
+	main._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	check("system back notification returns to the map", main._screen == "levels")
+	main._start_level(0)
+	await process_frame
 	main._go_back()
 	check("back from gameplay returns to the map", main._screen == "levels")
 	main._go_back()

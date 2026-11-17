@@ -9,7 +9,7 @@ const P = preload("res://scripts/ui/palette.gd")
 static func label(text: String, size: int, colour: Color = P.TEXT) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", P.type_size(size))
 	l.add_theme_color_override("font_color", colour)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -59,7 +59,7 @@ static func _style_button(b: Button, normal: StyleBoxFlat, hover: StyleBoxFlat, 
 static func primary_button(text: String, font_size: int = 36) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.add_theme_font_size_override("font_size", font_size)
+	b.add_theme_font_size_override("font_size", P.type_size(font_size))
 	b.custom_minimum_size = Vector2(0, 120)
 	_style_button(
 		b,
@@ -74,7 +74,7 @@ static func primary_button(text: String, font_size: int = 36) -> Button:
 static func ghost_button(text: String, font_size: int = 32) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.add_theme_font_size_override("font_size", font_size)
+	b.add_theme_font_size_override("font_size", P.type_size(font_size))
 	b.custom_minimum_size = Vector2(0, 104)
 	_style_button(
 		b,
@@ -89,7 +89,7 @@ static func ghost_button(text: String, font_size: int = 32) -> Button:
 static func text_button(text: String, font_size: int = 26) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.add_theme_font_size_override("font_size", font_size)
+	b.add_theme_font_size_override("font_size", P.type_size(font_size))
 	b.add_theme_color_override("font_color", P.MUTED)
 	b.add_theme_color_override("font_hover_color", P.TEXT)
 	b.add_theme_color_override("font_pressed_color", P.ACCENT)

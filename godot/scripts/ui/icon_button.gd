@@ -11,7 +11,7 @@ const Glyphs = preload("res://scripts/ui/icon_glyphs.gd")
 var kind := "undo"
 var label_text := ""
 var diameter := 72.0
-var font_size := 28
+var font_size := P.type_size(28)
 var tint := P.TEXT
 var accent := P.ACCENT
 

@@ -275,7 +275,7 @@ func _show_home() -> void:
 	col.add_child(UIKit.label("P R I S M   G A R D E N", 26, P.ACCENT))
 	col.add_child(UIKit.label("A midnight greenhouse of colours", 25, P.MUTED))
 	if not load_errors.is_empty():
-		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 19, P.PINK))
+		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 22, P.PINK))
 	col.add_child(UIKit.spacer(26))
 
 	var play := UIKit.primary_button(_play_label())
@@ -363,7 +363,7 @@ func _show_level_select() -> void:
 	chip_box.add_child(UIKit.label("%d / %d" % [mini(best.size(), levels.size()), levels.size()], 30, P.GOLD))
 
 	if not load_errors.is_empty():
-		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 19, P.PINK))
+		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 22, P.PINK))
 
 	var grid := GridContainer.new()
 	grid.columns = 5

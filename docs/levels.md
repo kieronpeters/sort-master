@@ -2,8 +2,16 @@
 
 All 30 levels are verified by `tools/solver/solve.py` under `rules-v1`.
 Minimum move counts are exact: the search is exhaustive and unbounded.
-Levels are ordered by measured minimum moves, so difficulty rises
-monotonically. Stage names are design guidance, not hard bands.
+Levels are ordered by measured minimum moves, so difficulty rises in a
+**non-decreasing** sequence: the minimum never falls from one level to the next,
+but ties do occur (2–3 and 4–5 share 6 and 7 moves respectively). Stage names
+are design guidance, not hard bands.
+
+The empty-vessel lesson is **not** present in levels 3–5: all three solve in the
+same number of moves with every pour into an empty tube forbidden
+(`tools/solver/check_empty_vessel_lesson.py`). It is present in levels 1, 2 and 6,
+which cannot be completed without one. The owner accepted this as a documented
+exception for 1.0 on 17 November 2026 — see `docs/owner-decisions.md`.
 
 | Level | Stage | Colours | Tubes | Min moves | States searched |
 |---:|---|---:|---:|---:|---:|

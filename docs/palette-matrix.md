@@ -25,6 +25,10 @@ The symbols are always on, so hue is never the only cue.
 
 ## 2. Known gap — level pairs
 
+**Owner decision QA-01, 17 November 2026: the 13 affected levels are accepted as
+documented exceptions for 1.0.** No level or palette change is permitted before a
+new decision. Revisit in 1.1.
+
 The independent QA audit recomputed CIEDE2000 separation for every level using
 the plan's thresholds (T2: ΔE00 ≥ 15.0; 12–15 marginal; <12 forbidden):
 
@@ -34,10 +38,27 @@ the plan's thresholds (T2: ΔE00 ≥ 15.0; 12–15 marginal; <12 forbidden):
   rule (R1) caps a level at four and its matrix says no five-colour subset
   passes T2.
 
-The 30-level set is frozen content and cannot be changed without owner
-approval, so this is recorded as an open defect rather than silently "fixed".
-Mitigations already shipped: the always-on symbol cue, max-contrast ink, and
-exact palette rendering (linear tonemap, no filmic desaturation).
+The 30-level set is frozen content, so this is recorded as an accepted exception
+rather than silently "fixed". Mitigations already shipped: the always-on shape
+symbol cue, max-contrast ink, and exact palette rendering (linear tonemap, no
+filmic desaturation).
+
+### Re-verification
+
+`tools/solver/audit_palette.py` recomputes the whole matrix from the level files
+(Machado 2009 severity 1.0, linear sRGB) and is the tool of record:
+
+```powershell
+py -3.12 tools\solver\audit_palette.py --levels godot\levels
+```
+
+Result on 17 November 2026: 30 levels, **17 pass, 13 marginal, 0 forbidden, 13
+over the R1 cap**, affected ids 16, 19–24 and 25–30 — matching this record.
+It exits non-zero only if a pair falls below the forbidden 12.0 threshold, so it
+can be run as a regression tripwire in future level authoring.
+
+A hard validator guard cannot be added at 1.0: it would reject the 13 accepted
+levels. It belongs with the re-authoring work in 1.1.
 
 ## 3. Rendering fidelity
 

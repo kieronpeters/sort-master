@@ -1,20 +1,68 @@
 # Owner decisions
 
-**Status:** four decisions pending, 13 November 2026.
-**Baseline:** `b1579db`. Nothing in this document has been implemented.
+**Status:** four decisions **recorded** 17 November 2026; three applied, QA-04
+blocked on the build pipeline (see §0.1).
+**Baseline:** `b1579db`. This document records the decisions and their state.
 
 Each decision records the evidence, the options, the consequences and a
-recommendation. The owner’s choice must be recorded before any code, level,
-palette or SDK change.
+recommendation. The owner’s choice is recorded here and on the FlowQuery ticket
+before any code, level, palette or SDK change.
 
-## Decision register
+## 0. Recorded decisions (17 November 2026)
 
-| ID | Decision | Blocking | Recommendation |
+| ID | Decision | Recorded choice | State |
 |---|---|---|---|
-| QA-01 | Palette exceptions vs re-authoring 13 levels | Full M5-01 acceptance | Accept documented exceptions for 1.0 |
-| QA-03 | Post-win undo policy | Rules sign-off | Seal the level at completion, amend `rules-v1` |
-| QA-04 | Minimum and target SDK | M10-01 acceptance | min 24, target 35 for 1.0 |
-| L3-5 | Levels 3–5 empty-vessel lesson | M4-04 acceptance | Accept the exception for 1.0 |
+| QA-01 | Palette exceptions vs re-authoring 13 levels | **Option A** — accept the 13 documented exceptions | Applied (record only) |
+| QA-03 | Post-win undo policy | **Policy A** — completion seals the level; `rules-v1` §7 amended (§7.1) | Applied |
+| QA-04 | Minimum and target SDK | **Option A** — min 24 / target 35 | **Recorded, not applied** — see §0.1 |
+| L3-5 | Levels 3–5 empty-vessel lesson | **Option A** — accept the documented exception | Applied (record only) |
+
+### 0.1 QA-04 cannot be applied by the current pipeline
+
+Godot 4.7.2 **rejects** `gradle_build/min_sdk` and `gradle_build/target_sdk`
+unless “Use Gradle Build” is enabled:
+
+```
+ERROR: Cannot export project with preset "Android RC" due to configuration errors:
+"Min SDK" can only be overridden when "Use Gradle Build" is enabled.
+"Target SDK" can only be overridden when "Use Gradle Build" is enabled.
+```
+
+Setting the values does not change the artifact, it breaks the export. The
+presets are therefore blank, and the APK ships the template defaults:
+**minSdk 24 / targetSdk 36**, verified with `aapt2` on the rebuilt RC.
+
+A second finding changes the recommendation’s rationale: **target 35 does not
+avoid edge-to-edge.** Android 15 enforces edge-to-edge for apps targeting API 35
+and above, so 35 and 36 behave the same way on Android 15+ devices. Only target
+34 or lower defers it, which is below the current Play requirement.
+
+Options open to the owner:
+
+| Option | Work | Effect |
+|---|---|---|
+| **A. Ratify min 24 / target 36** | none | The record matches the artifact; edge-to-edge must still be validated on device |
+| **B. Enable the Gradle build path** | install the Android build template, first build downloads a Gradle distribution | Pins the values exactly; produces a different APK that needs its own device pass. `android_source.zip` ships prebuilt `godot-lib` AARs, so the NDK/CMake that `docs/release-signing.md` assumed may not be required |
+| C. Record 24 / 35 and ship 24 / 36 | none | **Rejected** — the record would not match the artifact |
+
+Until this is settled, gate 9 (`docs/release-readiness.md`) stays open and the
+device pass must exercise edge-to-edge and safe-area insets (D08, D09).
+
+### 0.2 Independent re-verification performed before recording
+
+Neither numeric claim below was taken on trust from the earlier handover.
+
+- `tools/solver/audit_palette.py` recomputes CIEDE2000 for every colour pair in
+  every level from the level files (Machado 2009 severity 1.0, linear sRGB):
+  **17 pass, 13 marginal, 0 forbidden, 13 over the four-colour cap.** Affected
+  ids match the record exactly; worst pairs aqua/violet 12.9 deutan,
+  sapphire/violet 13.8 protan, aqua/rose 14.3 deutan (documented values
+  reproduce within ΔE 0.2).
+- `tools/solver/check_empty_vessel_lesson.py` reruns the rules-v1 search with
+  every pour into an empty tube forbidden: levels 3, 4 and 5 still solve in
+  **6, 7, 7** — identical minima, so none requires the spare vessel. Levels 1, 2
+  and 6 are unsolvable without one, so the lesson lands at L1–L2 and resumes at
+  L6.
 
 ---
 

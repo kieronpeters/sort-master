@@ -14,17 +14,17 @@ a production release. It does not claim the game is production-ready.
 | 1 | Rules, validation, save, layout | **PASS** | 126 checks, 0 failed | — |
 | 2 | Solver parity, both directions | **PASS** | 154 checks + 30-level transcript replay | — |
 | 3 | 30-level gameplay through the game | **PASS (automated)** | 153 flow checks, 30/30 wins | — |
-| 4 | Manual playthrough | **OPEN** | 1/30 by hand; interaction set + hit alignment | decide how much manual play 1.0 needs |
+| 4 | Manual playthrough | **OPEN** | 1/30 by hand; depth agreed 17 Nov (levels 1–10 + one 5-colour + one 6-colour), not yet executed | execute the agreed subset |
 | 5 | Presentation tickets | **PASS** | 21 accepted tickets, `docs/evidence/rc-*.png` | — |
-| 6 | Visual polish (QA-05) | **OPEN, non-blocking** | glass tint, type scale, final card, themed icon, brand mark | accept or schedule |
-| 7 | Palette separation (QA-01) | **DECISION PENDING** | 13/30 levels in the 12–14.9 “marginal” band | approve exception or re-author |
-| 8 | Post-win undo (QA-03) | **DECISION PENDING** | completion card vs `rules-v1` §7 | choose policy |
-| 9 | Minimum SDK (QA-04) | **DECISION PENDING** | template defaults 24 / 36 | record B8 |
-| 10 | Levels 3–5 empty-vessel lesson | **DECISION PENDING** | no minimum path uses the spare tube | accept exception or re-author |
-| 11 | Audio audition (QA-02) | **BLOCKED (human)** | no listening pass | listen and sign off |
+| 6 | Visual polish (QA-05) | **PASS (type scale)** | owner approved the type scale only; applied, evidence re-captured 17 Nov | other items stay post-1.0 |
+| 7 | Palette separation (QA-01) | **ACCEPTED EXCEPTION** | 13/30 in the 12–14.9 band, none forbidden; re-verified by `tools/solver/audit_palette.py` | revisit in 1.1 |
+| 8 | Post-win undo (QA-03) | **RESOLVED** | Policy A; `rules-v1` §7.1 decision record added; shipped behaviour already sealed | — |
+| 9 | Minimum SDK (QA-04) | **RECORDED, NOT APPLIED** | B8 = min 24 / target 35 recorded, but Godot rejects the override without Gradle; artifact ships 24/36 | choose ratification or the Gradle path (§0.1 of `owner-decisions.md`) |
+| 10 | Levels 3–5 empty-vessel lesson | **ACCEPTED EXCEPTION** | re-verified: 6/7/7 with empty-tube pours forbidden | revisit in 1.1 |
+| 11 | Audio audition (QA-02) | **BLOCKED (human)** | no listening pass yet; owner has agreed to listen | listen and sign off |
 | 12 | Android static configuration | **PASS** | portrait, version 2, icons, gating, arm64 | — |
-| 13 | Physical device validation | **BLOCKED** | not run; see `docs/device-validation.md` | provide the S23 Ultra |
-| 14 | Production signing (M10-03) | **BLOCKED** | no keystore; RC is debuggable/debug-signed | provide key + approval |
+| 13 | Physical device validation | **BLOCKED** | S23 Ultra agreed but not connected; `adb devices` empty | connect the device |
+| 14 | Production signing (M10-03) | **BLOCKED** | no keystore in this environment; RC is debuggable/debug-signed | provide key + approval |
 | 15 | Publishing | **BLOCKED** | owner boundary | approve after 11–14 |
 
 ## 2. What is verified now

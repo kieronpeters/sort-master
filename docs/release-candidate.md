@@ -1,14 +1,15 @@
 # Release candidate 0.1.0
 
-**Status:** rebuilt 13 November 2026 after the QA pass. Release-candidate
-quality; **not publishable** until signing and the device pass are complete.
+**Status:** rebuilt 17 November 2026 after the owner decisions and the type-scale
+change. Release-candidate quality; **not publishable** until signing and the
+device pass are complete.
 
 ## Artifacts
 
-| Artifact | Purpose | Size | Signing |
-|---|---|---|---|
-| `builds/sort-master-rc.apk` | release candidate | see build output | debug key, **debuggable** (fallback; see below) |
-| `builds/sort-master.apk` | development build with the F1 overlay | see build output | debug key |
+| Artifact | Purpose | Size | SHA-256 | Signing |
+|---|---|---|---:|---|
+| `builds/sort-master-rc.apk` | release candidate | 27.18 MB | `9BA58EABB54444709F2DFCFC09C9B2E02F4DF7575215891BE17F7D864B8B378C` | debug key, **debuggable** |
+| `builds/sort-master.apk` | development build with the F1 overlay | 27.21 MB | `F82FD4816525E94631C6D3D94E7D489C05F87F4B363317F9399267BE25328976` | debug key |
 
 Both are arm64-v8a only, **portrait-locked**, ETC2/ASTC enabled, mobile
 renderer. Version `0.1.0`, version code `2`.
@@ -22,7 +23,8 @@ renderer. Version `0.1.0`, version code `2`.
 | Version | 0.1.0 (code 2) |
 | Orientation | portrait (`screenOrientation=1`, verified with aapt2) |
 | Icon | original 512 px launcher icon + adaptive foreground/background (gradient-only background) |
-| Min/target SDK | template defaults 24 / 36 (owner decision B8 still open) |
+| Min/target SDK | **24 / 36** — the Godot 4.7.2 template defaults. B8 is recorded as 24 / 35 but cannot be applied without the Gradle build path; see `docs/owner-decisions.md` §0.1 |
+| Type scale | `Palette.TYPE_SCALE = 1.2`, applied in `UIKit`; body copy 16.4 dp, captions 12.3 dp at the target density |
 
 Version-code rule: **increment `version/code` by 1 for every distributed build;
 the version name follows semver.** Both presets must be bumped together.
@@ -41,12 +43,18 @@ and loads the overlay script only through a runtime `load()` inside that gate.
 ## Verification performed
 
 - `tools/test.ps1` at the 13 Nov build: rules 118/0, parity 154/0, flow 150/0, game-moves replay
-  30/30 — all exit 0.
+  30/30 — all exit 0. Re-run 17 Nov after the type-scale change: **126 / 154 /
+  153 / 30, all `FAILED: 0`, exit 0**.
 - `tools/build_rc.ps1` asserts package id, version code 2 and
   `screenOrientation=1` with `aapt2`; a landscape APK now fails the build.
 - APK signature verified with `apksigner` (v2/v3; v1 not required at minSdk 24).
 - RC content contains no `debug_overlay`, tests, dev scenes or `scripts/debug`
-  (verified in the exported APK, not only a separate pack).
+  (verified in the exported APK, not only a separate pack): 207 zip entries,
+  0 matches for `debug_overlay|scripts/debug`, 0 for `tests/`, 0 for
+  `scenes/dev|vessel_spike`.
+- Evidence screenshots regenerated 17 Nov from `godot/tests/capture.gd` at
+  720×1280 into `docs/evidence/rc-*.png`; every screen reflows with the new type
+  scale and nothing clips.
 - Launcher icons present at every density plus `mipmap-anydpi-v26/icon.xml`;
   adaptive background is gradient-only, so the launcher cannot double-draw the
   bottle.

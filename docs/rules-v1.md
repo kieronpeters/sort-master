@@ -158,13 +158,33 @@ Win is evaluated **after the commit of a move** and **once at load** (an already
 | **Undo** | Restores the exact previous logical state — every tube's contents in order, plus the move counter. One undo reverses exactly one move. |
 | **Undo at the initial state** | No-op; the control is disabled. Must not corrupt the board. |
 | **Undo during a pour** | **Exempt from the input lock.** Cancels the animation, applies to the last *committed* move, re-renders from state. The board is never redrawn from the animation. |
-| **Undo after the win** | **Allowed.** The win is retracted, the overlay dismissed, the board returns to the previous state. |
-| **Board after the win** | Locked for pours; undo and restart remain active. |
+| **Undo after the win** | **Not available.** Completion seals the level; the recorded win is final. Replay is the supported way to revisit it (§7.1). |
+| **Board after the win** | **Sealed.** No input alters the board after completion — undo and restart included. The completion card is the only affordance. |
 | **Restart** | Restores the initial state exactly and clears the history. Not itself undoable. Changes nothing else. |
 | **Selection after undo/restart** | Cleared. |
 | **History across save/resume** | Not persisted. A resumed session starts with an empty history at the saved board. |
 | **Move counter** | +1 per committed move, −1 per undo, reset by restart. Illegal moves never increment it. Display only. |
 | **Restart confirmation** | UI requirement (M6-03), not a rule. |
+
+### 7.1 Decision record — sealing at completion
+
+**D-2026-11-17 (QA-03, owner).** Earlier revisions of this section said undo and
+restart stayed available after a win. That contradicted the accepted completion
+ticket, which requires that no input alters the board after completion, and it
+could not be reconciled with the save format: the win is written immediately
+(best moves and the next unlock), so an undo would leave a player with a
+recorded win and an unsolved board.
+
+The owner chose to make completion authoritative:
+
+- winning seals the level; the recorded best and unlock stand;
+- undo and restart are unavailable once the win is committed;
+- **Replay** is the supported route to revisit a sealed level, starting a fresh
+  unsealed attempt.
+
+This documents shipped behaviour; no code change follows from the decision. It
+narrows the earlier promise in this section rather than the win condition in
+section 6, which is unchanged.
 
 ---
 

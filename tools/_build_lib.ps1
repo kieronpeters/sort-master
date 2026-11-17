@@ -2,6 +2,33 @@
 # No credentials and no personal paths: the Godot binary can always be
 # overridden with $env:GODOT or a binary on PATH.
 
+function Initialize-GodotUserData {
+    # Godot resolves user:// (progress saves, logs, editor settings) under
+    # %APPDATA%\Godot on Windows. A sandboxed or locked-down workspace can make
+    # that path read-only; every save test then reports a false failure and the
+    # test script aborts before it can quit. Probe it once and, only when it is
+    # not writable, point APPDATA at a git-ignored directory inside the repo for
+    # this process. The assertions themselves are unchanged.
+    $root = Split-Path -Parent $PSScriptRoot
+    $writable = $false
+    try {
+        $base = Join-Path $env:APPDATA 'Godot'
+        New-Item -ItemType Directory -Path $base -Force -ErrorAction Stop | Out-Null
+        $probe = Join-Path $base ('.probe-' + [guid]::NewGuid().ToString('N'))
+        Set-Content -LiteralPath $probe -Value 'x' -ErrorAction Stop
+        Remove-Item -LiteralPath $probe -Force -ErrorAction Stop
+        $writable = $true
+    } catch {
+        $writable = $false
+    }
+    if ($writable) { return $null }
+    $local = Join-Path $root '.localdata'
+    New-Item -ItemType Directory -Path $local -Force | Out-Null
+    $env:APPDATA = $local
+    Write-Host "note: %APPDATA%\Godot is not writable; using $local for user:// data"
+    return $local
+}
+
 function Resolve-Godot {
     $candidates = @()
     if ($env:GODOT) { $candidates += $env:GODOT }

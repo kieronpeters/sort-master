@@ -8,6 +8,7 @@
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '_build_lib.ps1')
+Initialize-GodotUserData | Out-Null
 
 $root = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $root 'godot'

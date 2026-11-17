@@ -3,6 +3,12 @@
 export_credentials.cfg
 *.translation
 
+# Local user:// data when %APPDATA%\Godot is not writable (see tools/_build_lib.ps1)
+.localdata/
+
+# Vendored reference material (master plan copy, not part of the game)
+SORT_MASTER_MASTER_PRODUCTION_PLAN/
+
 # Build output
 builds/
 *.apk

@@ -29,8 +29,18 @@ func _run() -> void:
 
 	var solutions = JSON.parse_string(FileAccess.get_file_as_string("res://tests/solutions.json"))
 	# 1-10 the tutorial ramp, 16 the palette worst case, 25 six colours, 30 eight tubes.
-	var subset := range(1, 31)
-	var milestone := [1, 5, 16, 25, 30]
+	# Levels may be narrowed for a quick check: --levels=1 or --levels=1,16,30.
+	# Defaults to the whole catalogue. The pour code is shared by every level, so
+	# one level exercises the same animation as thirty.
+	var subset: Array = []
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--levels="):
+			for part in arg.substr(9).split(","):
+				if part.strip_edges().is_valid_int():
+					subset.append(int(part.strip_edges()))
+	if subset.is_empty():
+		subset = range(1, 31)
+	var milestone := subset if subset.size() <= 6 else [1, 5, 16, 25, 30]
 	var passed := 0
 
 	print("")
@@ -52,10 +62,19 @@ func _run() -> void:
 			continue
 
 		var moves: Array = solutions[key]["moves"]
-		for move in moves:
+		var shot_pour: bool = (n == int(subset[0]))
+		for mi in moves.size():
+			var move: Dictionary = moves[mi]
 			main._on_vessel_tapped(int(move["from"]))
 			await _frames(1)
 			main._on_vessel_tapped(int(move["to"]))
+			if shot_pour and mi == 0:
+				await _frames(7)
+				await _shot("pour_travel")
+				await _frames(10)
+				await _shot("pour_flow")
+				await _frames(10)
+				await _shot("pour_late")
 			await _wait_pour()
 			await _frames(1)
 

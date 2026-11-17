@@ -233,12 +233,18 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 			var band := _find_band(src, drained)
 			if band != null:
 				var bottom := float(band.get_meta("band_bottom"))
-				var drain := create_tween().set_parallel(true)
+				# Sequential: wait its turn, shrink, then hide. Shrinking alone
+				# leaves a wafer-thin disc that renders as a line across the
+				# vessel; and an interval inside a parallel tween delays nothing.
+				var drain := create_tween()
+				drain.tween_interval(step * k)
 				drain.tween_property(band, "scale:y", 0.001, step) \
 					.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-				drain.tween_property(band, "position:y", bottom, step) \
+				drain.parallel().tween_property(band, "position:y", bottom, step) \
 					.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-				drain.tween_interval(step * k)
+				drain.tween_callback(func():
+					if is_instance_valid(band):
+						band.visible = false)
 				_pour_tweens.append(drain)
 
 			var idx := dst_count + k
@@ -246,12 +252,12 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 			grown.scale = Vector3(1.0, 0.001, 1.0)
 			grown.position.y = float(grown.get_meta("band_bottom"))
 			dst.add_child(grown)
-			var rise := create_tween().set_parallel(true)
+			var rise := create_tween()
+			rise.tween_interval(step * k)
 			rise.tween_property(grown, "scale:y", 1.0, step) \
 				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-			rise.tween_property(grown, "position:y", float(grown.get_meta("band_centre")), step) \
+			rise.parallel().tween_property(grown, "position:y", float(grown.get_meta("band_centre")), step) \
 				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-			rise.tween_interval(step * k)
 			_pour_tweens.append(rise))
 
 	t.tween_interval(POUR_POUR)

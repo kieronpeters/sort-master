@@ -144,6 +144,7 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 	return root
 
 const GLASS_SHADER = preload("res://assets/shaders/glass.gdshader")
+const LIQUID_SHADER = preload("res://assets/shaders/liquid.gdshader")
 
 static func glass_material(selected: bool) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
@@ -164,13 +165,23 @@ static func glass_material(selected: bool) -> ShaderMaterial:
 		m.set_shader_parameter("glow", 0.0)
 	return m
 
-static func _liquid_material(colour: Color, index: int) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	# deeper bands read as more liquid; the palette hex stays the base
-	# unshaded keeps the palette hex faithful; the bands must stay the
-	# brightest, most legible thing on screen
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = colour.darkened(0.03 * float(index))
+static func _liquid_material(colour: Color, index: int) -> ShaderMaterial:
+	# Deeper bands read as more liquid; the palette hue stays the base and the
+	# shader leaves the middle of the band at full brightness, so sampled colours
+	# still match the authored hex. The shader supplies the cylindrical shading
+	# the old flat unshaded albedo could not, which is what made the bands read
+	# as paper strips instead of liquid.
+	var m := ShaderMaterial.new()
+	m.shader = LIQUID_SHADER
+	m.set_shader_parameter("band_colour", colour.darkened(0.03 * float(index)))
+	m.set_shader_parameter("edge_dim", 0.52)
+	m.set_shader_parameter("edge_power", 0.62)
+	m.set_shader_parameter("top_light", 0.08)
+	m.set_shader_parameter("bottom_dim", 0.14)
+	m.set_shader_parameter("sheen", 0.13)
+	m.set_shader_parameter("sheen_centre", 0.55)
+	m.set_shader_parameter("band_radius", VesselMeshScript.liquid_radius())
+	m.set_shader_parameter("sheen_power", 5.0)
 	return m
 
 ## Soft radial falloff used for the contact shadow behind each vessel.

@@ -38,6 +38,7 @@ var _selected := -1
 var _tube_count := 0
 var _capacity := 4
 var _pour_tweens: Array = []
+var _pour_stream: MeshInstance3D = null
 
 
 func _ready() -> void:
@@ -195,9 +196,13 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 		if is_instance_valid(old):
 			old.kill()
 	_pour_tweens.clear()
+	# Killing a chain skips its trailing callbacks, so any stream it still owned
+	# would be orphaned and survive a level rebuild. Free it here explicitly.
+	if _pour_stream != null and is_instance_valid(_pour_stream):
+		_pour_stream.queue_free()
+	_pour_stream = null
 
 	var step: float = POUR_POUR / float(count)
-	var stream: MeshInstance3D = null
 
 	var t := create_tween()
 	t.tween_property(src, "position", hover, POUR_TRAVEL) \
@@ -206,7 +211,7 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	t.tween_callback(func():
-		stream = _make_stream(hue, Vector3(mouth.x, mouth.y, 0.05), Vector3(dst_x, base_y + 0.47, 0.05))
+		_pour_stream = _make_stream(hue, Vector3(mouth.x, mouth.y, 0.05), Vector3(dst_x, base_y + 0.47, 0.05))
 		# The source empties from the top down while the destination rises, so the
 		# liquid moves continuously instead of teleporting when the pour ends.
 		for k in count:
@@ -239,10 +244,12 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 
 	t.tween_interval(POUR_POUR)
 	t.tween_callback(func():
-		if stream != null and is_instance_valid(stream):
+		if _pour_stream != null and is_instance_valid(_pour_stream):
+			var owned := _pour_stream
+			_pour_stream = null
 			var fade := create_tween()
-			fade.tween_property(stream, "transparency", 1.0, 0.10)
-			fade.tween_callback(stream.queue_free)
+			fade.tween_property(owned, "transparency", 1.0, 0.10)
+			fade.tween_callback(owned.queue_free)
 			_pour_tweens.append(fade))
 	t.tween_property(src, "position", home, POUR_RETURN) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -286,7 +293,7 @@ func _make_stream(hue: Color, from: Vector3, to: Vector3) -> MeshInstance3D:
 	# the cylinder's axis is +Y, so align it with the stream direction
 	mi.rotation.z = atan2(delta.y, delta.x) - PI * 0.5
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	_vessels.add_child(mi)
 	return mi
 
 func _layout_vessels() -> void:

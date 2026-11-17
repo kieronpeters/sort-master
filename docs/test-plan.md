@@ -93,3 +93,34 @@ Prose alone is not evidence. Device rows must say "not run" until executed.
   step in `test_flow.gd`; new solver/game interaction gets a direction-2 case.
 - `tools/test.ps1` is the gate before every build and requires **exit code 0**
   and `FAILED: 0` in each suite.
+
+## 8. Android smoke harness
+
+`tools\android_smoke.ps1` boots the emulator, installs a build and asserts that
+it renders and responds - one command instead of driving taps by hand.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\android_smoke.ps1
+powershell -ExecutionPolicy Bypass -File tools\android_smoke.ps1 -Build   # dual-ABI debug APK first
+```
+
+It asserts: installs, process alive, app foreground, first frame not blank, a tap
+changes the screen, the second screen renders, no fatal crash, stays portrait
+when the system is forced to landscape, and relaunches after a force stop. It
+writes `builds\android-smoke\report.md` plus screenshots.
+
+Design notes worth keeping:
+
+- **It fails closed.** If a run ends early it reports how many checks actually
+  ran and exits non-zero. An early version ran 3 of 9 checks and still printed
+  "ALL CHECKS PASSED"; that false green is a worse outcome than no harness.
+- **A black frame is a valid PNG**, which is exactly how the Vulkan present
+  failure looked. Hence the explicit non-blank pixel assertion rather than
+  trusting that a screenshot exists.
+- `-Build` flips `architectures/x86_64` in the **debug** preset only, because
+  the game ships arm64-only and the emulator is x86_64. The preset is restored in
+  a `finally` block; the release preset is never touched.
+
+It runs with Vulkan disabled (`-feature -Vulkan`), so it exercises the OpenGL ES
+3.1 compatibility fallback. It does not validate the shipped Vulkan renderer and
+is not a substitute for the S23 Ultra rows in `docs/device-validation.md`.

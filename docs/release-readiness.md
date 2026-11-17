@@ -23,7 +23,7 @@ a production release. It does not claim the game is production-ready.
 | 10 | Levels 3–5 empty-vessel lesson | **ACCEPTED EXCEPTION** | re-verified: 6/7/7 with empty-tube pours forbidden | revisit in 1.1 |
 | 11 | Audio audition (QA-02) | **BLOCKED (human)** | no listening pass yet; owner has agreed to listen | listen and sign off |
 | 12 | Android static configuration | **PASS** | portrait, version 2, icons, gating, arm64 | — |
-| 13 | Physical device validation | **BLOCKED** | S23 Ultra agreed but not connected; `adb devices` empty | connect the device |
+| 13 | Physical device validation | **PARTIAL (emulator only)** | S23 Ultra not connected. Android 15 emulator pass: installs, launches, renders, pours, wins, persists, portrait held - but on the OpenGL fallback, not the shipped Vulkan renderer (`docs/evidence/android/RESULTS.md`) | connect the S23 Ultra for the physical rows and the Vulkan path |
 | 14 | Production signing (M10-03) | **BLOCKED** | no keystore in this environment; RC is debuggable/debug-signed | provide key + approval |
 | 15 | Publishing | **BLOCKED** | owner boundary | approve after 11–14 |
 

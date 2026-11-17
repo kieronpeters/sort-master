@@ -1,7 +1,16 @@
 # Device validation — Samsung Galaxy S23 Ultra
 
-**Status:** package prepared, **not executed**. No physical device has run this
-build. Every physical row below is `NOT TESTED` until a human performs it.
+**Status:** package prepared, **not executed on the S23 Ultra**. No physical
+device has run this build. Every physical row below is `NOT TESTED` until a human
+performs it on that device.
+
+An **emulator** pass (Android 15, API 35, x86_64, 1080 × 2400 / 411 dp) ran on
+17 November 2026 and is recorded separately in
+`docs/evidence/android/RESULTS.md`. It proves the build installs, launches,
+renders, accepts touch, completes a level and persists progress on Android — but
+it ran on the **OpenGL ES 3.1 Compatibility fallback**, because the emulator
+cannot present a Vulkan swapchain. The shipped **Vulkan mobile** renderer is
+therefore still unvalidated. Emulator results never overwrite the rows below.
 
 ## 1. Target and build
 

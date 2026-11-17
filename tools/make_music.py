@@ -125,7 +125,7 @@ def build(track: dict, seconds: float, rng: random.Random) -> list[float]:
         dur = int(bar * RATE)
         for k, semi in enumerate(chord):
             freq = semitone_to_hz(base, track["root"] + semi)
-            amp = 0.082 / (1.0 + 0.35 * k)
+            amp = 0.105 / (1.0 + 0.30 * k)
             add_pad(buf, int(t * RATE), dur, freq, amp, attack=2.6, release=3.4)
         t += bar * 0.86            # slight overlap so chords breathe
         ci += 1
@@ -136,7 +136,7 @@ def build(track: dict, seconds: float, rng: random.Random) -> list[float]:
     while t < seconds - 2.0:
         semi = track["root"] + 12 + rng.choice(scale)
         freq = semitone_to_hz(base, semi)
-        add_bell(buf, int(t * RATE), freq, 0.045 * track["brightness"])
+        add_bell(buf, int(t * RATE), freq, 0.062 * track["brightness"])
         t += rng.uniform(1.8, 4.2) / track["bell_rate"]
 
     add_air(buf, 0.012, rng)
@@ -150,7 +150,7 @@ def build(track: dict, seconds: float, rng: random.Random) -> list[float]:
     return buf
 
 
-def normalise(buf: list[float], target_peak: float = 0.14) -> list[float]:
+def normalise(buf: list[float], target_peak: float = 0.26) -> list[float]:
     peak = max(1e-9, max(abs(v) for v in buf))
     gain = target_peak / peak
     return [v * gain for v in buf]

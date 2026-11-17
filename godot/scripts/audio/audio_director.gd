@@ -28,6 +28,12 @@ const GAINS := {
 
 var muted := false
 
+## Music and effects levels, 0.0-1.0, saved with progress. They are applied as a
+## dB offset on top of the authored gains, so 1.0 leaves the mix exactly as
+## designed and 0.5 halves it.
+var music_volume := 1.0
+var sfx_volume := 1.0
+
 var _streams := {}
 var _players: Array = []
 
@@ -40,7 +46,7 @@ const MUSIC_TRACKS := [
 	"res://assets/audio/music/still_water.wav",
 	"res://assets/audio/music/morning_prism.wav",
 ]
-const MUSIC_DB := -14.0
+const MUSIC_DB := -9.0
 
 var _music: AudioStreamPlayer = null
 var _music_order: Array = []
@@ -72,7 +78,7 @@ func _setup_music() -> void:
 		return
 	_shuffle_music()
 	_music = AudioStreamPlayer.new()
-	_music.volume_db = MUSIC_DB
+	_music.volume_db = MUSIC_DB + _volume_db(music_volume)
 	_music.finished.connect(_next_track)
 	add_child(_music)
 	_start_track()
@@ -114,8 +120,24 @@ func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:
 	if player == null:
 		player = _players[0]
 	player.stream = _streams[sound]
-	player.volume_db = GAINS.get(sound, volume_db)
+	player.volume_db = GAINS.get(sound, volume_db) + _volume_db(sfx_volume)
 	player.play()
+
+
+## 1.0 keeps the authored level; 0.0 is silent. linear_to_db(0) is -inf, so the
+## floor keeps it finite and lets the player actually stop.
+static func _volume_db(v: float) -> float:
+	return linear_to_db(maxf(0.0001, clampf(v, 0.0, 1.0)))
+
+
+func set_music_volume(v: float) -> void:
+	music_volume = clampf(v, 0.0, 1.0)
+	if _music != null:
+		_music.volume_db = MUSIC_DB + _volume_db(music_volume)
+
+
+func set_sfx_volume(v: float) -> void:
+	sfx_volume = clampf(v, 0.0, 1.0)
 
 
 func set_muted(value: bool) -> void:

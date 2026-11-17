@@ -91,6 +91,8 @@ func _ready() -> void:
 	unlocked = clampi(unlocked, 0, maxi(0, levels.size() - 1))
 	audio = AudioDirectorScript.new()
 	audio.muted = bool(data.get("muted", false))
+	audio.set_music_volume(float(data.get("music", 1.0)))
+	audio.set_sfx_volume(float(data.get("sfx", 1.0)))
 	add_child(audio)
 	_refresh_safe_area()
 	get_viewport().size_changed.connect(_refresh_safe_area)
@@ -120,7 +122,13 @@ func _load_levels() -> void:
 
 
 func _save_progress() -> void:
-	var ok: bool = ProgressStoreScript.save_data({"unlocked": unlocked, "best": best, "muted": audio.muted if audio else false})
+	var ok: bool = ProgressStoreScript.save_data({
+		"unlocked": unlocked,
+		"best": best,
+		"muted": audio.muted if audio else false,
+		"music": audio.music_volume if audio else 1.0,
+		"sfx": audio.sfx_volume if audio else 1.0,
+	})
 	if not ok:
 		push_warning("Progress save failed; the session continues in memory.")
 
@@ -288,6 +296,10 @@ func _show_home() -> void:
 	var pick := UIKit.ghost_button("Levels")
 	pick.pressed.connect(_show_level_select)
 	col.add_child(pick)
+
+	var settings := UIKit.ghost_button("Settings")
+	settings.pressed.connect(_show_settings)
+	col.add_child(settings)
 
 	col.add_child(UIKit.spacer(10))
 
@@ -479,6 +491,58 @@ func _credits_section(parent: VBoxContainer, title: String, text: String) -> voi
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(b)
+
+
+# ---------- settings ----------
+
+func _show_settings() -> void:
+	_screen = "settings"
+	_clear_screen()
+	var m := _page(72, 56, 48)
+
+	var center := CenterContainer.new()
+	m.add_child(center)
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(780, 0)
+	col.add_theme_constant_override("separation", 20)
+	center.add_child(col)
+
+	col.add_child(UIKit.label("Settings", 46, P.TEXT))
+	col.add_child(UIKit.label("Audio", 24, P.ACCENT))
+	col.add_child(_volume_row("Music", audio.music_volume, func(v): audio.set_music_volume(v)))
+	col.add_child(_volume_row("Sound", audio.sfx_volume, func(v):
+		audio.set_sfx_volume(v)
+		audio.play("ui")))
+	col.add_child(UIKit.label("Progress is stored on this device only.", 22, P.MUTED))
+	col.add_child(UIKit.spacer(6))
+
+	var back := UIKit.ghost_button("Back")
+	back.pressed.connect(_show_home)
+	col.add_child(back)
+
+
+## One labelled 0-100 % slider. Writes through on every change so a player who
+## backs out immediately still keeps the level they set.
+func _volume_row(title: String, value: float, on_change: Callable) -> Control:
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+
+	var label := UIKit.label("%s    %d%%" % [title, int(round(value * 100.0))], 28, P.TEXT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	row.add_child(label)
+
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 100.0
+	slider.step = 5.0
+	slider.value = value * 100.0
+	slider.custom_minimum_size = Vector2(0, 60)
+	slider.value_changed.connect(func(v: float):
+		on_change.call(v / 100.0)
+		label.text = "%s    %d%%" % [title, int(v)]
+		_save_progress())
+	row.add_child(slider)
+	return row
 
 
 # ---------- gameplay ----------
@@ -1017,7 +1081,7 @@ func _go_back() -> void:
 				_confirm_leave()
 			else:
 				_show_level_select()
-		"levels", "credits":
+		"levels", "credits", "settings":
 			_show_home()
 		"home":
 			if OS.has_feature("mobile"):

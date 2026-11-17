@@ -12,7 +12,7 @@ extends RefCounted
 const DEFAULT_PATH := "user://progress.json"
 
 static func default_data() -> Dictionary:
-	return {"unlocked": 0, "best": {}, "muted": false}
+	return {"unlocked": 0, "best": {}, "muted": false, "music": 1.0, "sfx": 1.0}
 
 static func load_data(path: String = DEFAULT_PATH) -> Dictionary:
 	var data := default_data()
@@ -29,6 +29,13 @@ static func load_data(path: String = DEFAULT_PATH) -> Dictionary:
 	var muted = parsed.get("muted", false)
 	if muted is bool:
 		data["muted"] = muted
+
+	# Separate music and effects levels, 0.0-1.0. Older saves without them keep
+	# the defaults, so no migration step is needed.
+	for key in ["music", "sfx"]:
+		var level = parsed.get(key, 1.0)
+		if level is int or level is float:
+			data[key] = clampf(float(level), 0.0, 1.0)
 
 	var best = parsed.get("best", {})
 	if best is Dictionary:
@@ -55,6 +62,8 @@ static func save_data(data: Dictionary, path: String = DEFAULT_PATH) -> bool:
 		"unlocked": int(data.get("unlocked", 0)),
 		"best": clean_best,
 		"muted": bool(data.get("muted", false)),
+		"music": clampf(float(data.get("music", 1.0)), 0.0, 1.0),
+		"sfx": clampf(float(data.get("sfx", 1.0)), 0.0, 1.0),
 	}))
 	f.close()
 

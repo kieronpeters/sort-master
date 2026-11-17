@@ -44,6 +44,10 @@ func _run() -> void:
 	await _settle()
 	await _shot("rc-credits")
 
+	main._show_settings()
+	await _settle()
+	await _shot("rc-settings")
+
 	main.unlocked = 6
 	main._start_level(1)
 	await _settle()

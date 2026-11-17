@@ -19,8 +19,8 @@ const SELECTED_LIFT := 0.018   # world units, ~20 design px at phone scale
 ## asserts the move counter one frame after a tap), so this is presentation
 ## only: the source tilts, the arriving liquid rises out of nothing, and a short
 ## stream marks where it went. Without it a move just teleports liquid.
-const POUR_TIP_DEG := 62.0
-const POUR_LIFT := 0.62
+const POUR_TIP_DEG := 85.0
+const POUR_LIFT := 0.58
 const POUR_TRAVEL := 0.22
 const POUR_POUR := 0.45
 const POUR_RETURN := 0.20
@@ -294,8 +294,8 @@ func _make_stream(hue: Color, from: Vector3, to: Vector3) -> MeshInstance3D:
 	var mesh := CylinderMesh.new()
 	# Tapered: wide where it leaves the spout, narrower as it falls. A uniform
 	# cylinder reads as a stick no matter how thick it is.
-	mesh.top_radius = 0.0125
-	mesh.bottom_radius = 0.0038
+	mesh.top_radius = 0.0210
+	mesh.bottom_radius = 0.0110
 	mesh.height = length
 	mesh.radial_segments = 14
 	mesh.rings = 1

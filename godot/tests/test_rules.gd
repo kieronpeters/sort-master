@@ -120,7 +120,7 @@ func _initialize() -> void:
 		var lay: Dictionary = L.compute(n, Vector2(1080, 1920))
 		check("layout %d tubes not empty" % n, not lay.is_empty())
 		check("layout %d vessel width positive" % n, float(lay.vessel_w) > 0.0)
-		check("layout %d baseline on the 78%% line" % n, is_equal_approx(float(lay.baseline), 1920.0 * 0.78))
+		check("layout %d baseline on the 66%% line" % n, is_equal_approx(float(lay.baseline), 1920.0 * 0.66))
 		check("layout %d hit strip starts above the base" % n, float(lay.hit_top) < float(lay.baseline))
 		check("layout %d centres ordered" % n, float(lay.centres[0]) < float(lay.centres[n - 1]))
 		check("layout %d group inside the design width" % n, float(lay.centres[n - 1]) + float(lay.slot) * 0.5 <= 1080.0)
@@ -128,7 +128,7 @@ func _initialize() -> void:
 
 	var tall: Dictionary = L.compute(6, Vector2(1080, 2400))
 	check("taller viewport keeps 1:1 design scale", is_equal_approx(float(tall.scale), 1.0))
-	check("taller viewport moves the baseline down", float(tall.baseline) > 1920.0 * 0.78)
+	check("taller viewport moves the baseline down", float(tall.baseline) > 1920.0 * 0.66)
 	check("degenerate layout rejected", L.compute(0, Vector2(1080, 1920)).is_empty())
 
 	# --- progress store: save, load, clamping, corrupt data ----------------

@@ -15,8 +15,8 @@ const VESSEL_WORLD_W := 0.172
 const VESSEL_WORLD_H := 0.512
 
 const VESSEL_GAP := 20.0        # design px between neighbouring vessels
-const WIDTH_FRACTION := 0.88    # of the design width, including the outer margin
-const BASELINE_FRACTION := 0.78 # of the design height, measured from the top
+const WIDTH_FRACTION := 0.94    # of the design width, including the outer margin
+const BASELINE_FRACTION := 0.66 # of the design height, measured from the top
 const MAX_HEIGHT_FRACTION := 0.46
 
 ## Returns {} for a degenerate request.

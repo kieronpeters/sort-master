@@ -90,21 +90,22 @@ recorded; nothing is inferred.
 | D08 | Scaling at 1080 × 2400 | **PASS** | no letterbox, no stretch, UI fills the frame |
 | D09 | Safe areas | **PARTIAL** | immersive full-screen; emulator has no display cutout, so cutout handling is untested |
 | D10 | Home / Levels layout | **PASS** | `d01-home.png`, `d05-levels.png` — no clipping at 411 dp |
-| D11 | Gameplay at 4 tubes | **PASS** | `d06-gameplay.png`; 5/6/8 tubes not tested |
+| D11 | Gameplay at 4 / 5 / 8 tubes | **PASS** | 4 tubes `d06-gameplay.png`; 5 colours / 7 tubes (level 16) `d15-level16-5tubes.png`; 8 tubes / 6 colours (level 30) `d14-level30-8tubes.png`. All vessels visible, no overlap, nothing clipped at either extreme |
 | D13 | Tap accuracy at 4 tubes | **PASS** | selection and pour hit the intended tube |
 | D17 | Legal transfer | **PASS** | 2 units moved, MOVES 0 → 1, `d08-after-pour.png` |
 | D19 | Undo | **PASS** | board and counter restored, `d09-undo.png` |
+| D23 | Back out of a level with no moves | **PASS** | returns to the map with no confirmation, which is correct — the confirmation is only for a level with moves. **Not tested with moves taken** |
 | D25 | Complete level 1 | **PASS** | 3-move minimum, "Level Complete", `d10-complete.png` |
 | D27 | Force stop and relaunch | **PASS** | resumes with "Continue · Level 2", `d11-relaunch.png` |
 | D30 | Glass / vessel readability | **PASS (GL fallback)** | bands read as liquid with volume |
-| D31 | Colour separation symbols | **PASS** | distinct symbols visible on every band |
-| D40 | Crashes / freezes | **PASS so far** | no crash across install, launch, play, relaunch |
+| D31 | Colour separation symbols | **PASS** | level 16 (the even worst-case palette level) renders aqua/prism and violet/hexagon clearly distinguishable at 411 dp — `d15-level16-5tubes.png` |
+| D40 | Crashes / freezes | **PASS so far** | no crash across install, launch, play, relaunch, and 4/5/8-tube boards |
 
 **Not exercised — still `NOT TESTED`:** audio (D33–D35; emulator started with
-`-no-audio`), frame timing and thermals (D36–D38), memory growth (D39), all
-5/6/8-tube boards, restart confirmation (D21), back-navigation confirmation
-(D23, D24), mid-level kill (D29), and the launcher icon / adaptive icon rows
-(D03, D04).
+`-no-audio`), frame timing and thermals (D36–D38), memory growth (D39), the
+6-tube board, restart confirmation (D21), back-navigation confirmation with moves
+taken (D23 upper case), navigation from map/credits/home (D24), mid-level kill
+(D29), and the launcher icon / adaptive icon rows (D03, D04).
 
 ## 5. Screenshots
 
@@ -119,6 +120,13 @@ recorded; nothing is inferred.
 | `d10-complete.png` | completion card; Undo/Restart dimmed behind it |
 | `d11-relaunch.png` | after force stop — "Continue · Level 2" |
 | `d12-rotate-landscape.png` | landscape forced; app still portrait |
+| `d13-back-confirm.png` | back with no moves — straight to the map (no confirmation, correct) |
+| `d14-level30-8tubes.png` | level 30 — 8 tubes, 6 colours, no overlap |
+| `d15-level16-5tubes.png` | level 16 — the palette worst case; aqua/prism vs violet/hexagon distinguishable |
+
+To reach levels 16 and 30 the save was seeded directly (the debug build is
+`debuggable`, so `run-as` can replace `files/progress.json` with
+`{"unlocked":29,"best":{},"muted":false}`). No game code was changed for this.
 
 ## 6. What this changes
 

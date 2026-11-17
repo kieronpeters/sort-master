@@ -8,8 +8,8 @@ device pass are complete.
 
 | Artifact | Purpose | Size | SHA-256 | Signing |
 |---|---|---|---:|---|
-| `builds/sort-master-rc.apk` | release candidate | 27.18 MB | `DC95B8CBA671B2607E928BDE24065A2961EA6940F69BED6BA6DF82A878A9B6B9` | debug key, **debuggable** |
-| `builds/sort-master.apk` | development build with the F1 overlay | 27.21 MB | `FEC23589FA5E5BD6DD27B938326912A813D3656D72C729222CED31F7F328976B` | debug key |
+| `builds/sort-master-rc.apk` | release candidate | 27.18 MB | `C097E81F5298FB990B9716CF65842816490E5B02DC70F909E64A65E3DFDBD22B` | debug key, **debuggable** |
+| `builds/sort-master.apk` | development build with the F1 overlay | 27.22 MB | `D29CD97932C6D270A946197DE9BF79E9823A2717CC5862C2E6CC1306572DE37B` | debug key |
 
 Both are arm64-v8a only, **portrait-locked**, ETC2/ASTC enabled, mobile
 renderer. Version `0.1.0`, version code `2`.
@@ -49,7 +49,7 @@ and loads the overlay script only through a runtime `load()` inside that gate.
   `screenOrientation=1` with `aapt2`; a landscape APK now fails the build.
 - APK signature verified with `apksigner` (v2/v3; v1 not required at minSdk 24).
 - RC content contains no `debug_overlay`, tests, dev scenes or `scripts/debug`
-  (verified in the exported APK, not only a separate pack): 207 zip entries,
+  (verified in the exported APK, not only a separate pack): 208 zip entries,
   0 matches for `debug_overlay|scripts/debug`, 0 for `tests/`, 0 for
   `scenes/dev|vessel_spike`.
 - Evidence screenshots regenerated 17 Nov from `godot/tests/capture.gd` at

@@ -55,6 +55,16 @@ and loads the overlay script only through a runtime `load()` inside that gate.
 - Evidence screenshots regenerated 17 Nov from `godot/tests/capture.gd` at
   720×1280 into `docs/evidence/rc-*.png`; every screen reflows with the new type
   scale and nothing clips.
+- **16 KB page-size compatibility** (Play requires it for apps targeting
+  Android 15+): `zipalign -c -P 16 4` passes, and both native libraries carry
+  `LOAD` segments aligned to `0x4000`:
+  `lib/arm64-v8a/libgodot_android.so` (72.7 MB) and `libc++_shared.so` (1.3 MB),
+  all three `LOAD` segments at `0x4000`. Verified 17 Nov 2026.
+- Android 15 (API 35) emulator pass: installs, launches, renders, pours, wins,
+  persists across a force stop and holds portrait — see
+  `docs/evidence/android/RESULTS.md`. That pass ran on the OpenGL ES 3.1
+  Compatibility fallback because no emulator GPU backend can present a Vulkan
+  swapchain here, so the shipped Vulkan renderer is **not** covered by it.
 - Launcher icons present at every density plus `mipmap-anydpi-v26/icon.xml`;
   adaptive background is gradient-only, so the launcher cannot double-draw the
   bottle.

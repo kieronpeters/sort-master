@@ -35,10 +35,21 @@ uniform float bottom_dim : hint_range(0.0, 0.5) = 0.10;
 uniform float sheen : hint_range(0.0, 0.4) = 0.07;
 uniform float sheen_centre : hint_range(0.0, 1.0) = 0.55;
 
+// The gloss. This is the single biggest difference between flat bands and
+// liquid that reads as a substance: a bright, narrow streak down one side where
+// the surface catches the light, exactly where a rounded column would.
+uniform float highlight : hint_range(0.0, 0.8) = 0.20;
+uniform float highlight_pos : hint_range(0.0, 1.0) = 0.30;
+uniform float highlight_width : hint_range(0.02, 0.35) = 0.070;
+
 varying float lateral;
+varying float lateral_signed;
 
 void vertex() {
 	lateral = clamp(abs(VERTEX.x) / max(band_radius, 0.0001), 0.0, 1.0);
+	// Signed, so the gloss can sit on one side only. abs() mirrored it and made
+	// the highlight read as a wash across the whole band.
+	lateral_signed = clamp(VERTEX.x / max(band_radius, 0.0001), -1.0, 1.0);
 }
 
 void fragment() {
@@ -48,6 +59,11 @@ void fragment() {
 	// Sheen: a soft vertical band where a round surface would catch light.
 	float sheen_band = exp(-pow((lateral - sheen_centre) * 3.2, 2.0));
 	shade += sheen * sheen_band;
+
+	// Gloss streak, plus a tight core so it reads as a reflection, not a wash.
+	float gloss = exp(-pow((lateral_signed + highlight_pos) / highlight_width, 2.0));
+	float core = exp(-pow((lateral_signed + highlight_pos) / (highlight_width * 0.42), 2.0));
+	shade += highlight * gloss + highlight * 0.45 * core;
 
 	ALBEDO = band_colour * shade;
 }

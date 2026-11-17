@@ -116,19 +116,23 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 	# meniscus: a lighter lip at the liquid surface, slightly inset
 	if contents.size() > 0:
 		var surface: Color = COLOURS.get(contents[contents.size() - 1], Color.MAGENTA)
-		var disc := CylinderMesh.new()
-		disc.top_radius = r * 0.97
-		disc.bottom_radius = r
-		disc.height = 0.005
-		disc.radial_segments = 32
+		# A domed surface, not a flat cap: real liquid bulges slightly at the
+		# rim of the tube, and the curved highlight is what makes the top band
+		# read as a fluid surface rather than a cut-off cylinder.
+		var dome := SphereMesh.new()
+		dome.radius = r * 0.995
+		dome.height = 0.026
+		dome.radial_segments = 32
+		dome.rings = 8
+		dome.is_hemisphere = true
 		var disc_mi := MeshInstance3D.new()
-		disc_mi.mesh = disc
+		disc_mi.mesh = dome
 		var dm := StandardMaterial3D.new()
-		dm.albedo_color = surface.lightened(0.10)
-		dm.roughness = 0.22
-		dm.metallic_specular = 0.55
+		dm.albedo_color = surface.lightened(0.22)
+		dm.roughness = 0.14
+		dm.metallic_specular = 0.85
 		disc_mi.material_override = dm
-		disc_mi.position = Vector3(0, base_y + band_h * contents.size() + 0.002, 0)
+		disc_mi.position = Vector3(0, base_y + band_h * contents.size() - 0.004, 0)
 		root.add_child(disc_mi)
 
 	# dark inner neck, so the mouth reads as an opening rather than a cap

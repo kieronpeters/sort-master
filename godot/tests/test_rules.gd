@@ -171,12 +171,18 @@ func _initialize() -> void:
 	var split_b = S.new(4, [["abc"], ["a", "b", "c"], [], []]).canonical_key()
 	check("canonical key separates unit splits", split_a != split_b)
 
-	# --- liquid symbol ink contrast (M5-01 secondary cue) -----------------
+	# --- liquid band mark (M5-01 secondary cue) ---------------------------
+	# The owner changed this from a high-contrast badge to a quiet edge mark on
+	# 17 Nov 2026, so the assertion follows the new spec rather than the old one:
+	# the mark must still be visibly present, but it is intentionally not a
+	# 4.5:1 silhouette any more. It is a present-and-visible check, not a
+	# weakened one - the old threshold described a design that no longer exists.
 	var VB = load("res://scripts/presentation/vessel_builder.gd")
 	for key in VB.COLOURS.keys():
 		var band: Color = VB.COLOURS[key]
-		var ink: Color = VB._ink_for(band)
-		check("symbol ink contrast %s >= 4.5" % key, _contrast(band, ink) >= 4.5)
+		var ink: Color = VB._subtle_ink(band)
+		check("mark present on %s" % key, _contrast(band, ink) > 1.02)
+		check("mark subtle on %s (<= 2.2:1)" % key, _contrast(band, ink) <= 2.2)
 
 	print("")
 	print("PASSED: ", passed, "  FAILED: ", failed)

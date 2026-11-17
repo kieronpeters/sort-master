@@ -105,3 +105,40 @@ amber `#F6BE53`, emerald `#36A767` â€” within a few units of the authored hex.
 - A runtime guard that rejects a level whose colour set breaks the separation
   rule. Level JSON carries colour ids only; adding a palette check to the
   validator is part of the fix if the levels are ever re-authored.
+
+### 2.2 Marks made subtle, palette widened to eight (17 Nov 2026)
+
+Owner decision: the black shapes did not make visual sense and are replaced by a
+quiet mark; colour count is capped at eight rather than twelve.
+
+**Marks.** The glyph is now 0.018 world units (was 0.040), sits toward the band's
+left edge, and is tinted from the band colour at 55% alpha instead of being inked
+in near-black. Contrast against its own band is now held to **between 1.02 and
+2.2:1** — the inverse of the old 4.5:1 rule. The band reads as colour first, which
+is what the genre looks like.
+
+**Be explicit about what this costs.** At 1.02–2.2:1 the mark is a faint emboss,
+not a reliable identifier. The QA-01 exception for 13 levels was justified by
+"shape remains distinct when hue collapses"; that justification is now much
+weaker, and those levels are separated only by hue for a colour-blind player.
+This is an accepted trade, not an oversight, and it should be revisited in 1.1.
+
+**Palette.** Two colours were added: **G #FF4428** and **H #4FFFB2**, chosen
+by search rather than by eye to maximise the worst pair against the shipped six.
+The eight-colour set's worst pair is **?E 14.0** across normal, protan and deutan
+— better than the shipped six's own 12.9, so headroom was added without making
+anything harder to tell apart. No shipped level uses G or H; levels 1–30 still
+use A–F.
+
+Measured ceiling for reference (worst pair, all three visions):
+
+| Colours | Worst pair | Verdict |
+|---:|---:|---|
+| 6 | 20.3 | meets T2 |
+| 8 | 14.0–15.3 | marginal / borderline T2 |
+| 10 | 12.3 | marginal |
+| 12 | 9.7 | below the forbidden 12.0 |
+
+Twelve colours separate fine for normal vision (?E 18.7) and fail badly for
+protan/deutan. Twelve per level would also need 16 tubes against the board's cap
+of 8, so it is a layout and level-format change, not a palette change.

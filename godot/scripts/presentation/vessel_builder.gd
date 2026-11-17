@@ -15,6 +15,10 @@ const COLOURS := {
 	"D": Color("#4D7BF1"),
 	"E": Color("#D0A2FF"),
 	"F": Color("#F87AA7"),
+	# Added 17 Nov 2026 for headroom: eight is the practical ceiling that still
+	# clears the separation floor. No shipped level uses G or H yet.
+	"G": Color("#FF4428"),
+	"H": Color("#4FFFB2"),
 }
 
 ## Original symbols drawn by tools/make_glyphs.ps1: droplet, prism, leaf,
@@ -26,9 +30,17 @@ const GLYPHS := {
 	"D": preload("res://assets/2d/glyphs/glyph_d.png"),
 	"E": preload("res://assets/2d/glyphs/glyph_e.png"),
 	"F": preload("res://assets/2d/glyphs/glyph_f.png"),
+	# G and H reuse existing marks; they are secondary cues, not identifiers.
+	"G": preload("res://assets/2d/glyphs/glyph_a.png"),
+	"H": preload("res://assets/2d/glyphs/glyph_c.png"),
 }
 
-const SYMBOL_WORLD_H := 0.040
+## The mark is a quiet secondary cue, not a badge: small, set toward the band's
+## left edge, and tinted from the band colour rather than inked in near-black.
+## At 4.5:1 the glyphs read as stickers pasted on the liquid, which is what they
+## looked like; at this size and contrast the band reads as colour first.
+const SYMBOL_WORLD_H := 0.018
+const SYMBOL_EDGE := 0.62
 
 ## One liquid band, for callers that need to build or extend a band outside
 ## build() — the pour animation grows the receiving vessel's level this way.
@@ -94,11 +106,11 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 		var symbol := Sprite3D.new()
 		symbol.texture = GLYPHS.get(contents[i], GLYPHS["A"])
 		symbol.pixel_size = SYMBOL_WORLD_H / 128.0
-		symbol.modulate = _ink_for(colour)
+		symbol.modulate = _subtle_ink(colour)
 		symbol.shaded = false
 		symbol.double_sided = true
 		symbol.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		symbol.position = Vector3(0, base_y + band_h * 0.5 + band_h * i, r + 0.010)
+		symbol.position = Vector3(-r * SYMBOL_EDGE, base_y + band_h * 0.5 + band_h * i, r + 0.010)
 		root.add_child(symbol)
 
 	# meniscus: a lighter lip at the liquid surface, slightly inset
@@ -250,20 +262,8 @@ static func _glow_texture() -> GradientTexture2D:
 	tex.fill_to = Vector2(1.0, 0.5)
 	return tex
 
-## Picks whichever ink has the higher WCAG contrast against the band. The old
-## luminance threshold put white ink on emerald at ~1.8:1.
-static func _ink_for(colour: Color) -> Color:
-	var dark := Color(0.03, 0.05, 0.07, 0.95)
-	var light := Color(1, 1, 1, 0.97)
-	var band := _rel_lum(colour)
-	var c_dark: float = (maxf(band, _rel_lum(dark)) + 0.05) / (minf(band, _rel_lum(dark)) + 0.05)
-	var c_light: float = (maxf(band, 1.0) + 0.05) / (minf(band, 1.0) + 0.05)
-	return dark if c_dark >= c_light else light
-
-
-static func _rel_lum(c: Color) -> float:
-	return 0.2126 * _linear(c.r) + 0.7152 * _linear(c.g) + 0.0722 * _linear(c.b)
-
-
-static func _linear(v: float) -> float:
-	return (v / 12.92) if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4)
+## The mark's tint: a lightened version of the band, kept deliberately close to
+## it. Shape stays available as a cue without the black silhouette dominating.
+static func _subtle_ink(colour: Color) -> Color:
+	var tint := colour.lightened(0.30)
+	return Color(tint.r, tint.g, tint.b, 0.55)

@@ -51,9 +51,9 @@ Prose alone is not evidence. Device rows must say "not run" until executed.
 
 | Layer | Result | Date |
 |---|---|---|
-| Rules, validation, layout, save, ink contrast | **118 passed, 0 failed** | 13 Nov 2026 |
+| Rules, validation, layout, save, ink contrast | **126 passed, 0 failed** | 17 Nov 2026 |
 | Parity direction 1 | **154 checks, 0 failed, 30 levels** | 13 Nov 2026 |
-| Integration flow | **150 passed, 0 failed, 30/30 levels** | 13 Nov 2026 |
+| Integration flow | **153 passed, 0 failed, 30/30 levels** | 17 Nov 2026 |
 | Parity direction 2 | **GAME MOVES VERIFIED: 30 levels, 0 failed** | 13 Nov 2026 |
 | Manual desktop | Level 1 interaction set (select/pour/undo) + 4/6-tube hit alignment | 13 Nov 2026 |
 | Manual full playthrough | **1 of 30 by hand**; 29 covered only by the flow harness | — |

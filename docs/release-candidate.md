@@ -40,7 +40,7 @@ and loads the overlay script only through a runtime `load()` inside that gate.
 
 ## Verification performed
 
-- `tools/test.ps1`: rules 118/0, parity 154/0, flow 150/0, game-moves replay
+- `tools/test.ps1` at the 13 Nov build: rules 118/0, parity 154/0, flow 150/0, game-moves replay
   30/30 — all exit 0.
 - `tools/build_rc.ps1` asserts package id, version code 2 and
   `screenOrientation=1` with `aapt2`; a landscape APK now fails the build.

@@ -22,9 +22,9 @@ $env:GODOT = 'C:\Tools\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe'
 powershell -ExecutionPolicy Bypass -File tools\test.ps1
 ```
 
-Four suites: rules/validation/layout/save (118), solver→game parity (154),
-30-level integration flow (150), and the independent Python replay of the
-game's recorded moves (30 levels).
+Four suites: rules/validation/layout/save (126), solver→game parity (154),
+30-level integration flow (153), and the independent Python replay of the
+game's recorded moves (30 levels). All four must report `FAILED: 0` and exit 0.
 
 ## Build
 

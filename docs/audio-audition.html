@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sort Master - audio audition</title>
+<style>
+ body { font: 15px/1.5 system-ui, sans-serif; margin: 0 auto; max-width: 860px;
+        padding: 32px 20px 80px; background: #0B1F27; color: #EAF7FF; }
+ h1 { font-size: 26px; margin: 0 0 4px; }
+ h2 { font-size: 18px; margin: 32px 0 10px; color: #46D8D0; }
+ h3 { font-size: 15px; margin: 0 0 6px; font-weight: 600; }
+ p.lead { color: #8FB3BF; margin: 0 0 24px; }
+ .sound { background: #102832; border: 1px solid #2A5A66; border-radius: 14px;
+           padding: 14px 16px; margin: 10px 0; }
+ .role { color: #8FB3BF; font-weight: 400; font-size: 13px; }
+ audio { width: 100%; margin-top: 4px; }
+ table { border-collapse: collapse; width: 100%; font-size: 13px; }
+ th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #2A5A66; }
+ th { color: #46D8D0; font-weight: 600; }
+ td.blank { width: 90px; border-bottom: 1px solid #5E808C; }
+ .ok { color: #46D8D0; }
+ .warn { background: #3A2530; border-color: #F87AA7; }
+ code { background: #061116; padding: 1px 5px; border-radius: 4px; }
+</style></head><body>
+<h1>Audio audition &mdash; Sort Master 0.1.0</h1>
+<p class="lead">Six CC0 sounds. Listen on the target phone at 50% and 100% media
+volume, five plays each, before the notes below are treated as done. The
+measurements are objective; tone is not. Nothing here substitutes for your ear.</p>
+
+<h2>1. Objective measurements</h2>
+<table><thead><tr><th>File</th><th>Role</th><th>Dur s</th><th>Peak dBFS</th>
+<th>RMS dBFS</th><th>Crest dB</th><th>Trim dB</th><th>Clipped</th></tr></thead>
+<tbody><tr><td>invalid.wav</td><td>illegal transfer / locked level</td><td>0.16</td><td>-11.5</td><td>-23.1</td><td>11.6</td><td>-9</td><td>0</td></tr><tr><td>pour.wav</td><td>legal transfer</td><td>0.45</td><td>-15.3</td><td>-26.9</td><td>11.5</td><td>-10</td><td>0</td></tr><tr><td>select.wav</td><td>tube selected</td><td>0.09</td><td>-11.2</td><td>-24.8</td><td>13.5</td><td>-12</td><td>0</td></tr><tr><td>ui.wav</td><td>navigation</td><td>0.05</td><td>-17.3</td><td>-28.4</td><td>11.1</td><td>-15</td><td>0</td></tr><tr><td>undo.wav</td><td>undo</td><td>0.14</td><td>-15.7</td><td>-25.8</td><td>10.1</td><td>-13</td><td>0</td></tr><tr><td>win.wav</td><td>level complete</td><td>0.85</td><td>-11.6</td><td>-23.8</td><td>12.1</td><td>-8</td><td>0</td></tr></tbody></table>
+<p><p class='ok'>All six pass the objective checks.</p></p>
+
+<h2>2. Listen</h2>
+<div class="sound"><h3>invalid.wav <span class="role">illegal transfer / locked level</span></h3><audio controls preload="none" src="../godot/assets/audio/invalid.wav"></audio></div><div class="sound"><h3>pour.wav <span class="role">legal transfer</span></h3><audio controls preload="none" src="../godot/assets/audio/pour.wav"></audio></div><div class="sound"><h3>select.wav <span class="role">tube selected</span></h3><audio controls preload="none" src="../godot/assets/audio/select.wav"></audio></div><div class="sound"><h3>ui.wav <span class="role">navigation</span></h3><audio controls preload="none" src="../godot/assets/audio/ui.wav"></audio></div><div class="sound"><h3>undo.wav <span class="role">undo</span></h3><audio controls preload="none" src="../godot/assets/audio/undo.wav"></audio></div><div class="sound"><h3>win.wav <span class="role">level complete</span></h3><audio controls preload="none" src="../godot/assets/audio/win.wav"></audio></div>
+
+<h2>3. Checklist</h2>
+<table><thead><tr><th>ID</th><th>Check</th><th>Expected</th><th>Result</th></tr></thead>
+<tbody><tr><td>A01</td><td>Select sound triggers once per selection</td><td>soft tick, no double trigger</td><td class="blank"></td></tr><tr><td>A02</td><td>Pour sound triggers once per legal move</td><td>liquid sweep, not a click</td><td class="blank"></td></tr><tr><td>A03</td><td>Invalid sound on illegal move</td><td>low thud, not harsh</td><td class="blank"></td></tr><tr><td>A04</td><td>Undo sound</td><td>short descending blip</td><td class="blank"></td></tr><tr><td>A05</td><td>Win sound</td><td>warm arpeggio, &lt;=1 s, not intrusive</td><td class="blank"></td></tr><tr><td>A06</td><td>UI click on navigation</td><td>quiet, consistent</td><td class="blank"></td></tr><tr><td>A07</td><td>Volume balance across the six</td><td>win/select audible; UI not louder</td><td class="blank"></td></tr><tr><td>A08</td><td>Gameplay vs menus consistency</td><td>same character, no jarring shift</td><td class="blank"></td></tr><tr><td>A09</td><td>No clipping at 100% volume</td><td>no crackle or distortion</td><td class="blank"></td></tr><tr><td>A10</td><td>No hiss/noise, especially pour</td><td>clean</td><td class="blank"></td></tr><tr><td>A11</td><td>Repetition fatigue (5x each)</td><td>not annoying</td><td class="blank"></td></tr><tr><td>A12</td><td>Enhances without dominating</td><td>can hear the game, not the SFX</td><td class="blank"></td></tr><tr><td>A13</td><td>Mute is immediate and persists after relaunch</td><td>silence everywhere</td><td class="blank"></td></tr><tr><td>A14</td><td>No audio after backgrounding</td><td>silence when the app is not focused</td><td class="blank"></td></tr></tbody></table>
+
+<h2>4. Verdict</h2>
+<p>Per sound: <code>PASS</code> or <code>FAIL</code> plus a note. If a sound
+fails, name the file, the trigger and the perceived problem (harsh, quiet, long,
+clipped, repetitive). Do not re-tune by guesswork; open a defect.</p>
+<p>Overall: <strong>&nbsp;</strong></p>
+</body></html>

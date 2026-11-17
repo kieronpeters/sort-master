@@ -94,8 +94,16 @@ switch (cmd) {
     break;
   }
   case 'move': {
-    const version = Number(rest[3] ?? 0);
-    const payload = { status: rest[1], position: 0, expectedVersion: version };
+    // move <id> <status> [position] [version]
+    // Accept the 3-argument form too, which is easy to type by mistake.
+    const hasPosition = rest.length >= 4;
+    const position = hasPosition ? Number(rest[2]) : 0;
+    const version = Number(hasPosition ? rest[3] : rest[2]);
+    if (!Number.isInteger(version) || version <= 0) {
+      process.stderr.write('expectedVersion must be a positive integer; pass it explicitly.\n');
+      process.exit(2);
+    }
+    const payload = { status: rest[1], position, expectedVersion: version };
     const r = await call('POST', `/tasks/${rest[0]}/move`, payload);
     out(r);
     if (r.status >= 300) process.exit(1);

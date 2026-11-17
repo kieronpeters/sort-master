@@ -61,6 +61,15 @@ func _run() -> void:
 	main._on_vessel_tapped(int(first["from"]))
 	await _frames(2)
 	main._on_vessel_tapped(int(first["to"]))
+	# Catch the pour mid-flight: the source tilt, the stream and the liquid
+	# rising in the destination all happen inside ~0.3 s.
+	await _frames(6)
+	await _shot("rc-pour-early")
+	await _frames(14)
+	await _shot("rc-pour-mid")
+	await _frames(16)
+	await _shot("rc-pour-late")
+	await _wait_pour()
 	await _settle()
 	await _shot("rc-transfer")
 
@@ -110,7 +119,16 @@ func _solve(level_index: int, solutions: Dictionary) -> void:
 		main._on_vessel_tapped(int(move["from"]))
 		await _frames(1)
 		main._on_vessel_tapped(int(move["to"]))
+		# input is locked while the vessel is pouring, so wait for it to finish
+		await _wait_pour()
 		await _frames(1)
+
+
+func _wait_pour() -> void:
+	var guard := 0
+	while main._pouring and guard < 400:
+		await process_frame
+		guard += 1
 
 
 func _frames(n: int) -> void:

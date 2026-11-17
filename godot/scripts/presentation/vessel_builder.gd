@@ -30,6 +30,40 @@ const GLYPHS := {
 
 const SYMBOL_WORLD_H := 0.040
 
+## One liquid band, for callers that need to build or extend a band outside
+## build() — the pour animation grows the receiving vessel's level this way.
+static func make_band(colour_id: String, index: int, capacity: int) -> MeshInstance3D:
+	var band_h: float = VesselMeshScript.capacity_height() / float(maxi(1, capacity))
+	var base_y: float = VesselMeshScript.LIQUID_BASE
+	var r: float = VesselMeshScript.liquid_radius()
+
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = r
+	mesh.bottom_radius = r
+	mesh.height = band_h
+	mesh.radial_segments = 32
+	mesh.rings = 1
+
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = _liquid_material(COLOURS.get(colour_id, Color.MAGENTA), index)
+	mi.position = Vector3(0, base_y + band_h * 0.5 + band_h * index, 0)
+	mi.set_meta("band_index", index)
+	mi.set_meta("band_h", band_h)
+	mi.set_meta("band_bottom", base_y + band_h * index)
+	mi.set_meta("band_centre", base_y + band_h * 0.5 + band_h * index)
+	return mi
+
+
+## How many liquid bands a built vessel currently shows.
+static func band_count(vessel: Node) -> int:
+	var n := 0
+	for child in vessel.get_children():
+		if child.has_meta("band_index"):
+			n += 1
+	return n
+
+
 static func build(contents: Array, capacity: int, selected: bool = false) -> Node3D:
 	var root := Node3D.new()
 	var band_h: float = VesselMeshScript.capacity_height() / float(capacity)
@@ -50,6 +84,11 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 		mi.mesh = mesh
 		mi.material_override = _liquid_material(colour, i)
 		mi.position = Vector3(0, base_y + band_h * 0.5 + band_h * i, 0)
+		# Tagged so the board can animate a band rising when liquid arrives.
+		mi.set_meta("band_index", i)
+		mi.set_meta("band_h", band_h)
+		mi.set_meta("band_bottom", base_y + band_h * i)
+		mi.set_meta("band_centre", base_y + band_h * 0.5 + band_h * i)
 		root.add_child(mi)
 
 		var symbol := Sprite3D.new()

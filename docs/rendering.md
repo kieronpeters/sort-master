@@ -123,3 +123,29 @@ Device frame-time remains unverified until the S23 Ultra pass.
 - **Win card moved up.** It is centred in the upper 70% of the screen with a
   0.58 scrim, so the solved vessels remain visible behind it.
 
+## 8. Pour animation
+
+A move is presentationally a four-stage tween in `board_3d.pour()`: the source
+lifts and travels to a hover position, tips to 62 degrees, pours, and returns.
+The beginning and end positions are tweened together so the vessel reads as one
+object moving, not a teleport.
+
+Two details that matter:
+
+- **The hover position is solved, not guessed.** The vessel rotates about its
+  base, so its mouth sits at `base + R(theta)*(0, h)`. Inverting that puts the
+  mouth exactly over the destination regardless of the tilt angle, instead of
+  eyeballing an offset and hoping the liquid lands in the tube.
+- **The pour moves liquid continuously.** The game state commits on the tap, but
+  the board still shows the pre-pour vessels, so the animation owns temporary
+  visuals: it drains the source's top bands and grows new bands in the
+  destination over the pour duration. Without that the liquid teleports when the
+  animation ends, which is the "sudden pop" a player notices immediately.
+
+The stream is a short tapered cylinder in the liquid colour, drawn in the XY
+plane. Giving it any z depth is a trap under the orthographic camera: the
+depth adds length that is invisible in the projection, so the stream renders as
+a long rod above the bottle.
+
+It is disabled headless, because the flow suite asserts the move counter one
+frame after a tap and must not wait for an animation.

@@ -46,6 +46,9 @@ var state = null
 var history: Array = []
 var selected := -1
 var moves := 0
+## True while the pour animation owns the board. Input is ignored until the
+## vessel is home; the game state has already committed by then.
+var _pouring := false
 var unlocked := 0
 var best: Dictionary = {}
 var load_errors: Array = []
@@ -684,8 +687,14 @@ func _on_hit_input(event: InputEvent, index: int) -> void:
 		_on_vessel_tapped(index)
 
 
+## The pour animation is presentation only, so headless runs (the test suites)
+## must not take it: the flow suite asserts the move counter one frame after a tap.
+func _animations_on() -> bool:
+	return DisplayServer.get_name() != "headless" and board_3d != null
+
+
 func _on_vessel_tapped(index: int) -> void:
-	if state == null or win_layer != null or modal_layer != null:
+	if state == null or win_layer != null or modal_layer != null or _pouring:
 		return
 
 	if selected == -1:
@@ -709,15 +718,28 @@ func _on_vessel_tapped(index: int) -> void:
 		return
 
 	if state.can_move(selected, index):
+		var from_i: int = selected
+		var poured_colour: String = state.top_colour(selected)
+		var poured_units: int = state.top_run(selected)
 		_push_history()
-		state.apply_move_in_place(selected, index)
+		state.apply_move_in_place(from_i, index)
 		moves += 1
 		selected = -1
 		audio.play("pour")
 		_status("")
-		_refresh()
-		if state.is_won():
-			_on_win()
+		if _animations_on():
+			# The board still shows the pre-pour vessels; rebuilding waits until
+			# the vessel has finished pouring and returned home.
+			_pouring = true
+			board_3d.pour(from_i, index, poured_units, poured_colour, func():
+				_pouring = false
+				_refresh()
+				if state != null and state.is_won():
+					_on_win())
+		else:
+			_refresh()
+			if state.is_won():
+				_on_win()
 		return
 
 	var reason := _move_error(selected, index)
@@ -749,6 +771,8 @@ func _push_history() -> void:
 
 
 func _on_undo() -> void:
+	if _pouring:
+		return
 	if history.is_empty():
 		_status("Nothing to undo.", P.MUTED)
 		return
@@ -761,6 +785,8 @@ func _on_undo() -> void:
 
 
 func _on_restart() -> void:
+	if _pouring:
+		return
 	if history.is_empty():
 		_start_level(level_index)
 		return

@@ -25,8 +25,10 @@ genuine gaps, each with the reason it is still open.
 
 ## Deliberate compromises
 
-- Pour and selection are animated in place, but there is no liquid "stream"
-  animation. Moves are instant and unambiguous.
+- Pouring is animated: the source vessel lifts out of its slot, carries its
+  liquid across, tips to 62° with its mouth solved over the target, pours with a
+  stream while the source drains and the destination rises, then returns. Input
+  is locked until it lands. Selection animates in place.
 - The board is a fixed five- or six-tube layout per level; there is no zoom.
 - `best` move counts are recorded but not shown on the level grid (only on the
   completion card), to keep the grid legible.

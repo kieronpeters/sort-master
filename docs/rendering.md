@@ -66,6 +66,24 @@ Two traps worth recording:
 The lathe is built with the outer wall only (`build_glass(false)`). A double
 wall doubled the layer count and made the glass milky.
 
+### 4.1 The liquid shader
+
+`assets/shaders/liquid.gdshader` shades one band. It is still unshaded — the
+authored palette hex remains the base colour and the middle of the band is left
+at full brightness, so sampled colours match the palette — but it now carries the
+cylindrical shading that flat albedo had thrown away.
+
+The lateral coordinate comes from the vertex's **model-space x**, deliberately
+not from `NORMAL`. On a cylinder seen face-on the normal only turns sharply at
+the silhouette, so a normal-driven ramp compresses into the outer few pixels and
+is invisible; that was measured, not assumed, by rendering the coordinate
+directly as colour. Model-space x maps linearly across the width and gives a
+readable falloff.
+
+Per-band shaping: `edge_dim` 0.52 with `edge_power` 0.62 for the sides,
+`bottom_dim` 0.14 and `top_light` 0.08 for the vertical gradient, and a soft
+`sheen` at 0.13 to catch light off centre. Liquid stays the brightest thing on
+screen; nothing here adds light beyond the rim.
 ## 5. Fallback
 
 `main.gd` has `USE_3D`. Setting it to `false` builds the original 2D
@@ -78,7 +96,7 @@ a renderer problem on a future device is a one-line switch, not a rewrite.
 - Glass is one unshaded draw per tube with alpha, no refraction.
 - The garden is a single fullscreen quad with a procedural shader; no textures.
 - All liquid bands are unshaded, so the palette stays exact and the material
-  cost is minimal.
+  cost is minimal. Each band is one `liquid.gdshader` draw (see Â§4.1).
 - The SubViewport renders at the design resolution (1080 Ã— 1920), not the
   physical panel resolution; this is intentional for consistent cost.
 

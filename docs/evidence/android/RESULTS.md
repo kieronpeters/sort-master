@@ -43,18 +43,26 @@ adb shell monkey -p com.prismgarden.sortmaster -c android.intent.category.LAUNCH
 ## 3. Renderer caveat — important
 
 The shipping build uses the **Vulkan "mobile"** renderer. The emulator **cannot
-present a Vulkan swapchain** for this app; with both `-gpu swiftshader_indirect`
-and `-gpu host` the engine initialises and then repeats:
+present a Vulkan swapchain** for this app. Three GPU backends were tried:
+
+| Emulator GPU mode | Vulkan device selected | Outcome |
+|---|---|---|
+| `swiftshader_indirect` | SwiftShader | initialises, black screen, `Couldn't present to Vulkan queue (VkResult error 5)` on every frame |
+| `host` | NVIDIA RTX 3050 (passthrough) | same failure |
+| `angle_indirect` | llvmpipe (software Vulkan) | initialises, then the process exits (`OnDestroy`) before any frame |
+
+Representative log:
 
 ```
-Vulkan 1.2.0 / 1.3.0 - Forward Mobile - Using Device #0: SwiftShader / NVIDIA GeForce RTX 3050
+Vulkan 1.2.0 / 1.3.0 - Forward Mobile - Using Device #0: <SwiftShader | RTX 3050 | llvmpipe>
 ERROR: Couldn't present to Vulkan queue (VkResult error 5).
    at: command_queue_execute_and_present (drivers/vulkan/rendering_device_driver_vulkan.cpp:3359)
 ```
 
-The screen stays black. This is an emulator graphics limitation, not evidence of
-an app defect — but it means **the shipped Vulkan renderer path is still
-unvalidated on any device**.
+This is an emulator graphics limitation, not evidence of an app defect — but it
+means **the shipped Vulkan renderer path is still unvalidated on any device**,
+and no emulator configuration tried here can close that gap. Only the S23 Ultra
+(or any real Android device) can.
 
 The pass below therefore ran with Vulkan disabled on the emulator
 (`-feature -Vulkan`), so Godot fell back to the OpenGL ES 3.1 **Compatibility**

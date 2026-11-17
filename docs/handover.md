@@ -105,7 +105,7 @@ Use the file-read tool or quoted paths.
 
 **API base:** `https://flowquery.workstack.workers.dev/api/v1/agent`
 **Board:** `brd_BGCJBCQX24Q0JHZGJ6D57DZZ5M`
-**Token:** `C:\Users\Asus\source\repos\FlowQuery\.agent-token`
+**Token:** supplied via the `FLOWQUERY_TOKEN_FILE` environment variable (never committed)
 
 Never print, log or commit the token. If it is missing, ask the owner.
 
@@ -113,7 +113,7 @@ Never print, log or commit the token. If it is missing, ask the owner.
 
 ```powershell
 $Base = 'https://flowquery.workstack.workers.dev/api/v1/agent'
-$T = (Get-Content -LiteralPath 'C:\Users\Asus\source\repos\FlowQuery\.agent-token' -Raw).Trim()
+$T = (Get-Content -LiteralPath $env:FLOWQUERY_TOKEN_FILE -Raw).Trim()
 $H = @{ Authorization = "Bearer $T" }
 $board = Invoke-RestMethod -Uri "$Base/board" -Headers $H
 $review = Invoke-RestMethod -Uri "$Base/tasks?status=review&limit=100" -Headers $H

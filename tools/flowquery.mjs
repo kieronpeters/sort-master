@@ -14,9 +14,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const BASE = 'https://flowquery.workstack.workers.dev/api/v1/agent';
-const TOKEN_FILE = 'C:\\Users\\Asus\\source\\repos\\FlowQuery\\.agent-token';
+// The token file path is supplied by the environment, never committed: this
+// client is internal release tooling and the path is machine-specific.
+const TOKEN_FILE = process.env.FLOWQUERY_TOKEN_FILE ?? '';
 
 function token() {
+  if (!TOKEN_FILE) {
+    throw new Error('Set FLOWQUERY_TOKEN_FILE to the agent token file path.');
+  }
   const raw = fs.readFileSync(TOKEN_FILE, 'utf8').trim();
   if (!raw) throw new Error('Agent token file is empty.');
   return raw;

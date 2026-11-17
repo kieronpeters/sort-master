@@ -29,7 +29,7 @@ func _run() -> void:
 
 	var solutions = JSON.parse_string(FileAccess.get_file_as_string("res://tests/solutions.json"))
 	# 1-10 the tutorial ramp, 16 the palette worst case, 25 six colours, 30 eight tubes.
-	var subset := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 25, 30]
+	var subset := range(1, 31)
 	var milestone := [1, 5, 16, 25, 30]
 	var passed := 0
 

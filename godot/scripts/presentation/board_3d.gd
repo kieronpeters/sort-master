@@ -210,8 +210,20 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 	t.parallel().tween_property(src, "rotation:z", theta, POUR_TRAVEL) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
+	# Anchor the stream at the lip, not the vessel's axis. The pouring lip sits at
+	# radius 0.045, height 0.474 in vessel space; rotating it by theta puts the
+	# stream where the liquid would actually leave the spout instead of appearing
+	# to come out of the dark bore at the centre.
+	var lip_local := Vector2(0.045, 0.474)
+	var lip := Vector3(
+		hover.x + lip_local.x * cos(theta) - lip_local.y * sin(theta),
+		hover.y + lip_local.x * sin(theta) + lip_local.y * cos(theta),
+		0.05)
+	# Land the stream on the liquid surface inside the receiving tube.
+	var surface_y := base_y + 0.40
+
 	t.tween_callback(func():
-		_pour_stream = _make_stream(hue, Vector3(mouth.x, mouth.y, 0.05), Vector3(dst_x, base_y + 0.47, 0.05))
+		_pour_stream = _make_stream(hue, lip, Vector3(dst_x, surface_y, 0.05))
 		# The source empties from the top down while the destination rises, so the
 		# liquid moves continuously instead of teleporting when the pour ends.
 		for k in count:
@@ -274,10 +286,12 @@ func _make_stream(hue: Color, from: Vector3, to: Vector3) -> MeshInstance3D:
 	var length := maxf(0.02, delta.length())
 
 	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.0085
-	mesh.bottom_radius = 0.0045
+	# Tapered: wide where it leaves the spout, narrower as it falls. A uniform
+	# cylinder reads as a stick no matter how thick it is.
+	mesh.top_radius = 0.0125
+	mesh.bottom_radius = 0.0038
 	mesh.height = length
-	mesh.radial_segments = 10
+	mesh.radial_segments = 14
 	mesh.rings = 1
 
 	var mat := StandardMaterial3D.new()
@@ -294,6 +308,25 @@ func _make_stream(hue: Color, from: Vector3, to: Vector3) -> MeshInstance3D:
 	mi.rotation.z = atan2(delta.y, delta.x) - PI * 0.5
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_vessels.add_child(mi)
+
+	# A level splash where the stream meets the surface. Parented to the stream so
+	# it fades out with it, and counter-rotated to stay flat in world space.
+	var splash := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.028
+	disc.bottom_radius = 0.028
+	disc.height = 0.005
+	disc.radial_segments = 18
+	splash.mesh = disc
+	var smat := StandardMaterial3D.new()
+	smat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	smat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	smat.albedo_color = Color(hue.r, hue.g, hue.b, 0.55)
+	splash.material_override = smat
+	splash.position = Vector3(0.0, -length * 0.5, 0.0)
+	splash.rotation.z = -mi.rotation.z
+	mi.add_child(splash)
+
 	return mi
 
 func _layout_vessels() -> void:

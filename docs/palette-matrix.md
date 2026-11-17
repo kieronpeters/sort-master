@@ -60,6 +60,37 @@ can be run as a regression tripwire in future level authoring.
 A hard validator guard cannot be added at 1.0: it would reject the 13 accepted
 levels. It belongs with the re-authoring work in 1.1.
 
+### 2.1 Rendered separation — first measurement (17 Nov 2026)
+
+Every figure above is measured from the authored hexes. What a player sees has
+been through the linear tonemap and `liquid.gdshader`, so it is not the same.
+
+`tools/measure_rendered_palette.py` samples an evidence screenshot and recomputes
+the separation from the pixels. On the Android emulator capture of level 16
+(`docs/evidence/android/d15-level16-5tubes.png`):
+
+| Pair | Rendered | Normal ΔE | Deuteranopia ΔE |
+|---|---|---:|---:|
+| aqua / violet | `#3EBAB4` vs `#B18CD9` | 37.2 | **11.6** |
+| aqua / violet (authored) | `#46D8D0` vs `#D0A2FF` | 40.1 | 12.9 |
+
+The rendered pair is **closer than the authored pair**, and 11.6 is below the
+plan's forbidden 12.0 threshold where the authored 12.9 is above it.
+
+Read this with care before acting on it:
+
+- it was captured on the **OpenGL ES 3.1 Compatibility fallback**, not the
+  shipped Vulkan mobile renderer;
+- the sample is a single column through each vessel centre, and the liquid
+  shader deliberately darkens toward the edges, so the mean is crude;
+- the direction of the effect is the meaningful part, not the exact number.
+
+Conclusion recorded for 1.1: the mismatch between authored and rendered
+separation is real enough to warrant re-measuring on the shipped renderer and on
+the target device before the palette exception is re-affirmed. It does not change
+the 1.0 decision, which is based on the always-on symbol cue rather than on the
+pair clearing the threshold.
+
 ## 3. Rendering fidelity
 
 The renderer was switched from `TONE_MAPPER_FILMIC` to linear tone mapping

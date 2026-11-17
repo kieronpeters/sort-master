@@ -9,7 +9,7 @@ device pass are complete.
 | Artifact | Purpose | Size | SHA-256 | Signing |
 |---|---|---|---:|---|
 | `builds/sort-master-rc.apk` | release candidate | 27.18 MB | `C097E81F5298FB990B9716CF65842816490E5B02DC70F909E64A65E3DFDBD22B` | debug key, **debuggable** |
-| `builds/sort-master.apk` | development build with the F1 overlay | 27.22 MB | `D29CD97932C6D270A946197DE9BF79E9823A2717CC5862C2E6CC1306572DE37B` | debug key |
+| `builds/sort-master.apk` | development build with the F1 overlay | 27.22 MB | not pinned — rebuilt on every developer run and not byte-reproducible | debug key |
 
 Both are arm64-v8a only, **portrait-locked**, ETC2/ASTC enabled, mobile
 renderer. Version `0.1.0`, version code `2`.

@@ -455,7 +455,7 @@ func _show_credits() -> void:
 	_credits_section(body, "Artwork",
 		"Vessel meshes, liquid symbols, interface icons, the garden backdrop and the application icon are original work generated inside this repository. No third-party artwork is included.")
 	_credits_section(body, "Audio",
-		"All sound effects are synthesised from scratch by tools/make_audio.ps1 and are dedicated to the public domain (CC0 1.0). No sample libraries are used.")
+		"Every sound effect and all three music tracks are synthesised from scratch by the tools in this repository and dedicated to the public domain (CC0 1.0). No sample libraries, purchased audio or licensed music are used anywhere.")
 	_credits_section(body, "Privacy",
 		"Offline by design. No accounts, no analytics, no advertising, no purchases. Progress is a single local save file.")
 	_credits_section(body, "Licence texts",

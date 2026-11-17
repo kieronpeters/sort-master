@@ -31,6 +31,21 @@ var muted := false
 var _streams := {}
 var _players: Array = []
 
+## Background music: three generated tracks played in sequence, reshuffled each
+## cycle, so a session does not sit on one looping clip. They are far quieter
+## than the effects so the liquid and interface sounds stay the loudest thing
+## on screen. All three are original and CC0 (tools/make_music.py).
+const MUSIC_TRACKS := [
+	"res://assets/audio/music/amber_greenhouse.wav",
+	"res://assets/audio/music/still_water.wav",
+	"res://assets/audio/music/morning_prism.wav",
+]
+const MUSIC_DB := -14.0
+
+var _music: AudioStreamPlayer = null
+var _music_order: Array = []
+var _music_index := 0
+
 
 func _ready() -> void:
 	for key in SOUND_PATHS:
@@ -43,6 +58,49 @@ func _ready() -> void:
 		player.volume_db = BASE_VOLUME_DB
 		add_child(player)
 		_players.append(player)
+	_setup_music()
+
+
+func _setup_music() -> void:
+	# Headless runs (the test suites) must stay silent and cheap.
+	if DisplayServer.get_name() == "headless":
+		return
+	for path in MUSIC_TRACKS:
+		if ResourceLoader.exists(path):
+			_music_order.append(path)
+	if _music_order.is_empty():
+		return
+	_shuffle_music()
+	_music = AudioStreamPlayer.new()
+	_music.volume_db = MUSIC_DB
+	_music.finished.connect(_next_track)
+	add_child(_music)
+	_start_track()
+
+
+func _shuffle_music() -> void:
+	for i in range(_music_order.size() - 1, 0, -1):
+		var j := randi() % (i + 1)
+		var tmp = _music_order[i]
+		_music_order[i] = _music_order[j]
+		_music_order[j] = tmp
+
+
+func _start_track() -> void:
+	if _music == null or muted or _music_order.is_empty():
+		return
+	_music.stream = load(_music_order[_music_index % _music_order.size()])
+	_music.play()
+
+
+## Next track starts the instant the previous ends, so the bed is continuous.
+func _next_track() -> void:
+	if _music == null or _music_order.is_empty():
+		return
+	_music_index += 1
+	if _music_index % _music_order.size() == 0:
+		_shuffle_music()   # a fresh order each time through the set
+	_start_track()
 
 
 func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:
@@ -65,3 +123,7 @@ func set_muted(value: bool) -> void:
 	if muted:
 		for p in _players:
 			p.stop()
+		if _music != null:
+			_music.stop()
+	else:
+		_start_track()

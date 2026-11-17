@@ -43,9 +43,31 @@ script is deterministic: re-running it reproduces byte-identical files.
 
 Licence texts: `licences/CC0-1.0.txt` and `licences/GODOT-MIT.txt`.
 
+### Music
+
+Three background tracks were added on 17 November 2026. They are **original,
+generated from first principles** by `tools/make_music.py` (sine pads, decaying
+bells and a filtered noise bed) and are dedicated to the public domain under
+**CC0 1.0**. No purchased music, sample library or licensed track is used, so
+there is no royalty obligation and no attribution requirement.
+
+They play in sequence and are reshuffled each cycle, so a session does not loop
+one clip. 16 kHz mono, 75 s each — **225 s (3.8 minutes) before anything
+repeats**.
+
+| File | Mood | Duration | Peak | Source | Licence |
+|---|---|---:|---:|---|---|
+| `amber_greenhouse.wav` | D minor pentatonic, slow pads | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
+| `still_water.wav` | A minor, wider voicing, slower | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
+| `morning_prism.wav` | G major, brighter | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
+
+The bed is deliberately quiet (RMS ≈ −29 dBFS, played at −14 dB) so the liquid
+and interface sounds stay the loudest thing on screen.
+
 **Outstanding:** the sounds have not been auditioned by a human. The
 measurements show they are short and quiet, but "tone reviewed" cannot be
-claimed until someone listens on a phone speaker. No sample libraries, paid
+claimed until someone listens on a phone speaker. Neither has the music; a
+generated track can measure clean and still be dull. No sample libraries, paid
 sound packs or attribution obligations are involved.
 
 ## Data and privacy

@@ -28,13 +28,14 @@ uniform float edge_dim : hint_range(0.0, 1.0) = 0.34;
 uniform float edge_power : hint_range(0.2, 4.0) = 0.85;
 
 // Vertical shaping within the band.
-uniform float top_light : hint_range(0.0, 0.5) = 0.06;
-uniform float bottom_dim : hint_range(0.0, 0.5) = 0.10;
+uniform float top_light : hint_range(0.0, 0.5) = 0.0;
+uniform float bottom_dim : hint_range(0.0, 0.5) = 0.0;
 
-// Seam. Where two bands meet, the join reads as a hard printed line. A narrow
-// darkening at each band's top and bottom edge turns it into a soft crease, which
-// is what makes stacked bands read as separate volumes of liquid.
-uniform float seam_dim : hint_range(0.0, 0.6) = 0.20;
+// Seam. Zeroed deliberately: bands are drawn as separate cylinders, and any
+// darkening at their top and bottom edges turns a stack of one colour into
+// visible squares. Real liquid in a tube is one continuous body, so the bands
+// must meet with no line between them. Left as a parameter for future use.
+uniform float seam_dim : hint_range(0.0, 0.6) = 0.0;
 uniform float seam_width : hint_range(0.01, 0.35) = 0.085;
 
 // A soft vertical sheen on the camera-facing side, like light through glass.

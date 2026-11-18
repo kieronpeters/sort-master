@@ -49,9 +49,16 @@ function A { return (& $adb @dev @args 2>&1 | Out-String).Trim() }
 function Shot {
     param([string]$name)
     $local = Join-Path $outDir "$name.png"
-    & $adb @dev shell screencap -p /sdcard/dp.png 2>&1 | Out-Null
-    & $adb @dev pull /sdcard/dp.png $local 2>&1 | Out-Null
-    return $local
+    if (Test-Path $local) { Remove-Item $local -Force -ErrorAction SilentlyContinue }
+    # Wireless ADB is flaky: a pull can fail or return before the file lands.
+    # Retry, and only return a path that actually exists on disk.
+    for ($attempt = 1; $attempt -le 4; $attempt++) {
+        & $adb @dev shell screencap -p /sdcard/dp.png 2>&1 | Out-Null
+        & $adb @dev pull /sdcard/dp.png $local 2>&1 | Out-Null
+        if ((Test-Path $local) -and ((Get-Item $local).Length -gt 2000)) { return $local }
+        Start-Sleep -Seconds 2
+    }
+    return $null
 }
 
 function Lit {
@@ -103,6 +110,22 @@ Check 'installs on the device' ($install -match 'Success') ($install -split "`n"
 & $adb @dev logcat -c 2>&1 | Out-Null
 A shell am force-stop $pkg | Out-Null
 A shell monkey -p $pkg -c android.intent.category.LAUNCHER 1 | Out-Null
+
+# A dozing phone screenshots as pure black, and calling that "does not render"
+# is a wrong inference about the app. Wake it and say plainly if it is locked.
+A shell input keyevent KEYCODE_WAKEUP | Out-Null
+Start-Sleep -Seconds 3
+$wakeState = A shell dumpsys power
+$focusLine = (A shell dumpsys window) -split "`n" | Where-Object { $_ -match 'mCurrentFocus' } | Select-Object -First 1
+$isAwake = $wakeState -match 'mWakefulness=Awake'
+$locked = $focusLine -match 'NotificationShade|StatusBar|Keyguard'
+Check 'phone awake and unlocked' ($isAwake -and -not $locked) $(if (-not $isAwake) { 'screen dozing' } elseif ($locked) { 'lock screen on top' } else { "$focusLine".Trim() })
+if (-not ($isAwake -and -not $locked)) {
+    Write-Host ''
+    Write-Host 'Unlock the phone and re-run: a locked screen screenshots as black and'
+    Write-Host 'would masquerade as a rendering failure. Developer options > Stay awake.'
+    exit 3
+}
 
 # cold start can be slow on a real phone too; poll rather than sleep
 $home = Shot 'd01-launch'

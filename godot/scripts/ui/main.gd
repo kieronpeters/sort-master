@@ -93,6 +93,8 @@ func _ready() -> void:
 	audio.muted = bool(data.get("muted", false))
 	audio.set_music_volume(float(data.get("music", 1.0)))
 	audio.set_sfx_volume(float(data.get("sfx", 1.0)))
+	audio.set_music_muted(bool(data.get("music_muted", false)))
+	audio.set_sfx_muted(bool(data.get("sfx_muted", false)))
 	add_child(audio)
 	_refresh_safe_area()
 	get_viewport().size_changed.connect(_refresh_safe_area)
@@ -128,6 +130,8 @@ func _save_progress() -> void:
 		"muted": audio.muted if audio else false,
 		"music": audio.music_volume if audio else 1.0,
 		"sfx": audio.sfx_volume if audio else 1.0,
+		"music_muted": audio.music_muted if audio else false,
+		"sfx_muted": audio.sfx_muted if audio else false,
 	})
 	if not ok:
 		push_warning("Progress save failed; the session continues in memory.")
@@ -509,10 +513,19 @@ func _show_settings() -> void:
 
 	col.add_child(UIKit.label("Settings", 46, P.TEXT))
 	col.add_child(UIKit.label("Audio", 24, P.ACCENT))
-	col.add_child(_volume_row("Music", audio.music_volume, func(v): audio.set_music_volume(v)))
-	col.add_child(_volume_row("Sound", audio.sfx_volume, func(v):
-		audio.set_sfx_volume(v)
-		audio.play("ui")))
+	col.add_child(_volume_row("Music", audio.music_volume, audio.music_muted,
+		func(v): audio.set_music_volume(v),
+		func(m):
+			audio.set_music_muted(m)
+			_save_progress()))
+	col.add_child(_volume_row("Sound", audio.sfx_volume, audio.sfx_muted,
+		func(v):
+			audio.set_sfx_volume(v)
+			audio.play("ui"),
+		func(m):
+			audio.set_sfx_muted(m)
+			audio.play("ui")
+			_save_progress()))
 	col.add_child(UIKit.label("Progress is stored on this device only.", 22, P.MUTED))
 	col.add_child(UIKit.spacer(6))
 
@@ -523,17 +536,28 @@ func _show_settings() -> void:
 
 ## One labelled 0-100 % slider. Writes through on every change so a player who
 ## backs out immediately still keeps the level they set.
-func _volume_row(title: String, value: float, on_change: Callable) -> Control:
+## One labelled channel: slider 0-200 % and its own mute. The range runs past
+## 100 % because the phone speaker at maximum was too quiet in testing.
+func _volume_row(title: String, value: float, muted: bool, on_change: Callable, on_mute: Callable) -> Control:
 	var row := VBoxContainer.new()
 	row.add_theme_constant_override("separation", 4)
 
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 16)
+	row.add_child(header)
+
 	var label := UIKit.label("%s    %d%%" % [title, int(round(value * 100.0))], 28, P.TEXT)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	row.add_child(label)
+	header.add_child(label)
+
+	var mute := UIKit.text_button("Unmute" if muted else "Mute", 24)
+	mute.custom_minimum_size = Vector2(150, 48)
+	header.add_child(mute)
 
 	var slider := HSlider.new()
 	slider.min_value = 0.0
-	slider.max_value = 100.0
+	slider.max_value = 200.0
 	slider.step = 5.0
 	slider.value = value * 100.0
 	slider.custom_minimum_size = Vector2(0, 60)
@@ -542,6 +566,12 @@ func _volume_row(title: String, value: float, on_change: Callable) -> Control:
 		label.text = "%s    %d%%" % [title, int(v)]
 		_save_progress())
 	row.add_child(slider)
+
+	mute.pressed.connect(func():
+		# flip the stored flag, then reflect it in the button
+		var now_muted: bool = mute.text == "Mute"
+		on_mute.call(now_muted)
+		mute.text = "Unmute" if now_muted else "Mute")
 	return row
 
 

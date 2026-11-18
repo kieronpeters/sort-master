@@ -12,7 +12,7 @@ extends RefCounted
 const DEFAULT_PATH := "user://progress.json"
 
 static func default_data() -> Dictionary:
-	return {"unlocked": 0, "best": {}, "muted": false, "music": 1.0, "sfx": 1.0}
+	return {"unlocked": 0, "best": {}, "muted": false, "music": 1.0, "sfx": 1.0, "music_muted": false, "sfx_muted": false}
 
 static func load_data(path: String = DEFAULT_PATH) -> Dictionary:
 	var data := default_data()
@@ -32,10 +32,16 @@ static func load_data(path: String = DEFAULT_PATH) -> Dictionary:
 
 	# Separate music and effects levels, 0.0-1.0. Older saves without them keep
 	# the defaults, so no migration step is needed.
+	# 0.0 - 2.0: the top half of the range is a boost, because the phone speaker
+	# at 100 % was too quiet in testing.
 	for key in ["music", "sfx"]:
 		var level = parsed.get(key, 1.0)
 		if level is int or level is float:
-			data[key] = clampf(float(level), 0.0, 1.0)
+			data[key] = clampf(float(level), 0.0, 2.0)
+	for key in ["music_muted", "sfx_muted"]:
+		var flag = parsed.get(key, false)
+		if flag is bool:
+			data[key] = flag
 
 	var best = parsed.get("best", {})
 	if best is Dictionary:
@@ -62,8 +68,10 @@ static func save_data(data: Dictionary, path: String = DEFAULT_PATH) -> bool:
 		"unlocked": int(data.get("unlocked", 0)),
 		"best": clean_best,
 		"muted": bool(data.get("muted", false)),
-		"music": clampf(float(data.get("music", 1.0)), 0.0, 1.0),
-		"sfx": clampf(float(data.get("sfx", 1.0)), 0.0, 1.0),
+		"music": clampf(float(data.get("music", 1.0)), 0.0, 2.0),
+		"sfx": clampf(float(data.get("sfx", 1.0)), 0.0, 2.0),
+		"music_muted": bool(data.get("music_muted", false)),
+		"sfx_muted": bool(data.get("sfx_muted", false)),
 	}))
 	f.close()
 

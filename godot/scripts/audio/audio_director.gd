@@ -33,6 +33,11 @@ var muted := false
 ## designed and 0.5 halves it.
 var music_volume := 1.0
 var sfx_volume := 1.0
+## Separate from the global mute: a player may want the game silent but the music
+## on, or the reverse. The phone speaker measured quiet, so the range runs to 2.0
+## (+6 dB over the authored level) rather than stopping at 1.0.
+var music_muted := false
+var sfx_muted := false
 
 var _streams := {}
 var _players: Array = []
@@ -93,7 +98,7 @@ func _shuffle_music() -> void:
 
 
 func _start_track() -> void:
-	if _music == null or muted or _music_order.is_empty():
+	if _music == null or muted or music_muted or _music_order.is_empty():
 		return
 	_music.stream = load(_music_order[_music_index % _music_order.size()])
 	_music.play()
@@ -110,7 +115,7 @@ func _next_track() -> void:
 
 
 func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:
-	if muted or not _streams.has(sound):
+	if muted or sfx_muted or not _streams.has(sound):
 		return
 	var player: AudioStreamPlayer = null
 	for p in _players:
@@ -127,17 +132,34 @@ func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:
 ## 1.0 keeps the authored level; 0.0 is silent. linear_to_db(0) is -inf, so the
 ## floor keeps it finite and lets the player actually stop.
 static func _volume_db(v: float) -> float:
-	return linear_to_db(maxf(0.0001, clampf(v, 0.0, 1.0)))
+	return linear_to_db(maxf(0.0001, clampf(v, 0.0, 2.0)))
 
 
 func set_music_volume(v: float) -> void:
-	music_volume = clampf(v, 0.0, 1.0)
+	music_volume = clampf(v, 0.0, 2.0)
 	if _music != null:
 		_music.volume_db = MUSIC_DB + _volume_db(music_volume)
 
 
 func set_sfx_volume(v: float) -> void:
-	sfx_volume = clampf(v, 0.0, 1.0)
+	sfx_volume = clampf(v, 0.0, 2.0)
+
+
+func set_music_muted(value: bool) -> void:
+	music_muted = value
+	if _music == null:
+		return
+	if music_muted:
+		_music.stop()
+	else:
+		_start_track()
+
+
+func set_sfx_muted(value: bool) -> void:
+	sfx_muted = value
+	if sfx_muted:
+		for p in _players:
+			p.stop()
 
 
 func set_muted(value: bool) -> void:

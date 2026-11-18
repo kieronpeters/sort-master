@@ -146,9 +146,19 @@ try {
     $focus = (& $adb shell dumpsys window 2>&1 | Select-String 'mCurrentFocus' | Select-Object -First 1).Line
     Check 'app is foreground' ("$focus" -match [regex]::Escape($pkg)) ("$focus".Trim())
 
+    # Cold starts on the emulator spend several seconds compiling shaders, so a
+    # fixed sleep either flakes or hides a real blank frame. Poll instead, and
+    # report how long the first usable frame took.
     $homeShot = Shot 'home'
     $lit = Stat 'nonblack' @($homeShot)
-    Check 'first frame is not blank' ($lit -ge 0.05) ("lit fraction $lit")
+    $waited = 15
+    while ($lit -lt 0.05 -and $waited -lt 90) {
+        Start-Sleep -Seconds 5
+        $waited += 5
+        $homeShot = Shot 'home'
+        $lit = Stat 'nonblack' @($homeShot)
+    }
+    Check 'first frame is not blank' ($lit -ge 0.05) ("lit fraction $lit after ${waited}s")
 
     # The primary button sits mid-screen, but its exact y depends on the saved
     # progress ("Begin" vs "Continue - Level N"), so try the primary then the

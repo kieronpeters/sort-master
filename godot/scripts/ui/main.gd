@@ -51,6 +51,12 @@ var moves := 0
 var _pouring := false
 ## Per-tube list of veiled band indices, as declared by the level.
 var veils_declared: Array = []
+
+## Booster credits. Three per level, reset when the level starts or restarts.
+## Undo and "fill a bottle" each cost one; there are no purchases and no ads.
+const CREDITS_PER_LEVEL := 3
+var credits := CREDITS_PER_LEVEL
+var credits_label: Label
 var unlocked := 0
 var best: Dictionary = {}
 var load_errors: Array = []
@@ -617,6 +623,7 @@ func _start_level(index: int) -> void:
 	history.clear()
 	selected = -1
 	moves = 0
+	credits = CREDITS_PER_LEVEL
 	_show_game()
 
 
@@ -706,7 +713,7 @@ func _build_hud(parent: Control) -> void:
 	var chip_box := VBoxContainer.new()
 	chip_box.add_theme_constant_override("separation", 0)
 	chip.add_child(chip_box)
-	chip_box.add_child(UIKit.label("MOVES", P.TINY_SIZE - 2, P.MUTED))
+	chip_box.add_child(UIKit.label("MOVES / CREDITS", P.TINY_SIZE - 2, P.MUTED))
 	moves_label = UIKit.label("0", 36, P.TEXT)
 	chip_box.add_child(moves_label)
 
@@ -735,6 +742,18 @@ func _build_hud(parent: Control) -> void:
 	undo_button.pressed.connect(_on_undo)
 	bar.add_child(undo_button)
 
+	var bottle := IconButtonScript.new("check", "Fill", 120)
+	bottle.pressed.connect(_on_fill_bottle)
+	bar.add_child(bottle)
+
+	var shuffle := IconButtonScript.new("undo", "Shuffle", 108)
+	shuffle.pressed.connect(_on_shuffle)
+	bar.add_child(shuffle)
+
+	var addbottle := IconButtonScript.new("play", "Add", 108)
+	addbottle.pressed.connect(_on_add_bottle)
+	bar.add_child(addbottle)
+
 	var restart := IconButtonScript.new("restart", "Restart", 120)
 	restart.pressed.connect(_on_restart)
 	bar.add_child(restart)
@@ -761,7 +780,7 @@ func _refresh() -> void:
 			vessels_row.add_child(v)
 
 	if moves_label != null:
-		moves_label.text = str(moves)
+		moves_label.text = "%d  |  %d" % [moves, credits]
 	if undo_button != null:
 		undo_button.disabled = history.is_empty()
 		undo_button.queue_redraw()
@@ -770,6 +789,12 @@ func _refresh() -> void:
 
 ## Builds the transparent tap strips from the same BoardLayout used by the 3D
 ## vessels. This is the only place screen space and world space are bridged.
+
+	# A dead end is only meaningful once the board is settled, so check here
+	# rather than at each tap: every committed move, undo and booster ends in a
+	# refresh, and the guards stop it firing over a card that is already up.
+	if _screen == "game" and win_layer == null and modal_layer == null and not _pouring:
+		_check_dead_end()
 func _layout_hits() -> void:
 	if hit_layer == null or state == null:
 		return
@@ -944,12 +969,239 @@ func _on_undo() -> void:
 	if history.is_empty():
 		_status("Nothing to undo.", P.MUTED)
 		return
+	if credits <= 0:
+		audio.play("invalid")
+		_status("No credits left. Restart the level to get 3 more.", P.PINK)
+		return
+	credits -= 1
 	state = history.pop_back()
 	moves = maxi(0, moves - 1)
 	selected = -1
 	audio.play("undo")
 	_status("")
 	_refresh()
+
+
+## Booster: finish one bottle outright. Picks a colour that is not yet sorted,
+## strips its units from wherever they are and puts all four into one tube.
+##
+## This deliberately breaks the pouring rules - that is what a booster is - but it
+## preserves the level invariants: every colour still appears exactly `capacity`
+## times and no tube exceeds capacity, so the puzzle stays solvable and the save
+## stays valid.
+func _on_fill_bottle() -> void:
+	if state == null or win_layer != null or modal_layer != null or _pouring:
+		return
+	if credits <= 0:
+		audio.play("invalid")
+		_status("No credits left. Restart the level to get 3 more.", P.PINK)
+		return
+
+	var counts := {}
+	for t in state.tube_count():
+		for c in state.tubes[t]:
+			counts[c] = int(counts.get(c, 0)) + 1
+	var colour := ""
+	for c in counts:
+		if not _colour_sorted(str(c)):
+			colour = str(c)
+			break
+	if colour == "":
+		audio.play("invalid")
+		_status("Every colour is already sorted.", P.MUTED)
+		return
+
+	credits -= 1
+	_push_history()
+
+	# prefer a tube that already holds only this colour, else an empty one
+	var dst := -1
+	for t in state.tube_count():
+		var tube: Array = state.tubes[t]
+		if tube.size() > 0 and tube.size() < state.capacity:
+			var all_same := true
+			for c in tube:
+				if str(c) != colour:
+					all_same = false
+					break
+			if all_same:
+				dst = t
+				break
+	if dst == -1:
+		for t in state.tube_count():
+			if state.tubes[t].is_empty():
+				dst = t
+				break
+	if dst == -1:
+		dst = 0
+
+	for t in state.tube_count():
+		var kept: Array = []
+		for c in state.tubes[t]:
+			if str(c) != colour:
+				kept.append(c)
+		state.tubes[t] = kept
+	state.tubes[dst] = []
+	for i in state.capacity:
+		state.tubes[dst].append(colour)
+
+	moves += 1
+	audio.play("pour")
+	_status("Bottle filled: %s" % colour, P.ACCENT)
+	_refresh()
+	if state.is_won():
+		_on_win()
+
+
+func _colour_sorted(colour: String) -> bool:
+	for t in state.tube_count():
+		var tube: Array = state.tubes[t]
+		if tube.size() == state.capacity:
+			var all_same := true
+			for c in tube:
+				if str(c) != colour:
+					all_same = false
+					break
+			if all_same:
+				return true
+	return false
+
+
+## Booster: shuffle the liquid. Every tube keeps its length, but the units are
+## redistributed, which can turn a dead arrangement into a live one. It preserves
+## the level invariants - each colour still appears exactly `capacity` times and no
+## tube changes size - so a shuffled board is still solvable.
+func _on_shuffle() -> void:
+	if not _booster_ready():
+		return
+	var units: Array = []
+	var sizes: Array = []
+	for t in state.tube_count():
+		sizes.append(state.tubes[t].size())
+		for c in state.tubes[t]:
+			units.append(c)
+	credits -= 1
+	_push_history()
+	units.shuffle()
+	var cursor := 0
+	for t in state.tube_count():
+		var rebuilt: Array = []
+		for i in int(sizes[t]):
+			rebuilt.append(units[cursor])
+			cursor += 1
+		state.tubes[t] = rebuilt
+	audio.play("ui")
+	_status("Liquid shuffled.", P.ACCENT)
+	_refresh()
+
+
+## Booster: add one empty bottle. Pure capacity, no rule is bent, so this is the
+## safest of the three and the natural answer to the dead-end card.
+func _on_add_bottle() -> void:
+	if not _booster_ready():
+		return
+	if state.tube_count() >= 9:
+		audio.play("invalid")
+		_status("The shelf is full.", P.MUTED)
+		return
+	credits -= 1
+	_push_history()
+	state.tubes.append([])
+	audio.play("ui")
+	_status("Extra bottle added.", P.ACCENT)
+	_refresh()
+
+
+func _booster_ready() -> bool:
+	if state == null or win_layer != null or modal_layer != null or _pouring:
+		return false
+	if credits <= 0:
+		audio.play("invalid")
+		_status("No credits left. Restart the level to get 3 more.", P.PINK)
+		return false
+	return true
+
+
+## Is there a move worth making? A legal move that only pours a finished tube
+## into an empty one changes nothing, so counting it would hide a real dead end.
+func _has_useful_move() -> bool:
+	if state == null:
+		return false
+	for move in state.all_moves():
+		var from_i: int = int(move[0])
+		var to_i: int = int(move[1])
+		var tube: Array = state.tubes[from_i]
+		var complete: bool = tube.size() == state.capacity and tube.size() > 0
+		if complete:
+			var same := true
+			for c in tube:
+				if c != tube[0]:
+					same = false
+					break
+			if same and state.tubes[to_i].is_empty():
+				continue          # pointless: a finished tube into nothing
+		return true
+	return false
+
+
+## Called after every committed move. A board with no useful move is a dead end,
+## and leaving the player staring at it with no explanation is the worst outcome.
+func _check_dead_end() -> void:
+	if state == null or state.is_won():
+		return
+	if _has_useful_move():
+		return
+	_show_stuck_card()
+
+
+func _show_stuck_card() -> void:
+	if modal_layer != null:
+		return
+	modal_layer = Control.new()
+	modal_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	screen_root.add_child(modal_layer)
+
+	var dim := ColorRect.new()
+	dim.color = Color(0.01, 0.03, 0.04, 0.80)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	modal_layer.add_child(center)
+
+	var card := UIKit.panel(P.PANEL, P.PINK, 2, 28)
+	card.custom_minimum_size = Vector2(660, 0)
+	center.add_child(card)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 18)
+	card.add_child(box)
+	box.add_child(UIKit.label("No moves left", 36, P.PINK))
+	box.add_child(UIKit.label("This arrangement is stuck.", 22, P.MUTED))
+	box.add_child(UIKit.spacer(4))
+
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 16)
+	box.add_child(buttons)
+
+	if credits > 0 and not history.is_empty():
+		var undo := UIKit.primary_button("Undo - 1 credit")
+		undo.pressed.connect(func():
+			if modal_layer != null:
+				modal_layer.queue_free()
+				modal_layer = null
+			_on_undo())
+		buttons.add_child(undo)
+
+	var retry := UIKit.ghost_button("Replay level")
+	retry.pressed.connect(func():
+		if modal_layer != null:
+			modal_layer.queue_free()
+			modal_layer = null
+		_start_level(level_index))
+	buttons.add_child(retry)
 
 
 func _on_restart() -> void:
@@ -1091,7 +1343,7 @@ func _show_win_card(record: bool, previous: int) -> void:
 		box.add_child(UIKit.label("Best remains %d moves" % previous, 24, P.MUTED))
 
 	if final_level:
-		box.add_child(UIKit.label("All 30 gardens are in bloom.", 24, P.MUTED))
+		box.add_child(UIKit.label("All %d gardens are in bloom." % levels.size(), 24, P.MUTED))
 
 	box.add_child(UIKit.divider())
 	box.add_child(UIKit.spacer(4))

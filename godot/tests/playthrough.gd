@@ -64,11 +64,10 @@ func _run() -> void:
 		if solutions.has(key):
 			moves = solutions[key]["moves"]
 		else:
-			var path := "res://levels/level_%d.json" % n
-			if FileAccess.file_exists(path):
-				var lvl = JSON.parse_string(FileAccess.get_file_as_string(path))
-				if lvl is Dictionary and lvl.has("solution"):
-					moves = lvl["solution"]
+			if FileAccess.file_exists("res://tests/solutions_ext.json"):
+				var ext = JSON.parse_string(FileAccess.get_file_as_string("res://tests/solutions_ext.json"))
+				if ext is Dictionary and ext.has(key):
+					moves = ext[key]
 		if moves.is_empty():
 			print("FAIL   %02d   no recorded solution" % n)
 			continue

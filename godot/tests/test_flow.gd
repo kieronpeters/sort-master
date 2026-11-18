@@ -211,6 +211,69 @@ func _run() -> void:
 	main._go_back()
 	check("back from credits returns home", main._screen == "home")
 
+	# --- booster: fill one bottle -----------------------------------------
+	# The booster writes straight into state.tubes, bypassing the guards the
+	# normal move path provides, so it has to prove it cannot corrupt a level:
+	# every colour still appears exactly capacity times, no tube overflows, and
+	# one tube comes out complete.
+	main.unlocked = mini(main.levels.size() - 1, 30)
+	main._start_level(3)
+	await process_frame
+	var credits_before: int = main.credits
+	var colours_before := {}
+	for t in main.state.tube_count():
+		for col in main.state.tubes[t]:
+			colours_before[str(col)] = int(colours_before.get(str(col), 0)) + 1
+
+	main._on_fill_bottle()
+	await process_frame
+
+	check("booster spends one credit", main.credits == credits_before - 1)
+
+	var colours_after := {}
+	for t in main.state.tube_count():
+		for col in main.state.tubes[t]:
+			colours_after[str(col)] = int(colours_after.get(str(col), 0)) + 1
+	var counts_preserved := true
+	for col in colours_before.keys():
+		if int(colours_after.get(col, -1)) != int(colours_before[col]):
+			counts_preserved = false
+	check("booster keeps every colour count", counts_preserved)
+
+	var no_overflow := true
+	for t in main.state.tube_count():
+		if main.state.tubes[t].size() > main.state.capacity:
+			no_overflow = false
+	check("booster never overfills a tube", no_overflow)
+
+	var filled := 0
+	for t in main.state.tube_count():
+		var tube: Array = main.state.tubes[t]
+		if tube.size() == main.state.capacity:
+			var same := true
+			for col in tube:
+				if col != tube[0]:
+					same = false
+					break
+			if same:
+				filled += 1
+	check("booster leaves a completed bottle", filled >= 1)
+
+	# The board must remain workable: in this puzzle family a colour can always be
+	# consolidated while an empty tube exists, so losing the last one is the real
+	# failure mode. (The previous version of this check was a tautology.)
+	var empty_tubes := 0
+	for t in main.state.tube_count():
+		if main.state.tubes[t].is_empty():
+			empty_tubes += 1
+	check("booster leaves a spare tube", empty_tubes >= 1)
+
+	# credits never go negative
+	main.credits = 0
+	main._on_fill_bottle()
+	await process_frame
+	check("booster refuses when out of credits", main.credits == 0)
+
 	_finish()
 
 

@@ -256,3 +256,14 @@ cycle.
 | QA-05 | Visual polish (glass tint, type scale, final card, themed icon, brand mark) | backlog; classify as post-1.0 unless the owner wants them in 1.0 |
 | — | Production signing (M10-03) | owner key + approval; see `docs/release-signing.md` |
 | — | Device pass | owner hardware; see `docs/device-validation.md` |
+
+### 0.3 Effective SDK values, recorded 18 November 2026
+
+B8 as decided is min API 24 / target API 35. As shipped the artifact carries
+**min 24 / target 36**, because Godot refuses the override without the Gradle
+build (�0.1). Until the toolchain question is settled, the *effective* values are
+24 / 36 and every document that describes the APK says so.
+
+This is a recorded fact about the artifact, not a reversal of the decision. The
+rationale for 35 also does not hold: Android 15 enforces edge-to-edge from API 35
+upward, so 35 and 36 behave identically on Android 15+ devices.

@@ -31,6 +31,12 @@ uniform float edge_power : hint_range(0.2, 4.0) = 0.85;
 uniform float top_light : hint_range(0.0, 0.5) = 0.06;
 uniform float bottom_dim : hint_range(0.0, 0.5) = 0.10;
 
+// Seam. Where two bands meet, the join reads as a hard printed line. A narrow
+// darkening at each band's top and bottom edge turns it into a soft crease, which
+// is what makes stacked bands read as separate volumes of liquid.
+uniform float seam_dim : hint_range(0.0, 0.6) = 0.20;
+uniform float seam_width : hint_range(0.01, 0.35) = 0.085;
+
 // A soft vertical sheen on the camera-facing side, like light through glass.
 uniform float sheen : hint_range(0.0, 0.4) = 0.07;
 uniform float sheen_centre : hint_range(0.0, 1.0) = 0.55;
@@ -55,6 +61,10 @@ void vertex() {
 void fragment() {
 	float shade = 1.0 - edge_dim * pow(lateral, edge_power);
 	shade *= mix(1.0 - bottom_dim, 1.0 + top_light, clamp(UV.y, 0.0, 1.0));
+
+	// 1.0 across the middle of the band, falling to 0 at both seams.
+	float seam = smoothstep(0.0, seam_width, UV.y) * smoothstep(1.0, 1.0 - seam_width, UV.y);
+	shade *= mix(1.0 - seam_dim, 1.0, seam);
 
 	// Sheen: a soft vertical band where a round surface would catch light.
 	float sheen_band = exp(-pow((lateral - sheen_centre) * 3.2, 2.0));

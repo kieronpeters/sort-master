@@ -23,6 +23,7 @@ renderer. Version `0.1.0`, version code `2`.
 | Version | 0.1.0 (code 2) |
 | Orientation | portrait (`screenOrientation=1`, verified with aapt2) |
 | Icon | original 512 px launcher icon + adaptive foreground/background (gradient-only background) |
+| Auto Backup | **enabled** (`user_data_backup/allow=true`) - progress can be restored on reinstall or a new device with no backend and no account |
 | Min/target SDK | **24 / 36** — the Godot 4.7.2 template defaults. B8 is recorded as 24 / 35 but cannot be applied without the Gradle build path; see `docs/owner-decisions.md` §0.1 |
 | Type scale | `Palette.TYPE_SCALE = 1.2`, applied in `UIKit`; body copy 16.4 dp, captions 12.3 dp at the target density |
 

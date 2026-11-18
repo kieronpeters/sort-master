@@ -41,8 +41,10 @@ function Check {
     $script:results.Add("| $name | $verdict | $detail |")
 }
 
-function A { param([Parameter(ValueFromRemainingArguments = $true)][string[]]$rest)
-    return (& $adb @dev @rest 2>&1 | Out-String).Trim() }
+# Simple function, no param block: a param block makes this an advanced function,
+# and then any argument starting with '-' (install -r, monkey -p, settings put)
+# is parsed as a parameter name instead of being passed to adb.
+function A { return (& $adb @dev @args 2>&1 | Out-String).Trim() }
 
 function Shot {
     param([string]$name)
@@ -95,7 +97,7 @@ if ($aapt2) {
 }
 
 # --- install and launch ------------------------------------------------------
-$install = A install -r $apkPath
+$install = (& $adb @dev install -r $apkPath 2>&1 | Out-String).Trim()
 Check 'installs on the device' ($install -match 'Success') ($install -split "`n" | Select-Object -Last 1)
 
 & $adb @dev logcat -c 2>&1 | Out-Null

@@ -150,19 +150,37 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 	shadow.shaded = false
 	root.add_child(shadow)
 
-	# selection pool, so the chosen tube reads at a glance
-	var pool := Sprite3D.new()
-	pool.texture = _glow_texture()
-	pool.pixel_size = 0.46 / 64.0
-	pool.scale = Vector3(1.0, 0.42, 1.0)
-	pool.position = Vector3(0, 0.045, -0.09)
-	pool.modulate = Color(1, 1, 1, 0.55)
-	pool.visible = selected
-	pool.shaded = false
-	root.add_child(pool)
-	root.set_meta("select_glow", pool)
+	# The selection used to draw a soft glow sprite here. It was parented to the
+	# vessel, so it lifted and tilted with the bottle and stayed visible right
+	# through the pour, which read as a yellow aura under a moving object. The
+	# glass tint and the raised slot already mark the selection, so the glow is
+	# gone rather than moved.
 
 	# lathed glass
+	# A finished bottle gets corked, like the reference: the cork is the "done"
+	# signal you can read at a glance without counting bands.
+	var full := contents.size() == capacity and contents.size() > 0
+	if full:
+		var same := true
+		for c in contents:
+			if c != contents[0]:
+				same = false
+				break
+		if same:
+			var cork := MeshInstance3D.new()
+			var cork_mesh := CylinderMesh.new()
+			cork_mesh.top_radius = 0.044
+			cork_mesh.bottom_radius = 0.038
+			cork_mesh.height = 0.052
+			cork_mesh.radial_segments = 24
+			cork.mesh = cork_mesh
+			var cork_mat := StandardMaterial3D.new()
+			cork_mat.albedo_color = Color(0.68, 0.47, 0.28)
+			cork_mat.roughness = 0.85
+			cork.material_override = cork_mat
+			cork.position = Vector3(0, 0.508, 0)
+			root.add_child(cork)
+
 	var glass := MeshInstance3D.new()
 	glass.mesh = VesselMeshScript.build_glass(false)
 	glass.material_override = glass_material(selected)

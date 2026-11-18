@@ -51,15 +51,17 @@ bells and a filtered noise bed) and are dedicated to the public domain under
 **CC0 1.0**. No purchased music, sample library or licensed track is used, so
 there is no royalty obligation and no attribution requirement.
 
-They play in sequence and are reshuffled each cycle, so a session does not loop
-one clip. 16 kHz mono, 75 s each — **225 s (3.8 minutes) before anything
-repeats**.
+They play in sequence and are reshuffled each cycle, and a reshuffle never
+repeats the track that just finished. Five tracks, Ogg Vorbis mono, 150 s
+each — **750 s (12.5 minutes) before the set begins again**.
 
 | File | Mood | Duration | Peak | Source | Licence |
 |---|---|---:|---:|---|---|
-| `amber_greenhouse.wav` | D minor pentatonic, slow pads | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
-| `still_water.wav` | A minor, wider voicing, slower | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
-| `morning_prism.wav` | G major, brighter | 75 s | −17.1 dBFS | `tools/make_music.py` | CC0 1.0 |
+| `amber_greenhouse.ogg` | D minor pentatonic, slow pads | 150 s | `tools/make_music.py` | CC0 1.0 |
+| `still_water.ogg` | A minor, wider voicing, slower | 150 s | `tools/make_music.py` | CC0 1.0 |
+| `morning_prism.ogg` | G major, brighter | 150 s | `tools/make_music.py` | CC0 1.0 |
+| `glass_hour.ogg` | E minor, sparse bells, cooler | 150 s | `tools/make_music.py` | CC0 1.0 |
+| `lantern_walk.ogg` | C major, gentle motion | 150 s | `tools/make_music.py` | CC0 1.0 |
 
 The bed is deliberately quiet (RMS ≈ −29 dBFS, played at −14 dB) so the liquid
 and interface sounds stay the loudest thing on screen.

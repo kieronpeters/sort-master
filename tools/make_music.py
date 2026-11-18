@@ -24,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import subprocess
 import math
 import random
 import struct
@@ -31,7 +32,7 @@ import wave
 from pathlib import Path
 
 RATE = 16000
-TRACK_SECONDS = 75.0
+TRACK_SECONDS = 150.0
 
 # Pentatonic-friendly voicings; each entry is a chord as semitone offsets from A2.
 TRACKS = [
@@ -58,6 +59,22 @@ TRACKS = [
         "chords": [[0, 4, 7, 12], [-3, 2, 7, 11], [-1, 4, 9, 12], [0, 4, 7, 14]],
         "bell_rate": 1.1,
         "brightness": 1.15,
+    },
+    {
+        "name": "glass_hour",
+        "root": -5,         # E
+        "minor": True,
+        "chords": [[0, 3, 7, 12], [-3, 0, 7, 10], [-5, 2, 7, 12], [0, 5, 7, 15]],
+        "bell_rate": 0.5,
+        "brightness": 0.9,
+    },
+    {
+        "name": "lantern_walk",
+        "root": 3,          # C
+        "minor": False,
+        "chords": [[0, 4, 7, 12], [-2, 4, 7, 11], [-4, 3, 7, 12], [0, 4, 9, 12]],
+        "bell_rate": 1.3,
+        "brightness": 1.2,
     },
 ]
 
@@ -181,12 +198,22 @@ def main() -> int:
     for i, track in enumerate(TRACKS):
         rng = random.Random(1000 + i)
         buf = normalise(build(track, args.seconds, rng))
-        path = out / f"{track['name']}.wav"
-        write_wav(path, buf)
-        size = path.stat().st_size / 1024 / 1024
+        wav_path = out / f"{track['name']}.wav"
+        write_wav(wav_path, buf)
+
+        # Encode to Ogg Vorbis and drop the WAV. Uncompressed music at this length
+        # would add ~24 MB to the APK; Ogg lands near a tenth of that and Godot
+        # plays it natively. ffmpeg is the only external tool this repo needs.
+        ogg_path = out / f"{track['name']}.ogg"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav_path),
+             "-c:a", "libvorbis", "-q:a", "4", "-ac", "1", str(ogg_path)],
+            check=True)
+        wav_path.unlink()
+
+        size = ogg_path.stat().st_size / 1024 / 1024
         total += args.seconds
-        print(f"{path.name:<24} {args.seconds:5.1f}s  {size:4.2f} MB  "
-              f"peak -20 dBFS  CC0 original")
+        print(f"{ogg_path.name:<24} {args.seconds:5.1f}s  {size:4.2f} MB  CC0 original")
     print(f"\n{len(TRACKS)} tracks, {total:.0f}s ({total/60:.1f} min) of unique music")
     return 0
 

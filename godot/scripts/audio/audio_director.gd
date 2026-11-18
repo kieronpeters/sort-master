@@ -47,10 +47,15 @@ var _players: Array = []
 ## than the effects so the liquid and interface sounds stay the loudest thing
 ## on screen. All three are original and CC0 (tools/make_music.py).
 const MUSIC_TRACKS := [
-	"res://assets/audio/music/amber_greenhouse.wav",
-	"res://assets/audio/music/still_water.wav",
-	"res://assets/audio/music/morning_prism.wav",
+	"res://assets/audio/music/amber_greenhouse.ogg",
+	"res://assets/audio/music/still_water.ogg",
+	"res://assets/audio/music/morning_prism.ogg",
+	"res://assets/audio/music/glass_hour.ogg",
+	"res://assets/audio/music/lantern_walk.ogg",
 ]
+## The last track started, so a reshuffle never repeats it immediately. Five
+## tracks at 2.5 minutes each is 12.5 minutes before the set begins again.
+var _last_track := ""
 const MUSIC_DB := -9.0
 
 var _music: AudioStreamPlayer = null
@@ -95,12 +100,20 @@ func _shuffle_music() -> void:
 		var tmp = _music_order[i]
 		_music_order[i] = _music_order[j]
 		_music_order[j] = tmp
+	# A shuffle can hand back the same track that just finished; swap it away so
+	# the bed never plays the same piece twice in a row.
+	if _music_order.size() > 1 and _music_order[0] == _last_track:
+		var k := randi() % (_music_order.size() - 1) + 1
+		var held = _music_order[0]
+		_music_order[0] = _music_order[k]
+		_music_order[k] = held
 
 
 func _start_track() -> void:
 	if _music == null or muted or music_muted or _music_order.is_empty():
 		return
-	_music.stream = load(_music_order[_music_index % _music_order.size()])
+	_last_track = _music_order[_music_index % _music_order.size()]
+	_music.stream = load(_last_track)
 	_music.play()
 
 

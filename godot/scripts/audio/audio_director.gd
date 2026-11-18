@@ -59,6 +59,8 @@ var _last_track := ""
 const MUSIC_DB := -9.0
 
 var _music: AudioStreamPlayer = null
+var _idle_checks := 0
+var _music_watchdog: Timer = null
 var _music_order: Array = []
 var _music_index := 0
 
@@ -91,6 +93,16 @@ func _setup_music() -> void:
 	_music.volume_db = MUSIC_DB + _volume_db(music_volume)
 	_music.finished.connect(_next_track)
 	add_child(_music)
+
+	# A missed `finished` signal (a decode hiccup, a focus change, a stream that
+	# failed to load) left the bed silent with nothing to retry it. This simply
+	# checks that music is playing and restarts it if not.
+	_music_watchdog = Timer.new()
+	_music_watchdog.wait_time = 2.0
+	_music_watchdog.autostart = true
+	_music_watchdog.timeout.connect(_watch_music)
+	add_child(_music_watchdog)
+
 	_start_track()
 
 
@@ -112,9 +124,19 @@ func _shuffle_music() -> void:
 func _start_track() -> void:
 	if _music == null or muted or music_muted or _music_order.is_empty():
 		return
-	_last_track = _music_order[_music_index % _music_order.size()]
-	_music.stream = load(_last_track)
-	_music.play()
+	# Walk the order until a stream actually loads. A single failed load used to
+	# leave the bed silent forever, because nothing retried.
+	for attempt in _music_order.size():
+		var candidate: String = _music_order[_music_index % _music_order.size()]
+		var stream := load(candidate) as AudioStream
+		if stream != null:
+			_last_track = candidate
+			_music.stream = stream
+			_music.play()
+			_idle_checks = 0
+			return
+		push_warning("Music failed to load: " + candidate)
+		_music_index += 1
 
 
 ## Next track starts the instant the previous ends, so the bed is continuous.
@@ -125,6 +147,23 @@ func _next_track() -> void:
 	if _music_index % _music_order.size() == 0:
 		_shuffle_music()   # a fresh order each time through the set
 	_start_track()
+
+
+## Restarts the bed if it has gone quiet when it should be playing. Two
+## consecutive idle checks, so the gap between tracks is never mistaken for a stall.
+func _watch_music() -> void:
+	if _music == null:
+		return
+	if muted or music_muted:
+		_idle_checks = 0
+		return
+	if _music.playing:
+		_idle_checks = 0
+		return
+	_idle_checks += 1
+	if _idle_checks >= 2:
+		_idle_checks = 0
+		_next_track()
 
 
 func play(sound: String, volume_db: float = BASE_VOLUME_DB) -> void:

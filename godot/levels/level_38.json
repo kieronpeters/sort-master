@@ -1,0 +1,110 @@
+{
+  "id": "L38",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 38",
+  "tubes": [
+    [
+      "A",
+      "C",
+      "D",
+      "A"
+    ],
+    [
+      "B",
+      "D",
+      "B",
+      "A"
+    ],
+    [
+      "D"
+    ],
+    [
+      "C",
+      "C",
+      "B"
+    ],
+    [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    []
+  ],
+  "minMoves": 12,
+  "solution": [
+    {
+      "from": 0,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 1,
+      "units": 2,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 4,
+      "to": 2,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 4,
+      "to": 3,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 4,
+      "to": 1,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    }
+  ]
+}

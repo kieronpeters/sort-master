@@ -1,0 +1,158 @@
+{
+  "id": "L329",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 329",
+  "tubes": [
+    [
+      "C",
+      "B",
+      "B",
+      "D"
+    ],
+    [
+      "F",
+      "D",
+      "F"
+    ],
+    [
+      "F",
+      "D",
+      "A",
+      "E"
+    ],
+    [
+      "C",
+      "E",
+      "F",
+      "A"
+    ],
+    [
+      "C"
+    ],
+    [
+      "D",
+      "E",
+      "C",
+      "A"
+    ],
+    [
+      "B",
+      "B",
+      "E",
+      "A"
+    ],
+    []
+  ],
+  "minMoves": 18,
+  "solution": [
+    {
+      "from": 2,
+      "to": 7,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 3,
+      "to": 2,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 3,
+      "to": 1,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 3,
+      "to": 7,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 3,
+      "to": 4,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "units": 2,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 5,
+      "to": 3,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 5,
+      "to": 4,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "units": 2,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 2,
+      "colour": "F"
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 6,
+      "to": 3,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "units": 2,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "units": 1,
+      "colour": "C"
+    }
+  ]
+}

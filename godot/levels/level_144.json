@@ -1,0 +1,150 @@
+{
+  "id": "L144",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 144",
+  "tubes": [
+    [
+      "A",
+      "B",
+      "A"
+    ],
+    [
+      "A",
+      "B"
+    ],
+    [
+      "E",
+      "D",
+      "E",
+      "C"
+    ],
+    [
+      "D",
+      "D",
+      "C",
+      "B"
+    ],
+    [
+      "C",
+      "D",
+      "E"
+    ],
+    [
+      "A",
+      "E",
+      "B",
+      "C"
+    ],
+    []
+  ],
+  "minMoves": 16,
+  "veils": [
+    [
+      2,
+      1
+    ],
+    [
+      4,
+      0
+    ]
+  ],
+  "solution": [
+    {
+      "from": 1,
+      "to": 6,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 3,
+      "to": 0,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 4,
+      "to": 2,
+      "units": 2,
+      "colour": "E"
+    },
+    {
+      "from": 4,
+      "to": 3,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "units": 2,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 4,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 5,
+      "to": 2,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "units": 3,
+      "colour": "A"
+    }
+  ]
+}

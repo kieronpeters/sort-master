@@ -46,6 +46,14 @@ uniform float sheen_centre : hint_range(0.0, 1.0) = 0.55;
 // liquid that reads as a substance: a bright, narrow streak down one side where
 // the surface catches the light, exactly where a rounded column would.
 uniform float highlight : hint_range(0.0, 0.8) = 0.20;
+
+// Veil. A "hidden colour" band is drawn as fabric instead of liquid: the player
+// can see that something is there but not what colour, so they have to reason
+// about it rather than read it. Revealing is handled by the game, which clears
+// the flag; the shader only draws what it is told.
+uniform float veiled : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 cloth_colour : source_color = vec3(0.36, 0.40, 0.44);
+uniform float cloth_weave : hint_range(0.0, 0.5) = 0.16;
 uniform float highlight_pos : hint_range(0.0, 1.0) = 0.30;
 uniform float highlight_width : hint_range(0.02, 0.35) = 0.070;
 
@@ -76,5 +84,15 @@ void fragment() {
 	float core = exp(-pow((lateral_signed + highlight_pos) / (highlight_width * 0.42), 2.0));
 	shade += highlight * gloss + highlight * 0.45 * core;
 
-	ALBEDO = band_colour * shade;
+	vec3 colour = band_colour;
+
+	// Woven cross-hatch so a veil reads as cloth rather than a flat grey band.
+	if (veiled > 0.001) {
+		float weave = sin(UV.y * 220.0) * sin(lateral_signed * 26.0);
+		colour = mix(band_colour, cloth_colour * (1.0 + weave * cloth_weave), veiled);
+		// veiled bands keep the cross-section shading but lose the liquid gloss
+		shade = mix(shade, shade * 0.92, veiled);
+	}
+
+	ALBEDO = colour * shade;
 }

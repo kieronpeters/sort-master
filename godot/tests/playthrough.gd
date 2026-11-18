@@ -47,7 +47,8 @@ func _run() -> void:
 	print("level  moves  expected  won    result")
 	print("------------------------------------------")
 	for n in subset:
-		main.unlocked = 29
+		# unlock through the whole catalogue; the extended levels are past 30 now
+		main.unlocked = maxi(0, main.levels.size() - 1)
 		main.best = {}
 		main._start_level(n - 1)
 		await _frames(4)
@@ -57,11 +58,20 @@ func _run() -> void:
 			await _shot("level_%02d_start" % n)
 
 		var key := "level_%d" % n
-		if not solutions.has(key):
+		# Levels 1-30 keep their solutions in solutions.json; the extended
+		# catalogue carries its own, so the harness can play any level.
+		var moves: Array = []
+		if solutions.has(key):
+			moves = solutions[key]["moves"]
+		else:
+			var path := "res://levels/level_%d.json" % n
+			if FileAccess.file_exists(path):
+				var lvl = JSON.parse_string(FileAccess.get_file_as_string(path))
+				if lvl is Dictionary and lvl.has("solution"):
+					moves = lvl["solution"]
+		if moves.is_empty():
 			print("FAIL   %02d   no recorded solution" % n)
 			continue
-
-		var moves: Array = solutions[key]["moves"]
 		var shot_pour: bool = (n == int(subset[0]))
 		for mi in moves.size():
 			var move: Dictionary = moves[mi]

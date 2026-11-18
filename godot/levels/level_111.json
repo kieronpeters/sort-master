@@ -1,0 +1,140 @@
+{
+  "id": "L111",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 111",
+  "tubes": [
+    [
+      "B",
+      "E",
+      "C"
+    ],
+    [
+      "A",
+      "C",
+      "B",
+      "D"
+    ],
+    [
+      "C",
+      "E",
+      "D"
+    ],
+    [
+      "B",
+      "A",
+      "D"
+    ],
+    [
+      "E",
+      "D",
+      "B",
+      "C"
+    ],
+    [
+      "A",
+      "E",
+      "A"
+    ],
+    []
+  ],
+  "minMoves": 16,
+  "solution": [
+    {
+      "from": 1,
+      "to": 2,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 2,
+      "to": 6,
+      "units": 2,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 1,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 4,
+      "to": 3,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 6,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "units": 2,
+      "colour": "E"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 3,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 1,
+      "units": 2,
+      "colour": "A"
+    },
+    {
+      "from": 5,
+      "to": 4,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "units": 3,
+      "colour": "A"
+    }
+  ]
+}

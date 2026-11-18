@@ -133,7 +133,7 @@ func _fit_camera() -> void:
 
 ## Rebuilds every vessel from a board snapshot. Rebuilds only when the board
 ## actually changed; selection-only updates animate the existing meshes.
-func set_board(tubes: Array, capacity: int, selected: int) -> void:
+func set_board(tubes: Array, capacity: int, selected: int, veils: Array = []) -> void:
 	if _vessels == null:
 		return
 	_tube_count = tubes.size()
@@ -146,7 +146,8 @@ func set_board(tubes: Array, capacity: int, selected: int) -> void:
 			_vessels.remove_child(child)
 			child.queue_free()
 		for i in tubes.size():
-			_vessels.add_child(VesselBuilderScript.build(tubes[i], capacity, i == selected))
+			var hidden: Array = veils[i] if i < veils.size() else []
+			_vessels.add_child(VesselBuilderScript.build(tubes[i], capacity, i == selected, hidden))
 		_selected = selected
 		_fit_camera()
 		_apply_selection(selected, true)

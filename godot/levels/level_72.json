@@ -1,0 +1,134 @@
+{
+  "id": "L72",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 72",
+  "tubes": [
+    [
+      "B",
+      "D",
+      "C",
+      "A"
+    ],
+    [
+      "B",
+      "B",
+      "C",
+      "D"
+    ],
+    [
+      "B",
+      "D",
+      "A"
+    ],
+    [
+      "E",
+      "E",
+      "E",
+      "D"
+    ],
+    [
+      "A"
+    ],
+    [
+      "E",
+      "C",
+      "A",
+      "C"
+    ],
+    []
+  ],
+  "minMoves": 14,
+  "veils": [
+    [
+      0,
+      0
+    ]
+  ],
+  "solution": [
+    {
+      "from": 0,
+      "to": 2,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 1,
+      "to": 0,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "units": 2,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "units": 2,
+      "colour": "D"
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "units": 3,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 3,
+      "colour": "B"
+    },
+    {
+      "from": 3,
+      "to": 0,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 4,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "units": 3,
+      "colour": "E"
+    }
+  ]
+}

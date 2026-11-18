@@ -49,6 +49,8 @@ var moves := 0
 ## True while the pour animation owns the board. Input is ignored until the
 ## vessel is home; the game state has already committed by then.
 var _pouring := false
+## Per-tube list of veiled band indices, as declared by the level.
+var veils_declared: Array = []
 var unlocked := 0
 var best: Dictionary = {}
 var load_errors: Array = []
@@ -107,16 +109,32 @@ func _ready() -> void:
 func _load_levels() -> void:
 	levels.clear()
 	load_errors.clear()
-	for i in range(1, 31):
-		var path := "res://levels/level_%d.json" % i
-		if not FileAccess.file_exists(path):
-			load_errors.append("level_%d.json is missing" % i)
-			continue
+	# Discover the catalogue instead of assuming 30. Levels are numbered
+	# sequentially from 1; the directory is scanned so the count can grow without
+	# editing this function, and a missing number is reported rather than skipped
+	# silently.
+	var dir := DirAccess.open("res://levels")
+	if dir == null:
+		load_errors.append("cannot open res://levels")
+		return
+	var numbers: Array = []
+	for file in dir.get_files():
+		if file.begins_with("level_") and file.ends_with(".json"):
+			var stem := file.trim_prefix("level_").trim_suffix(".json")
+			if stem.is_valid_int():
+				numbers.append(int(stem))
+	numbers.sort()
+	var expected := 1
+	for n in numbers:
+		if int(n) != expected:
+			load_errors.append("level_%d.json is missing" % expected)
+		expected = int(n) + 1
+		var path := "res://levels/level_%d.json" % int(n)
 		var text := FileAccess.get_file_as_string(path)
 		var data = JSON.parse_string(text)
 		var problem: String = LevelValidatorScript.validate(data)
 		if problem != "":
-			load_errors.append("level_%d.json: %s" % [i, problem])
+			load_errors.append("level_%d.json: %s" % [int(n), problem])
 			continue
 		levels.append(data)
 	if not load_errors.is_empty():
@@ -586,6 +604,16 @@ func _start_level(index: int) -> void:
 	level_index = index
 	var data: Dictionary = levels[index]
 	state = PuzzleStateScript.new(int(data.get("capacity", 4)), data.get("tubes", []))
+	# Veils are authored per level as [[tube, band], ...]; regroup them per tube
+	# so the renderer can ask "what is hidden in tube i".
+	veils_declared = []
+	for i in state.tube_count():
+		veils_declared.append([])
+	for pair in data.get("veils", []):
+		if pair is Array and pair.size() == 2:
+			var t: int = int(pair[0])
+			if t >= 0 and t < veils_declared.size():
+				veils_declared[t].append(int(pair[1]))
 	history.clear()
 	selected = -1
 	moves = 0
@@ -665,7 +693,7 @@ func _build_hud(parent: Control) -> void:
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 2)
 	row.add_child(titles)
-	var eyebrow := UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()])
+	var eyebrow := UIKit.eyebrow("LEVEL %d" % (level_index + 1))
 	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	titles.add_child(eyebrow)
 	var stage := UIKit.label(_stage_name(level_index), 36, P.TEXT)
@@ -717,7 +745,7 @@ func _refresh() -> void:
 		return
 	if USE_3D:
 		if board_3d != null:
-			board_3d.set_board(state.tubes, state.capacity, selected)
+			board_3d.set_board(state.tubes, state.capacity, selected, _visible_veils())
 		_layout_hits()
 	elif vessels_row != null:
 		for child in vessels_row.get_children():
@@ -783,6 +811,52 @@ func _on_hit_input(event: InputEvent, index: int) -> void:
 
 ## The pour animation is presentation only, so headless runs (the test suites)
 ## must not take it: the flow suite asserts the move counter one frame after a tap.
+## Which bands are still hidden from the player.
+##
+## A band is veiled when the level says so and it has not yet been earned. Three
+## things peel a veil off, in the order a player experiences them: the band
+## becomes the top of its tube (you can see it now), its colour is completed
+## somewhere (the colour is proven), or three tubes are finished (so a level can
+## never become unreadable through bad luck).
+func _visible_veils() -> Array:
+	var out: Array = []
+	if state == null:
+		return out
+	var done_tubes := 0
+	var proven := {}
+	for i in state.tube_count():
+		var tube: Array = state.tubes[i]
+		if tube.size() == state.capacity and tube.size() > 0:
+			var same := true
+			for c in tube:
+				if c != tube[0]:
+					same = false
+					break
+			if same:
+				done_tubes += 1
+				proven[str(tube[0])] = true
+
+	for i in state.tube_count():
+		var hidden: Array = []
+		var declared: Array = veils_declared[i] if i < veils_declared.size() else []
+		var top: int = state.tubes[i].size() - 1
+		for idx in declared:
+			# A veiled band can already have been poured away, in which case the
+			# stored index no longer exists in this tube. Skip rather than index
+			# past the end.
+			if int(idx) >= state.tubes[i].size():
+				continue
+			if int(idx) == top:
+				continue                      # exposed at the surface
+			if proven.has(str(state.tubes[i][int(idx)])):
+				continue                      # its colour is already sorted
+			if done_tubes >= 3:
+				continue                      # safety valve
+			hidden.append(int(idx))
+		out.append(hidden)
+	return out
+
+
 func _animations_on() -> bool:
 	return DisplayServer.get_name() != "headless" and board_3d != null
 
@@ -1004,7 +1078,7 @@ func _show_win_card(record: bool, previous: int) -> void:
 	box.add_theme_constant_override("separation", 16)
 	card.add_child(box)
 
-	box.add_child(UIKit.eyebrow("LEVEL %02d OF %d" % [level_index + 1, levels.size()], P.ACCENT))
+	box.add_child(UIKit.eyebrow("LEVEL %d" % (level_index + 1), P.ACCENT))
 	box.add_child(UIKit.label("Garden Restored" if final_level else "Level Complete", 50, P.GOLD))
 	box.add_child(UIKit.label("Solved in %d moves" % moves, 30, P.TEXT))
 	if record and previous > 0:

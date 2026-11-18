@@ -1,0 +1,174 @@
+{
+  "id": "L426",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 426",
+  "tubes": [
+    [
+      "C",
+      "E"
+    ],
+    [
+      "E",
+      "B",
+      "F"
+    ],
+    [
+      "F",
+      "A",
+      "C",
+      "A"
+    ],
+    [
+      "C",
+      "A",
+      "D"
+    ],
+    [
+      "B",
+      "E",
+      "C",
+      "F"
+    ],
+    [
+      "B",
+      "D",
+      "D",
+      "A"
+    ],
+    [
+      "B",
+      "F",
+      "E",
+      "D"
+    ],
+    []
+  ],
+  "minMoves": 19,
+  "veils": [
+    [
+      1,
+      0
+    ],
+    [
+      2,
+      0
+    ]
+  ],
+  "solution": [
+    {
+      "from": 2,
+      "to": 7,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 4,
+      "to": 1,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 7,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "units": 2,
+      "colour": "F"
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 7,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 4,
+      "to": 3,
+      "units": 2,
+      "colour": "C"
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 0,
+      "units": 3,
+      "colour": "D"
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 1,
+      "units": 2,
+      "colour": "E"
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 6,
+      "to": 0,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 6,
+      "to": 1,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 6,
+      "to": 2,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "units": 3,
+      "colour": "B"
+    }
+  ]
+}

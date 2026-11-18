@@ -42,7 +42,7 @@ const GLYPHS_UNUSED := {
 
 ## One liquid band, for callers that need to build or extend a band outside
 ## build() — the pour animation grows the receiving vessel's level this way.
-static func make_band(colour_id: String, index: int, capacity: int) -> MeshInstance3D:
+static func make_band(colour_id: String, index: int, capacity: int, veiled: bool = false) -> MeshInstance3D:
 	var band_h: float = VesselMeshScript.capacity_height() / float(maxi(1, capacity))
 	var base_y: float = VesselMeshScript.LIQUID_BASE
 	var r: float = VesselMeshScript.liquid_radius()
@@ -56,7 +56,7 @@ static func make_band(colour_id: String, index: int, capacity: int) -> MeshInsta
 
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
-	mi.material_override = _liquid_material(COLOURS.get(colour_id, Color.MAGENTA), index)
+	mi.material_override = _liquid_material(COLOURS.get(colour_id, Color.MAGENTA), index, veiled)
 	mi.position = Vector3(0, base_y + band_h * 0.5 + band_h * index, 0)
 	mi.set_meta("band_index", index)
 	mi.set_meta("band_h", band_h)
@@ -74,7 +74,7 @@ static func band_count(vessel: Node) -> int:
 	return n
 
 
-static func build(contents: Array, capacity: int, selected: bool = false) -> Node3D:
+static func build(contents: Array, capacity: int, selected: bool = false, veils: Array = []) -> Node3D:
 	var root := Node3D.new()
 	var band_h: float = VesselMeshScript.capacity_height() / float(capacity)
 	var base_y: float = VesselMeshScript.LIQUID_BASE
@@ -92,7 +92,7 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 
 		var mi := MeshInstance3D.new()
 		mi.mesh = mesh
-		mi.material_override = _liquid_material(colour, i)
+		mi.material_override = _liquid_material(colour, i, i in veils)
 		mi.position = Vector3(0, base_y + band_h * 0.5 + band_h * i, 0)
 		# Tagged so the board can animate a band rising when liquid arrives.
 		mi.set_meta("band_index", i)
@@ -209,7 +209,7 @@ static func glass_material(selected: bool) -> ShaderMaterial:
 		m.set_shader_parameter("glow", 0.0)
 	return m
 
-static func _liquid_material(colour: Color, index: int) -> ShaderMaterial:
+static func _liquid_material(colour: Color, index: int, veiled: bool = false) -> ShaderMaterial:
 	# Deeper bands read as more liquid; the palette hue stays the base and the
 	# shader leaves the middle of the band at full brightness, so sampled colours
 	# still match the authored hex. The shader supplies the cylindrical shading
@@ -225,6 +225,7 @@ static func _liquid_material(colour: Color, index: int) -> ShaderMaterial:
 	m.set_shader_parameter("sheen", 0.13)
 	m.set_shader_parameter("sheen_centre", 0.55)
 	m.set_shader_parameter("band_radius", VesselMeshScript.liquid_radius())
+	m.set_shader_parameter("veiled", 1.0 if veiled else 0.0)
 	m.set_shader_parameter("sheen_power", 5.0)
 	return m
 

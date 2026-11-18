@@ -1,0 +1,152 @@
+{
+  "id": "L269",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 269",
+  "tubes": [
+    [
+      "E",
+      "E",
+      "B"
+    ],
+    [
+      "C",
+      "C",
+      "B",
+      "F"
+    ],
+    [
+      "E"
+    ],
+    [
+      "D",
+      "C",
+      "D",
+      "E"
+    ],
+    [
+      "A",
+      "A",
+      "C",
+      "B"
+    ],
+    [
+      "F",
+      "A",
+      "F",
+      "D"
+    ],
+    [
+      "D",
+      "A",
+      "F",
+      "B"
+    ],
+    []
+  ],
+  "minMoves": 17,
+  "solution": [
+    {
+      "from": 0,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "units": 2,
+      "colour": "E"
+    },
+    {
+      "from": 1,
+      "to": 0,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 3,
+      "to": 2,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 4,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 1,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 3,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 5,
+      "to": 0,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 5,
+      "to": 4,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "units": 2,
+      "colour": "F"
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 6,
+      "to": 5,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 6,
+      "to": 4,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "units": 2,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 1,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "units": 1,
+      "colour": "D"
+    }
+  ]
+}

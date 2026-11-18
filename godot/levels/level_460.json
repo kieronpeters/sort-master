@@ -1,0 +1,163 @@
+{
+  "id": "L460",
+  "ruleVersion": "rules-v1",
+  "capacity": 4,
+  "name": "Level 460",
+  "tubes": [
+    [
+      "A",
+      "C",
+      "A",
+      "F"
+    ],
+    [
+      "C",
+      "D",
+      "F",
+      "B"
+    ],
+    [
+      "E",
+      "C",
+      "E",
+      "B"
+    ],
+    [
+      "F",
+      "D",
+      "E",
+      "C"
+    ],
+    [],
+    [
+      "F",
+      "B",
+      "A",
+      "B"
+    ],
+    [
+      "D",
+      "D",
+      "A",
+      "E"
+    ],
+    []
+  ],
+  "minMoves": 19,
+  "solution": [
+    {
+      "from": 0,
+      "to": 4,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 1,
+      "to": 4,
+      "units": 1,
+      "colour": "F"
+    },
+    {
+      "from": 2,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 3,
+      "to": 0,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "units": 1,
+      "colour": "C"
+    },
+    {
+      "from": 3,
+      "to": 2,
+      "units": 2,
+      "colour": "E"
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "units": 1,
+      "colour": "D"
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "units": 3,
+      "colour": "C"
+    },
+    {
+      "from": 5,
+      "to": 0,
+      "units": 2,
+      "colour": "A"
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "units": 1,
+      "colour": "B"
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "units": 2,
+      "colour": "F"
+    },
+    {
+      "from": 6,
+      "to": 2,
+      "units": 1,
+      "colour": "E"
+    },
+    {
+      "from": 6,
+      "to": 0,
+      "units": 1,
+      "colour": "A"
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "units": 2,
+      "colour": "D"
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "units": 1,
+      "colour": "F"
+    }
+  ]
+}

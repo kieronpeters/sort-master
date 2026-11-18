@@ -153,3 +153,25 @@ level, the moves, the expected/actual result and a logcat excerpt.
 - Layout maths at 1080 × 1920 and 1080 × 2400; hit strips at 4 and 6 tubes.
 
 These do not substitute for the physical rows above.
+
+## 8. One-command pass
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\device_pass.ps1
+```
+
+Automates the rows the phone allows: APK identity, install, launch, **which
+renderer actually ran**, first-frame render, portrait lock under forced rotation,
+touch reaching the game, fatal-crash scan, and force-stop/relaunch. It writes
+screenshots, logcat.txt and eport.md to uilds\device-pass\.
+
+It deliberately does **not** disable Vulkan. The point of the physical pass is to
+answer whether the shipped Vulkan mobile renderer draws on real hardware, which
+no emulator backend here could establish. The report states explicitly whether
+Vulkan ran or the app fell back to OpenGL ES.
+
+It refuses to run against an emulator, and refuses cleanly with no device
+attached, printing the phone steps it needs.
+
+Audio, thermals, frame timing, the launcher icon and the multi-tube boards still
+require a person holding the phone.

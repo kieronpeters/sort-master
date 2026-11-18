@@ -19,6 +19,13 @@ boot_splash/fullsize=false
 
 window/size/viewport_width=1080
 window/size/viewport_height=1920
+; Desktop window size. The design is 1080x1920, which is taller than most
+; monitors, so the exported window used to open with its title bar above the top
+; of the screen and no way to close it. These overrides only affect windowed
+; desktop builds - Android ignores them and stays fullscreen.
+window/size/window_width_override=648
+window/size/window_height_override=1152
+window/size/resizable=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1

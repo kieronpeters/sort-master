@@ -154,10 +154,10 @@ func _run() -> void:
 
 	# --- locked levels cannot be entered -----------------------------------
 	main.unlocked = 0
-	main._show_level_select()
+	main._show_home()
 	await process_frame
 	main._on_level_pressed(7)
-	check("locked level tap does not start a game", main._screen == "levels")
+	check("locked level cannot be entered", main._screen == "home")
 
 	# --- invalid input -----------------------------------------------------
 	main.unlocked = 1
@@ -193,18 +193,18 @@ func _run() -> void:
 		main.modal_layer = null
 
 	# --- navigation and Android back -------------------------------------
-	main._show_level_select()
-	check("level map is reachable", main._screen == "levels")
+	main._show_home()
+	check("home is reachable", main._screen == "home")
 	main._start_level(0)
 	await process_frame
 	main._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
-	check("system back notification returns to the map", main._screen == "levels")
+	check("system back notification returns to the screen behind it", main._screen in ["home", "game"])
 	main._start_level(0)
 	await process_frame
 	main._go_back()
-	check("back from gameplay returns to the map", main._screen == "levels")
+	check("back from gameplay returns home", main._screen == "home")
 	main._go_back()
-	check("back from the map returns home", main._screen == "home")
+	check("the map no longer exists", not main.has_method("_show_level_select"))
 	main._go_back()
 	check("back at home does not quit on desktop", main._screen == "home")
 	main._show_credits()

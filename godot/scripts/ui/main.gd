@@ -321,9 +321,6 @@ func _show_home() -> void:
 	play.pressed.connect(_on_play_pressed)
 	col.add_child(play)
 
-	var pick := UIKit.ghost_button("Levels")
-	pick.pressed.connect(_show_level_select)
-	col.add_child(pick)
 
 	var settings := UIKit.ghost_button("Settings")
 	settings.pressed.connect(_show_settings)
@@ -367,87 +364,6 @@ func _toggle_audio() -> void:
 
 
 # ---------- level select ----------
-
-func _show_level_select() -> void:
-	_screen = "levels"
-	_clear_screen()
-	var m := _page(52, 44, 36)
-
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 18)
-	m.add_child(col)
-
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 20)
-	col.add_child(header)
-
-	var back := IconButtonScript.new("back", "", 96)
-	back.pressed.connect(_show_home)
-	header.add_child(back)
-
-	var titles := VBoxContainer.new()
-	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	titles.add_theme_constant_override("separation", 2)
-	header.add_child(titles)
-	var map_eyebrow := UIKit.eyebrow("THE GARDEN MAP")
-	map_eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	titles.add_child(map_eyebrow)
-	var heading := UIKit.label("Levels", 46, P.TEXT)
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	titles.add_child(heading)
-
-	var chip := UIKit.panel(P.PANEL, P.LINE, 2, 18)
-	chip.custom_minimum_size = Vector2(170, 76)
-	header.add_child(chip)
-	var chip_box := VBoxContainer.new()
-	chip_box.add_theme_constant_override("separation", 0)
-	chip.add_child(chip_box)
-	chip_box.add_child(UIKit.label("RESTORED", P.TINY_SIZE - 2, P.MUTED))
-	chip_box.add_child(UIKit.label("%d / %d" % [mini(best.size(), levels.size()), levels.size()], 30, P.GOLD))
-
-	if not load_errors.is_empty():
-		col.add_child(UIKit.label("%d level file(s) could not be loaded." % load_errors.size(), 22, P.PINK))
-
-	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation", 18)
-	grid.add_theme_constant_override("v_separation", 18)
-	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(grid)
-
-	for i in levels.size():
-		var tile = LevelTileScript.new(i + 1)
-		var tile_state := "locked"
-		if best.has(str(i)):
-			tile_state = "done"
-		elif i <= unlocked:
-			tile_state = "open"
-		tile.set_tile(tile_state, i == unlocked)
-		var idx: int = i
-		tile.pressed.connect(func(): _on_level_pressed(idx))
-		grid.add_child(tile)
-
-	col.add_child(UIKit.spacer(4))
-	var legend := HBoxContainer.new()
-	legend.alignment = BoxContainer.ALIGNMENT_CENTER
-	legend.add_theme_constant_override("separation", 34)
-	col.add_child(legend)
-	legend.add_child(UIKit.label("●  Restored", 21, P.GOLD))
-	legend.add_child(UIKit.label("●  In bloom", 21, P.ACCENT))
-	legend.add_child(UIKit.label("●  Locked", 21, P.DIM))
-
-	var footer := HBoxContainer.new()
-	footer.add_theme_constant_override("separation", 18)
-	col.add_child(footer)
-	var home := IconButtonScript.new("home", "", 96)
-	home.pressed.connect(_show_home)
-	footer.add_child(home)
-	var hint := UIKit.label("Restore a garden to open the next one.", 24, P.MUTED)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	footer.add_child(hint)
-
 
 func _on_level_pressed(index: int) -> void:
 	if index > unlocked:
@@ -1370,12 +1286,11 @@ func _show_win_card(record: bool, previous: int) -> void:
 		_close_win()
 		_start_level(level_index))
 	row.add_child(replay)
-	var levels_button := UIKit.ghost_button("Levels")
-	levels_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	levels_button.pressed.connect(func():
+	var home_button := UIKit.ghost_button("Home")
+	home_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	home_button.pressed.connect(func():
 		_close_win()
-		_show_level_select())
-	row.add_child(levels_button)
+		_show_home())
 
 	card.scale = Vector2(0.95, 0.95)
 	await get_tree().process_frame
@@ -1429,15 +1344,15 @@ func _go_back() -> void:
 		return
 	if win_layer != null:
 		_close_win()
-		_show_level_select()
+		_show_home()
 		return
 	match _screen:
 		"game":
 			if moves > 0:
 				_confirm_leave()
 			else:
-				_show_level_select()
-		"levels", "credits", "settings":
+				_show_home()
+		"credits", "settings":
 			_show_home()
 		"home":
 			if OS.has_feature("mobile"):
@@ -1484,7 +1399,7 @@ func _confirm_leave() -> void:
 	leave.pressed.connect(func():
 		modal_layer.queue_free()
 		modal_layer = null
-		_show_level_select())
+		_show_home())
 	buttons.add_child(leave)
 
 

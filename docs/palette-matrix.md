@@ -142,3 +142,31 @@ Measured ceiling for reference (worst pair, all three visions):
 Twelve colours separate fine for normal vision (?E 18.7) and fail badly for
 protan/deutan. Twelve per level would also need 16 tubes against the board's cap
 of 8, so it is a layout and level-format change, not a palette change.
+
+### 2.3 Marks removed entirely (18 Nov 2026)
+
+Owner decision: the per-band marks are gone. The liquid is **colour only**, as in
+the rest of the genre.
+
+This is the end of a three-step retreat from the original accessibility design:
+
+| Step | Cue | Contrast vs band |
+|---|---|---|
+| Original | black shape on every band | >= 4.5:1 |
+| 17 Nov | small tinted mark at the band edge | 1.02 - 2.2:1 |
+| **18 Nov** | **none** | **n/a** |
+
+**State this plainly: there is now no colour-vision mitigation at all.** The
+QA-01 exception for 13 levels was accepted on the basis that "shape remains
+distinct when hue collapses"; that basis no longer exists. A player with
+deuteranopia or protanopia cannot separate aqua/violet (rendered dE ~11.6) on
+those levels by anything except position and memory.
+
+The eight ink-contrast checks were removed with the feature; the rules suite went
+136 -> 128 checks. They tested code that no longer exists rather than being
+relaxed to pass.
+
+If accessibility is to be restored for 1.1, the options are, in order of cost:
+re-author the 13 levels within the separation threshold; or reintroduce a cue
+that does not clutter the water, such as a subtle pattern in the glass rather
+than on the liquid.

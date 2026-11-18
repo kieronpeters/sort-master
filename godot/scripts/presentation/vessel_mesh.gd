@@ -13,12 +13,12 @@ static var OUTER: Array = [
 	Vector2(0.078, 0.014),
 	Vector2(0.086, 0.040),
 	Vector2(0.086, 0.070),
-	Vector2(0.086, 0.330),
-	Vector2(0.082, 0.360),
-	Vector2(0.070, 0.395),
-	Vector2(0.056, 0.425),
-	Vector2(0.048, 0.450),
-	Vector2(0.046, 0.472),
+	Vector2(0.086, 0.375),
+	Vector2(0.082, 0.398),
+	Vector2(0.070, 0.425),
+	Vector2(0.056, 0.450),
+	Vector2(0.048, 0.468),
+	Vector2(0.046, 0.480),
 	Vector2(0.049, 0.487),
 	Vector2(0.058, 0.498),
 	Vector2(0.061, 0.506),
@@ -87,4 +87,6 @@ static func liquid_radius() -> float:
 	return inner_radius_at(0.15) - 0.0005
 
 static func capacity_height() -> float:
-	return 0.285
+	# Raised with the shoulder (18 Nov 2026): a full column now reaches 0.370 of
+	# the 0.512 vessel, so a full jug reads full instead of stopping a third short.
+	return 0.325

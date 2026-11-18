@@ -4,7 +4,7 @@ extends RefCounted
 ## Builds one vessel from a tube's contents.
 ## Glass is a lathed profile (VesselMesh); liquid is a stack of opaque bands
 ## inside the inner wall, with a meniscus disc at the surface and a designed
-## symbol on every band so colour is never the only cue.
+## Colour is the only cue on the liquid itself, as in the genre.
 
 const VesselMeshScript = preload("res://scripts/presentation/vessel_mesh.gd")
 
@@ -23,7 +23,7 @@ const COLOURS := {
 
 ## Original symbols drawn by tools/make_glyphs.ps1: droplet, prism, leaf,
 ## sparkle, hexagon, ring. Shape carries the colour identity too.
-const GLYPHS := {
+const GLYPHS_UNUSED := {
 	"A": preload("res://assets/2d/glyphs/glyph_a.png"),
 	"B": preload("res://assets/2d/glyphs/glyph_b.png"),
 	"C": preload("res://assets/2d/glyphs/glyph_c.png"),
@@ -39,8 +39,6 @@ const GLYPHS := {
 ## left edge, and tinted from the band colour rather than inked in near-black.
 ## At 4.5:1 the glyphs read as stickers pasted on the liquid, which is what they
 ## looked like; at this size and contrast the band reads as colour first.
-const SYMBOL_WORLD_H := 0.018
-const SYMBOL_EDGE := 0.62
 
 ## One liquid band, for callers that need to build or extend a band outside
 ## build() — the pour animation grows the receiving vessel's level this way.
@@ -103,15 +101,6 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 		mi.set_meta("band_centre", base_y + band_h * 0.5 + band_h * i)
 		root.add_child(mi)
 
-		var symbol := Sprite3D.new()
-		symbol.texture = GLYPHS.get(contents[i], GLYPHS["A"])
-		symbol.pixel_size = SYMBOL_WORLD_H / 128.0
-		symbol.modulate = _subtle_ink(colour)
-		symbol.shaded = false
-		symbol.double_sided = true
-		symbol.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		symbol.position = Vector3(-r * SYMBOL_EDGE, base_y + band_h * 0.5 + band_h * i, r + 0.010)
-		root.add_child(symbol)
 
 	# meniscus: a lighter lip at the liquid surface, slightly inset
 	if contents.size() > 0:
@@ -148,7 +137,7 @@ static func build(contents: Array, capacity: int, selected: bool = false) -> Nod
 	bm_inner.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	bm_inner.cull_mode = BaseMaterial3D.CULL_DISABLED
 	bore_mi.material_override = bm_inner
-	bore_mi.position = Vector3(0, 0.474, 0)
+	bore_mi.position = Vector3(0, 0.482, 0)
 	root.add_child(bore_mi)
 
 	# contact shadow, so the vessel sits on the garden rather than floating
@@ -268,6 +257,4 @@ static func _glow_texture() -> GradientTexture2D:
 
 ## The mark's tint: a lightened version of the band, kept deliberately close to
 ## it. Shape stays available as a cue without the black silhouette dominating.
-static func _subtle_ink(colour: Color) -> Color:
-	var tint := colour.lightened(0.30)
-	return Color(tint.r, tint.g, tint.b, 0.55)
+

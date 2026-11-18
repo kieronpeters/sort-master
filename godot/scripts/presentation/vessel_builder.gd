@@ -140,15 +140,10 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 	bore_mi.position = Vector3(0, 0.482, 0)
 	root.add_child(bore_mi)
 
-	# contact shadow, so the vessel sits on the garden rather than floating
-	var shadow := Sprite3D.new()
-	shadow.texture = _shadow_texture()
-	shadow.pixel_size = 0.34 / 64.0
-	shadow.scale = Vector3(1.0, 0.38, 1.0)
-	shadow.position = Vector3(0, 0.030, -0.10)
-	shadow.modulate = Color(1, 1, 1, 0.55)
-	shadow.shaded = false
-	root.add_child(shadow)
+	# A contact shadow used to sit here: a dark sprite squashed to 0.38 and laid on
+	# the ground. Seen from this camera it collapsed into a hard black bar across
+	# the base of every bottle, reading as a gap rather than as glass. The base is
+	# drawn by the vessel mesh itself, so the shadow is gone.
 
 	# The selection used to draw a soft glow sprite here. It was parented to the
 	# vessel, so it lifted and tilted with the bottle and stayed visible right
@@ -187,21 +182,10 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 	root.add_child(glass)
 	root.set_meta("glass", glass)
 
-	# base plinth
-	var base := CylinderMesh.new()
-	base.top_radius = 0.088
-	base.bottom_radius = 0.091
-	base.height = 0.010
-	base.radial_segments = 40
-	var base_mi := MeshInstance3D.new()
-	base_mi.mesh = base
-	var bm := StandardMaterial3D.new()
-	bm.albedo_color = Color("#16323C")
-	bm.roughness = 0.42
-	bm.metallic = 0.20
-	base_mi.material_override = bm
-	base_mi.position = Vector3(0, 0.006, 0)
-	root.add_child(base_mi)
+	# This used to draw a dark cylinder at the foot of every bottle. It was meant
+	# as a plinth but rendered as a hard near-black bar across the base, which read
+	# as a gap under the glass. The silhouette now closes its own floor, so the
+	# plinth is gone.
 
 	return root
 

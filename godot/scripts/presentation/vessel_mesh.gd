@@ -33,6 +33,7 @@ static func build_glass(inner_wall: bool = true) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_stitch(st, OUTER, false)
+	_bottom_cap(st, OUTER[0])
 	if inner_wall:
 		_stitch(st, _inset(OUTER), true)
 	st.generate_normals()
@@ -65,6 +66,21 @@ static func _stitch(st: SurfaceTool, profile: Array, flip: bool) -> void:
 			else:
 				st.add_vertex(p00); st.add_vertex(p11); st.add_vertex(p10)
 				st.add_vertex(p00); st.add_vertex(p01); st.add_vertex(p11)
+
+
+## The silhouette is a surface of revolution, so the base was an open hole and the
+## unlit interior read as a hard black bar under every bottle. A fan closes it.
+## Both windings are emitted: the glass material does not cull, and a floor that
+## vanishes from one side is worse than the hole it replaces.
+static func _bottom_cap(st: SurfaceTool, base: Vector2) -> void:
+	var centre := Vector3(0.0, base.y, 0.0)
+	for s in SEGMENTS:
+		var t0 := TAU * float(s) / float(SEGMENTS)
+		var t1 := TAU * float(s + 1) / float(SEGMENTS)
+		var p0 := _pt(base, t0)
+		var p1 := _pt(base, t1)
+		st.add_vertex(centre); st.add_vertex(p0); st.add_vertex(p1)
+		st.add_vertex(centre); st.add_vertex(p1); st.add_vertex(p0)
 
 static func _pt(p: Vector2, angle: float) -> Vector3:
 	return Vector3(cos(angle) * p.x, p.y, sin(angle) * p.x)

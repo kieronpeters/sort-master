@@ -341,6 +341,7 @@ func _layout_vessels() -> void:
 		return
 	var ppu: float = _layout.ppu
 	var centres: Array = _layout.centres
+	var slots: Array = _layout.vessels
 	var offset_y: float = (_layout.design_h * 0.5 - _layout.baseline) / ppu
 	var children := _vessels.get_children()
 	for i in children.size():
@@ -348,9 +349,14 @@ func _layout_vessels() -> void:
 			break
 		var v: Node3D = children[i]
 		var x: float = (centres[i] - BoardLayoutScript.DESIGN_W * 0.5) / ppu
+		# Rows: each vessel sits on its own row baseline, so a stacked board reads
+		# as two shelves rather than one line of bottles floating at one height.
+		var base_y: float = offset_y
+		if i < slots.size():
+			base_y = (_layout.design_h * 0.5 - float(slots[i]["baseline"])) / ppu
 		v.set_meta("base_x", x)
-		v.set_meta("base_y", offset_y)
-		v.position = Vector3(x, offset_y, 0)
+		v.set_meta("base_y", base_y)
+		v.position = Vector3(x, base_y, 0)
 
 
 func _apply_selection(selected: int, instant: bool) -> void:

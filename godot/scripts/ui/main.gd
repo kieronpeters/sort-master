@@ -729,11 +729,17 @@ func _layout_hits() -> void:
 
 	var sx: float = layout.scale
 	var slot: float = layout.slot
-	var top: float = layout.hit_top * sx
-	var bottom: float = (layout.baseline + 16.0) * sx
 	var centres: Array = layout.centres
+	var slots: Array = layout.vessels
 
 	for i in n:
+		# Each vessel gets its own rectangle: with rows, a single full-width band
+		# would put the top row's taps over the bottom row.
+		var top: float = layout.hit_top * sx
+		var bottom: float = (layout.baseline + 16.0) * sx
+		if i < slots.size():
+			top = float(slots[i]["hit_top"]) * sx
+			bottom = float(slots[i]["hit_bottom"]) * sx
 		var hit := Control.new()
 		hit.mouse_filter = Control.MOUSE_FILTER_STOP
 		hit.position = Vector2((centres[i] - slot * 0.5) * sx, top)

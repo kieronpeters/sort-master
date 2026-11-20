@@ -11,6 +11,7 @@ const SOUND_PATHS := {
 	"undo": "res://assets/audio/undo.wav",
 	"win": "res://assets/audio/win.wav",
 	"ui": "res://assets/audio/ui.wav",
+	"seal": "res://assets/audio/seal.wav",
 }
 
 const VOICES := 8

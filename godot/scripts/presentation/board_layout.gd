@@ -20,6 +20,7 @@ const BASELINE_FRACTION := 0.66 # of the design height, measured from the top
 const MAX_HEIGHT_FRACTION := 0.46
 const MAX_PER_ROW := 6            # vessels across before the board stacks
 const ROW_GAP := 26.0             # design px between stacked rows
+const ROW_GAP_TIGHT := 16.0       # three rows cannot afford the same spacing
 
 ## Returns {} for a degenerate request.
 ##
@@ -59,9 +60,15 @@ static func compute(tube_count: int, viewport: Vector2) -> Dictionary:
 
 	# More rows means each row is shorter; the board area grows a little to
 	# compensate so the vessels do not become thimbles.
-	var board_fraction: float = MAX_HEIGHT_FRACTION if rows == 1 else 0.60
+	# Three rows need more of the screen than two, or the jugs become thimbles.
+	var board_fraction: float = MAX_HEIGHT_FRACTION
+	if rows == 2:
+		board_fraction = 0.60
+	elif rows >= 3:
+		board_fraction = 0.74
 	var usable_h: float = design_h * board_fraction
-	var row_h: float = (usable_h - float(rows - 1) * ROW_GAP) / float(rows)
+	var gap: float = ROW_GAP if rows <= 2 else ROW_GAP_TIGHT
+	var row_h: float = (usable_h - float(rows - 1) * gap) / float(rows)
 	var ppu_h: float = row_h * 0.94 / VESSEL_WORLD_H
 	var ppu: float = maxf(1.0, minf(ppu_w, ppu_h))
 
@@ -69,10 +76,14 @@ static func compute(tube_count: int, viewport: Vector2) -> Dictionary:
 	var vessel_h: float = VESSEL_WORLD_H * ppu
 	var slot: float = vessel_w + VESSEL_GAP
 
-	var bottom_baseline: float = design_h * (0.66 if rows == 1 else 0.74)
+	var bottom_baseline: float = design_h * 0.66
+	if rows == 2:
+		bottom_baseline = design_h * 0.74
+	elif rows >= 3:
+		bottom_baseline = design_h * 0.80
 	var row_baseline: Array = []
 	for r in rows:
-		row_baseline.append(bottom_baseline - float(rows - 1 - r) * (vessel_h + ROW_GAP))
+		row_baseline.append(bottom_baseline - float(rows - 1 - r) * (vessel_h + gap))
 
 	var centres: Array = []
 	var vessels: Array = []

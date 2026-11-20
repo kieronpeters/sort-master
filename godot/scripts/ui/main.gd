@@ -808,6 +808,19 @@ func _animations_on() -> bool:
 	return DisplayServer.get_name() != "headless" and board_3d != null
 
 
+## True when this tube is complete and all one colour - i.e. corked.
+func _tube_sealed(index: int) -> bool:
+	if state == null or index < 0 or index >= state.tube_count():
+		return false
+	var tube: Array = state.tubes[index]
+	if tube.size() != state.capacity or tube.is_empty():
+		return false
+	for c in tube:
+		if c != tube[0]:
+			return false
+	return true
+
+
 func _on_vessel_tapped(index: int) -> void:
 	if state == null or win_layer != null or modal_layer != null or _pouring:
 		return
@@ -842,6 +855,9 @@ func _on_vessel_tapped(index: int) -> void:
 		selected = -1
 		audio.play("pour")
 		_status("")
+		var sealed: bool = _tube_sealed(index)
+		if sealed:
+			audio.play("seal")
 		if _animations_on():
 			# The board still shows the pre-pour vessels; rebuilding waits until
 			# the vessel has finished pouring and returned home.
@@ -849,6 +865,9 @@ func _on_vessel_tapped(index: int) -> void:
 			board_3d.pour(from_i, index, poured_units, poured_colour, func():
 				_pouring = false
 				_refresh()
+				# After the rebuild, so the stars are not wiped with the old board.
+				if sealed and board_3d != null:
+					board_3d.celebrate(index)
 				if state != null and state.is_won():
 					_on_win())
 		else:
@@ -969,8 +988,13 @@ func _on_fill_bottle() -> void:
 
 	moves += 1
 	audio.play("pour")
+	var filled_one: bool = _tube_sealed(dst)
+	if filled_one:
+		audio.play("seal")
 	_status("Bottle filled: %s" % colour, P.ACCENT)
 	_refresh()
+	if filled_one and _animations_on() and board_3d != null:
+		board_3d.celebrate(dst)
 	if state.is_won():
 		_on_win()
 

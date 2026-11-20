@@ -133,6 +133,16 @@ func _initialize() -> void:
 	var tall: Dictionary = L.compute(6, Vector2(1080, 2400))
 	check("taller viewport keeps 1:1 design scale", is_equal_approx(float(tall.scale), 1.0))
 	check("taller viewport keeps a single row on its line", is_equal_approx(float(tall.baseline), float(tall.design_h) * 0.66))
+	# The engine must be able to draw boards wider than the catalogue can currently
+	# verify: three rows, and every vessel on screen with its own tap strip.
+	var wide: Dictionary = L.compute(14, Vector2(1080, 1920))
+	check("wide board uses three rows", int(wide.rows) == 3)
+	check("wide board seats every vessel", wide.vessels.size() == 14)
+	var all_on_screen := true
+	for v in wide.vessels:
+		if float(v.hit_top) < 0.0 or float(v.hit_bottom) > 1920.0:
+			all_on_screen = false
+	check("wide board keeps every vessel on screen", all_on_screen)
 	check("degenerate layout rejected", L.compute(0, Vector2(1080, 1920)).is_empty())
 
 	# --- progress store: save, load, clamping, corrupt data ----------------

@@ -294,6 +294,48 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 	_pour_tweens.append(t)
 
 
+
+## A sealed jug is the moment the level is actually being won, so it gets more than
+## a colour change: a ring of stars spins up around the neck and fades. Kept as a
+## short tween that frees itself, so nothing survives a board rebuild.
+func celebrate(index: int) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var children := _vessels.get_children()
+	if index < 0 or index >= children.size():
+		return
+	var vessel: Node3D = children[index]
+	var sparkle := Node3D.new()
+	sparkle.position = vessel.position + Vector3(0.0, 0.46, 0.02)
+	_vessels.add_child(sparkle)
+
+	var tex: Texture2D = load("res://assets/2d/star.png")
+	for i in 8:
+		var star := Sprite3D.new()
+		star.texture = tex
+		star.pixel_size = 0.0013
+		star.shaded = false
+		star.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		star.modulate = Color(1.0, 0.94, 0.72, 1.0)
+		var angle := TAU * float(i) / 8.0
+		star.position = Vector3(cos(angle) * 0.105, 0.0, sin(angle) * 0.055)
+		sparkle.add_child(star)
+		star.rotation.z = angle * 0.7
+
+	sparkle.scale = Vector3(0.55, 0.55, 0.55)
+	var t := create_tween()
+	t.set_parallel(true)
+	t.tween_property(sparkle, "rotation:y", TAU, 0.85) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(sparkle, "scale", Vector3(1.15, 1.15, 1.15), 0.35) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(sparkle, "position:y", sparkle.position.y + 0.10, 0.85) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	t.chain().tween_property(sparkle, "scale", Vector3(0.01, 0.01, 0.01), 0.28) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.chain().tween_callback(sparkle.queue_free)
+
+
 func _find_band(vessel: Node3D, index: int) -> MeshInstance3D:
 	for child in vessel.get_children():
 		if child.has_meta("band_index") and int(child.get_meta("band_index")) == index:

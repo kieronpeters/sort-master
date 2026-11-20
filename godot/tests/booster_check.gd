@@ -63,7 +63,9 @@ func _run() -> void:
 		check("fill spends a credit", main.credits == 2)
 		check("fill keeps colour counts", _counts(main.state) == colours_before)
 		check("fill completes a bottle", _completed(main.state) >= 1)
-		await _shot("L%d_fill" % n)
+		# catch the seal burst while it is still on screen
+		await create_timer(0.30).timeout
+		await _shot("L%d_seal" % n)
 
 		# --- undo the fill --------------------------------------------------
 		main._on_undo()

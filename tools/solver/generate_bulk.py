@@ -32,27 +32,33 @@ LEVEL_DIR = Path("godot/levels")
 FROZEN = 30          # 1-30 are the QA-verified set and are never rewritten
 
 
-def tier(level_no: int) -> tuple[int, int]:
-    """(colours, target minimum moves) for a level number.
+def tier(level_no: int) -> tuple[int, int, int]:
+    """(colours, empties, target minimum moves) for a level number.
 
     Six colours with two spare tubes is the widest the board layout has been
     tested for, so the curve tops out there rather than growing the tube count.
     """
     if level_no <= 40:
-        return 4, 12
+        return 4, 2, 12
     if level_no <= 70:
-        return 4, 14
+        return 4, 2, 14
     if level_no <= 110:
-        return 5, 15
+        return 5, 2, 15
     if level_no <= 160:
-        return 5, 16
+        return 5, 2, 16
     if level_no <= 220:
-        return 5, 17
+        return 5, 2, 17
     if level_no <= 300:
-        return 6, 18
+        return 6, 2, 18
     if level_no <= 400:
-        return 7, 22
-    return 8, 23
+        return 7, 2, 22
+    # Ten jugs (eight colours, two spares) is the practical ceiling. Boards wider
+    # than this are measurable in the engine - the layout stacks three rows - but
+    # they cannot be produced: BFS verification of a twelve-jug board does not
+    # finish in usable time, and shipping an unverified level is not an option.
+    # Widening the catalogue needs a faster solver (A* or IDA* with a better
+    # admissible bound), not a different renderer.
+    return 8, 2, 23
 
 
 def make_level(level_no: int, rng: random.Random, seen: set, attempts: int = 40):
@@ -60,8 +66,7 @@ def make_level(level_no: int, rng: random.Random, seen: set, attempts: int = 40)
     # rarely hit exactly, so a large budget was spent searching for a board that
     # does not exist. Taking the closest candidate found is good enough and keeps
     # generation to a few seconds per level.
-    colours, target = tier(level_no)
-    empties = 2
+    colours, empties, target = tier(level_no)
     best = None
     best_delta = 99
     for _ in range(attempts):

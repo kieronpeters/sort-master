@@ -57,29 +57,39 @@ the audio and art assets.
 So a port keeps the *content* and loses the *implementation* - several weeks to
 parity, and it would still need the same shader work at the end.
 
-## The real blocker on "as many rows and columns as Magic Sort"
+## Rows and columns: now at fourteen jugs, in three rows
 
-This one is not about rendering, and it is the finding that matters most.
+Magic Sort grows its boards to two rows. Ours now goes further: levels 441-500 ship
+twelve and fourteen jugs, laid out in **two rows of six** or **three rows of five,
+five and four**, all verified playable through the real tap path.
 
-The engine already draws three rows: `board_layout.compute` seats up to 14 jugs in
-three rows, and a rules test asserts every one of them lands on screen with its own
-tap strip.
+Getting there needed two things, neither of them a different renderer:
 
-What blocks a *wider catalogue* is **puzzle verification**:
+1. **A layout that stacks.** `board_layout.compute` seats up to fourteen jugs across
+   three rows, each with its own tap strip. A rules test asserts every vessel lands
+   on screen.
 
-- Our palette is capped at **eight colours** by measured colour separation
-  (CIEDE2000 under deuteranopia: 8 colours gives 15.3/14.0, ten gives 12.3, twelve
-  gives 9.7 which is below the forbidden line). More jugs therefore means more
-  *spare* jugs, not more colours.
-- Spare jugs make boards **easier**, and they enlarge the search space enormously.
-  An attempt to generate twelve-jug and fourteen-jug levels with BFS verification
-  did not produce a single level in **28 minutes**; the generator was killed twice.
-- Shipping an unverified level is not acceptable, so the catalogue stops at **ten
-  jugs** (eight colours, two spares) - two rows of five.
+2. **A cheaper proof of playability.** Proving the *exact* minimum does not scale:
+   BFS on a twelve-jug board produced no level in twenty-eight minutes (killed
+   twice), and A* - with an admissible bound of `sum(tubes holding each colour - 1)`
+   - closed only one of four twelve-jug boards and none of the thirteen-jug ones.
 
-To go wider, the work is a **faster solver** (A\* or IDA\* with an admissible bound on
-remaining moves), not a different renderer. That is the next concrete step if wider
-boards matter.
+   What *is* cheap is proving a board is **solvable**: depth-first search with
+   consolidation-first ordering closes a fourteen-jug board in about 20 ms. So the
+   wide tiers ship with a recorded solution and **no** `minMoves`. They do not claim
+   optimality they have not proved; every recorded solution is replayed through the
+   real rules before shipping.
+
+The catalogue therefore has two guarantees, and the level files say which applies:
+
+| Levels | Guarantee |
+|---|---|
+| 1-440 | minimum move count, proved by exact search |
+| 441-500 | solvable, proved by replay; no minimum claimed |
+
+The colour ceiling is still eight (measured CIEDE2000 separation), so the extra jugs
+in the wide tiers are spares. That makes them more forgiving, which is why their
+recorded solutions are longer (26-42 moves) rather than shorter.
 
 ## Visual features still missing, in order of impact
 

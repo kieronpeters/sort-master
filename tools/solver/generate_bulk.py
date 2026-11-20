@@ -49,13 +49,13 @@ def tier(level_no: int) -> tuple[int, int]:
     if level_no <= 220:
         return 5, 17
     if level_no <= 300:
-        return 6, 17
-    if level_no <= 400:
         return 6, 18
-    return 6, 19
+    if level_no <= 400:
+        return 7, 22
+    return 8, 23
 
 
-def make_level(level_no: int, rng: random.Random, seen: set, attempts: int = 90):
+def make_level(level_no: int, rng: random.Random, seen: set, attempts: int = 40):
     # 90 attempts, not 400: on the higher colour counts the target move count is
     # rarely hit exactly, so a large budget was spent searching for a board that
     # does not exist. Taking the closest candidate found is good enough and keeps

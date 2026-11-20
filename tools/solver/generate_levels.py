@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from solve import CAPACITY, key, legal_moves, solve, validate, is_won  # noqa: E402
 
-COLOURS = "ABCDEFG"
+COLOURS = "ABCDEFGH"
 
 STAGES = [
     # name, first level, colours, empties, scramble depth, min moves band

@@ -18,7 +18,7 @@ const VESSEL_GAP := 20.0        # design px between neighbouring vessels
 const WIDTH_FRACTION := 0.94    # of the design width, including the outer margin
 const BASELINE_FRACTION := 0.66 # of the design height, measured from the top
 const MAX_HEIGHT_FRACTION := 0.46
-const MAX_PER_ROW := 5            # vessels across before the board stacks
+const MAX_PER_ROW := 6            # vessels across before the board stacks
 const ROW_GAP := 26.0             # design px between stacked rows
 
 ## Returns {} for a degenerate request.

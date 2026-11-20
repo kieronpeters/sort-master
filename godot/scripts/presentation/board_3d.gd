@@ -39,6 +39,7 @@ var _tube_count := 0
 var _capacity := 4
 var _pour_tweens: Array = []
 var _pour_stream: MeshInstance3D = null
+var _pour_splash: CPUParticles3D = null
 
 
 func _ready() -> void:
@@ -202,6 +203,9 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 	if _pour_stream != null and is_instance_valid(_pour_stream):
 		_pour_stream.queue_free()
 	_pour_stream = null
+	if _pour_splash != null and is_instance_valid(_pour_splash):
+		_pour_splash.queue_free()
+	_pour_splash = null
 
 	var step: float = POUR_POUR / float(count)
 
@@ -225,6 +229,7 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 
 	t.tween_callback(func():
 		_pour_stream = _make_stream(hue, lip, Vector3(dst_x, surface_y, 0.05))
+		_pour_splash = _make_splash(hue, Vector3(dst_x, surface_y, 0.05))
 		# The source empties from the top down while the destination rises, so the
 		# liquid moves continuously instead of teleporting when the pour ends.
 		for k in count:
@@ -263,6 +268,14 @@ func pour(from_i: int, to_i: int, units: int, colour_id: String, done: Callable)
 
 	t.tween_interval(POUR_POUR)
 	t.tween_callback(func():
+		if _pour_splash != null and is_instance_valid(_pour_splash):
+			var splay := _pour_splash
+			_pour_splash = null
+			splay.emitting = false
+			var stop := create_tween()
+			stop.tween_interval(0.6)
+			stop.tween_callback(splay.queue_free)
+			_pour_tweens.append(stop)
 		if _pour_stream != null and is_instance_valid(_pour_stream):
 			var owned := _pour_stream
 			_pour_stream = null
@@ -286,6 +299,43 @@ func _find_band(vessel: Node3D, index: int) -> MeshInstance3D:
 		if child.has_meta("band_index") and int(child.get_meta("band_index")) == index:
 			return child
 	return null
+
+
+## Droplets where the stream meets the liquid. A pour with no splash reads as a
+## solid rod of colour being slid into the glass; the splash is what says "liquid".
+## CPU particles are used rather than GPU: a handful of spheres is cheaper than the
+## setup, and this only lives for the length of one pour.
+func _make_splash(hue: Color, at: Vector3) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 20
+	p.lifetime = 0.55
+	p.one_shot = false
+	p.emitting = true
+	p.direction = Vector3(0, 1, 0)
+	p.spread = 55.0
+	p.initial_velocity_min = 0.20
+	p.initial_velocity_max = 0.65
+	p.gravity = Vector3(0, -2.2, 0)
+	p.scale_amount_min = 0.004
+	p.scale_amount_max = 0.011
+
+	var bead := SphereMesh.new()
+	bead.radius = 0.5
+	bead.height = 1.0
+	bead.radial_segments = 6
+	bead.rings = 3
+	p.mesh = bead
+
+	var m := StandardMaterial3D.new()
+	m.albedo_color = hue.lightened(0.18)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	p.material_override = m
+
+	p.position = at
+	_vessels.add_child(p)
+	return p
+
 
 ## A short cylinder spanning the gap between the two mouths, in the liquid colour.
 func _make_stream(hue: Color, from: Vector3, to: Vector3) -> MeshInstance3D:

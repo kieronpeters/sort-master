@@ -55,6 +55,19 @@ uniform float veiled : hint_range(0.0, 1.0) = 0.0;
 uniform vec3 cloth_colour : source_color = vec3(0.36, 0.40, 0.44);
 uniform float cloth_weave : hint_range(0.0, 0.5) = 0.16;
 uniform float highlight_pos : hint_range(0.0, 1.0) = 0.30;
+
+// Fresnel rim. This is the term the band was missing: a real column of liquid
+// brightens at its silhouette because you are looking through more of it edge-on.
+// It is driven by the geometry normal against the view direction, not by the
+// lateral coordinate, so it stays correct when the vessel is tilted - which is
+// exactly when the flat readings fall apart.
+uniform float rim : hint_range(0.0, 0.9) = 0.42;
+uniform float rim_power : hint_range(0.5, 8.0) = 2.4;
+
+// A slow, shallow wobble on the gloss so a still surface does not look like a
+// painted stripe. Kept very small: this is life, not movement.
+uniform float flow : hint_range(0.0, 0.2) = 0.035;
+uniform float flow_speed : hint_range(0.0, 2.0) = 0.18;
 uniform float highlight_width : hint_range(0.02, 0.35) = 0.070;
 
 varying float lateral;
@@ -80,7 +93,8 @@ void fragment() {
 	shade += sheen * sheen_band;
 
 	// Gloss streak, plus a tight core so it reads as a reflection, not a wash.
-	float gloss = exp(-pow((lateral_signed + highlight_pos) / highlight_width, 2.0));
+	float drift = flow * sin(TIME * flow_speed + UV.y * 6.2831);
+	float gloss = exp(-pow((lateral_signed + highlight_pos + drift) / highlight_width, 2.0));
 	float core = exp(-pow((lateral_signed + highlight_pos) / (highlight_width * 0.42), 2.0));
 	shade += highlight * gloss + highlight * 0.45 * core;
 
@@ -93,6 +107,11 @@ void fragment() {
 		// veiled bands keep the cross-section shading but lose the liquid gloss
 		shade = mix(shade, shade * 0.92, veiled);
 	}
+
+	// Rim last, and additive: it is light that has travelled through the liquid
+	// and come out at the edge, so it brightens rather than tints.
+	float facing = abs(dot(normalize(NORMAL), normalize(VIEW)));
+	shade += rim * pow(1.0 - facing, rim_power);
 
 	ALBEDO = colour * shade;
 }

@@ -363,7 +363,7 @@ func _apply_selection(selected: int, instant: bool) -> void:
 		var glass = v.get_meta("glass", null)
 		if glass != null:
 			glass.material_override = VesselBuilderScript.glass_material(is_selected)
-		var pool = v.get_meta("select_glow", null)
+		var pool = v.get_meta("select_glow") if v.has_meta("select_glow") else null
 		if pool != null:
 			pool.visible = is_selected
 		var base_y: float = float(v.get_meta("base_y", v.position.y))

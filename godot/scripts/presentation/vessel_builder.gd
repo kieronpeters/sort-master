@@ -80,6 +80,7 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 	var base_y: float = VesselMeshScript.LIQUID_BASE
 	var r: float = VesselMeshScript.liquid_radius()
 
+	var top_band: MeshInstance3D = null
 	for i in contents.size():
 		var colour: Color = COLOURS.get(contents[i], Color.MAGENTA)
 
@@ -100,6 +101,8 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 		mi.set_meta("band_bottom", base_y + band_h * i)
 		mi.set_meta("band_centre", base_y + band_h * 0.5 + band_h * i)
 		root.add_child(mi)
+		if i == contents.size() - 1:
+			top_band = mi
 
 
 	# meniscus: a lighter lip at the liquid surface, slightly inset
@@ -121,8 +124,15 @@ static func build(contents: Array, capacity: int, selected: bool = false, veils:
 		dm.roughness = 0.14
 		dm.metallic_specular = 0.85
 		disc_mi.material_override = dm
-		disc_mi.position = Vector3(0, base_y + band_h * contents.size() - 0.004, 0)
-		root.add_child(disc_mi)
+		# Parented to the top band, so the surface sinks and flattens as that band
+		# drains. As a sibling it stayed at the original height, which is why a
+		# draining bottle kept a coloured cap floating above the receding liquid.
+		if top_band != null:
+			top_band.add_child(disc_mi)
+			disc_mi.position = Vector3(0, band_h * 0.5 - 0.002, 0)
+		else:
+			disc_mi.position = Vector3(0, base_y + band_h * contents.size() - 0.004, 0)
+			root.add_child(disc_mi)
 
 	# dark inner neck, so the mouth reads as an opening rather than a cap
 	var bore := CylinderMesh.new()

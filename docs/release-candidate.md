@@ -8,7 +8,7 @@ device pass are complete.
 
 | Artifact | Purpose | Size | SHA-256 | Signing |
 |---|---|---|---:|---|
-| `builds/sort-master-rc.apk` | release candidate | 27.18 MB | `C097E81F5298FB990B9716CF65842816490E5B02DC70F909E64A65E3DFDBD22B` | debug key, **debuggable** |
+| `builds/sort-master-rc.apk` | release candidate, built and installed 20 Nov | 27.86 MB | `1104B5607521AAD7F1E0D3E912F04D1C9B259491EEED0DD2D337D3BFD40143B7` | debug key, **debuggable** |
 | `builds/sort-master.apk` | development build with the F1 overlay | 27.22 MB | not pinned - rebuilt on every developer run and not byte-reproducible | debug key |
 
 Both are arm64-v8a only, **portrait-locked**, ETC2/ASTC enabled, mobile
@@ -44,8 +44,8 @@ and loads the overlay script only through a runtime `load()` inside that gate.
 ## Verification performed
 
 - `tools/test.ps1` at the 13 Nov build: rules 118/0, parity 154/0, flow 150/0, game-moves replay
-  30/30 — all exit 0. Re-run 17 Nov after the type-scale change: **126 / 154 /
-  153 / 30, all `FAILED: 0`, exit 0**.
+  30/30 — all exit 0. Re-run 17 Nov after the type-scale change: **139 / 154 /
+  159 / 30, all `FAILED: 0`, exit 0** (re-run 20 Nov).
 - `tools/build_rc.ps1` asserts package id, version code 2 and
   `screenOrientation=1` with `aapt2`; a landscape APK now fails the build.
 - APK signature verified with `apksigner` (v2/v3; v1 not required at minSdk 24).
@@ -66,9 +66,34 @@ and loads the overlay script only through a runtime `load()` inside that gate.
   `docs/evidence/android/RESULTS.md`. That pass ran on the OpenGL ES 3.1
   Compatibility fallback because no emulator GPU backend can present a Vulkan
   swapchain here, so the shipped Vulkan renderer is **not** covered by it.
+- **Installed and verified on the physical S23 Ultra (SM-S918B, Android 17 /
+  API 37)** on 20 Nov 2026 over wireless ADB: `install -r` returned `Success`,
+  `dumpsys package` reports `versionName=0.1.0`, `versionCode=2`, `minSdk=24`,
+  `targetSdk=36`, `lastUpdateTime=22:34:39`. The launch itself was not confirmed on
+  this build - WhatsApp held the foreground with a recording in progress.
 - Launcher icons present at every density plus `mipmap-anydpi-v26/icon.xml`;
   adaptive background is gradient-only, so the launcher cannot double-draw the
   bottle.
+
+## Catalogue
+
+500 levels. The guarantees are not uniform, and the level files say which applies:
+
+| Levels | Jugs | Colours | Guarantee |
+|---|---:|---:|---|
+| 1-30 | 4-8 | 2-6 | QA-verified set, frozen |
+| 31-440 | 5-10 | 3-8 | **minimum move count**, proved by exact search |
+| 441-500 | 12-14 | 8 | **solvable**, proved by replay; no minimum claimed |
+
+The wide tiers are the only levels without a minimum-move guarantee. Proving the
+exact minimum does not scale: BFS on a twelve-jug board produced no level in
+twenty-eight minutes, and A* with an admissible bound closed one of four twelve-jug
+boards and none of the thirteen-jug ones. Proving *solvability* closes a
+fourteen-jug board in about 20 ms, so those levels ship with a recorded solution and
+no `minMoves` field. Every recorded solution is replayed through the real rules
+before shipping.
+
+They render as two rows of six or three rows of five-five-four.
 
 ## Signing — owner boundary (M10-03)
 

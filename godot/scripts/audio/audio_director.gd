@@ -51,11 +51,8 @@ const MUSIC_TRACKS := [
 	"res://assets/audio/music/amber_greenhouse.ogg",
 	"res://assets/audio/music/still_water.ogg",
 	"res://assets/audio/music/morning_prism.ogg",
-	"res://assets/audio/music/glass_hour.ogg",
-	"res://assets/audio/music/lantern_walk.ogg",
 ]
-## The last track started, so a reshuffle never repeats it immediately. Five
-## tracks at 2.5 minutes each is 12.5 minutes before the set begins again.
+## The track currently playing, for debugging and for the no-repeat guard.
 var _last_track := ""
 const MUSIC_DB := -9.0
 
@@ -89,7 +86,7 @@ func _setup_music() -> void:
 			_music_order.append(path)
 	if _music_order.is_empty():
 		return
-	_shuffle_music()
+	_seed_rotation()
 	_music = AudioStreamPlayer.new()
 	_music.volume_db = MUSIC_DB + _volume_db(music_volume)
 	_music.finished.connect(_next_track)
@@ -107,19 +104,10 @@ func _setup_music() -> void:
 	_start_track()
 
 
-func _shuffle_music() -> void:
-	for i in range(_music_order.size() - 1, 0, -1):
-		var j := randi() % (i + 1)
-		var tmp = _music_order[i]
-		_music_order[i] = _music_order[j]
-		_music_order[j] = tmp
-	# A shuffle can hand back the same track that just finished; swap it away so
-	# the bed never plays the same piece twice in a row.
-	if _music_order.size() > 1 and _music_order[0] == _last_track:
-		var k := randi() % (_music_order.size() - 1) + 1
-		var held = _music_order[0]
-		_music_order[0] = _music_order[k]
-		_music_order[k] = held
+## Three pieces, played strictly in order and wrapping 1 -> 2 -> 3 -> 1. The only
+## randomness is where a session starts, so two runs do not begin on the same song.
+func _seed_rotation() -> void:
+	_music_index = randi() % maxi(1, _music_order.size())
 
 
 func _start_track() -> void:
@@ -144,9 +132,7 @@ func _start_track() -> void:
 func _next_track() -> void:
 	if _music == null or _music_order.is_empty():
 		return
-	_music_index += 1
-	if _music_index % _music_order.size() == 0:
-		_shuffle_music()   # a fresh order each time through the set
+	_music_index += 1          # strictly in order; the rotation wraps on its own
 	_start_track()
 
 

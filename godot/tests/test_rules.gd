@@ -143,6 +143,26 @@ func _initialize() -> void:
 		if float(v.hit_top) < 0.0 or float(v.hit_bottom) > 1920.0:
 			all_on_screen = false
 	check("wide board keeps every vessel on screen", all_on_screen)
+	# --- music: three tracks, played in order, random starting song --------
+	var AD = load("res://scripts/audio/audio_director.gd")
+	check("music ships three tracks", AD.MUSIC_TRACKS.size() == 3)
+	var d = AD.new()
+	d._music_order = ["a", "b", "c"]
+	d._seed_rotation()
+	var first: int = int(d._music_index) % 3
+	var ordered := true
+	for k in 5:
+		var now: int = int(d._music_index) % 3
+		if now != (first + k) % 3:
+			ordered = false
+		d._music_index = int(d._music_index) + 1
+	check("music advances one song at a time, wrapping", ordered)
+	var starts := {}
+	for t in 60:
+		d._seed_rotation()
+		starts[int(d._music_index) % 3] = true
+	check("a session can start on any of the three", starts.size() == 3)
+	d.free()
 	check("degenerate layout rejected", L.compute(0, Vector2(1080, 1920)).is_empty())
 
 	# --- progress store: save, load, clamping, corrupt data ----------------

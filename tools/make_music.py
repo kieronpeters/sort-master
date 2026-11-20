@@ -60,22 +60,6 @@ TRACKS = [
         "bell_rate": 1.1,
         "brightness": 1.15,
     },
-    {
-        "name": "glass_hour",
-        "root": -5,         # E
-        "minor": True,
-        "chords": [[0, 3, 7, 12], [-3, 0, 7, 10], [-5, 2, 7, 12], [0, 5, 7, 15]],
-        "bell_rate": 0.5,
-        "brightness": 0.9,
-    },
-    {
-        "name": "lantern_walk",
-        "root": 3,          # C
-        "minor": False,
-        "chords": [[0, 4, 7, 12], [-2, 4, 7, 11], [-4, 3, 7, 12], [0, 4, 9, 12]],
-        "bell_rate": 1.3,
-        "brightness": 1.2,
-    },
 ]
 
 
